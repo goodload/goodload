@@ -6,9 +6,27 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="goodload-dsl" />
+        <module name="goodload-sample" />
         <module name="goodload-core" />
+        <module name="goodload-dsl" />
+        <module name="goodload-http" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="goodload" target="11" />
+      <module name="goodload-core" target="11" />
+      <module name="goodload-dsl" target="11" />
+      <module name="goodload-dsl (1)" target="11" />
+      <module name="goodload-http" target="11" />
+      <module name="goodload-sample" target="11" />
+    </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="goodload-core" options="-parameters" />
+      <module name="goodload-dsl" options="-parameters" />
+      <module name="goodload-http" options="-parameters" />
+      <module name="goodload-sample" options="-parameters" />
+    </option>
   </component>
 </project>
