@@ -1,4 +1,4 @@
-package com.divsgaur.goodload;
+package org.divsgaur.goodload;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
