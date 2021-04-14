@@ -8,6 +8,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="goodload-sample" />
         <module name="goodload-core" />
+        <module name="goodload-engine" />
         <module name="goodload-dsl" />
         <module name="goodload-http" />
       </profile>
@@ -17,6 +18,7 @@
       <module name="goodload-core" target="11" />
       <module name="goodload-dsl" target="11" />
       <module name="goodload-dsl (1)" target="11" />
+      <module name="goodload-engine" target="11" />
       <module name="goodload-http" target="11" />
       <module name="goodload-sample" target="11" />
     </bytecodeTargetLevel>
@@ -25,6 +27,7 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="goodload-core" options="-parameters" />
       <module name="goodload-dsl" options="-parameters" />
+      <module name="goodload-engine" options="-parameters" />
       <module name="goodload-http" options="-parameters" />
       <module name="goodload-sample" options="-parameters" />
     </option>

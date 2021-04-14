@@ -20,6 +20,7 @@
         <module>goodload-dsl</module>
         <module>goodload-http</module>
         <module>goodload-sample</module>
+        <module>goodload-engine</module>
     </modules>
 
     <properties>
@@ -37,9 +38,8 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
         </dependency>
-
     </dependencies>
 
     <dependencyManagement>
@@ -50,7 +50,6 @@
                 <artifactId>okhttp</artifactId>
                 <version>${okhttp.version}</version>
             </dependency>
-
 
             <dependency>
                 <groupId>org.divsgaur.goodload</groupId>

@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/goodload.iml" filepath="$PROJECT_DIR$/.idea/goodload.iml" />
       <module fileurl="file://$PROJECT_DIR$/goodload-core/goodload-core.iml" filepath="$PROJECT_DIR$/goodload-core/goodload-core.iml" />
       <module fileurl="file://$PROJECT_DIR$/goodload-dsl/goodload-dsl.iml" filepath="$PROJECT_DIR$/goodload-dsl/goodload-dsl.iml" />
+      <module fileurl="file://$PROJECT_DIR$/goodload-engine/goodload-engine.iml" filepath="$PROJECT_DIR$/goodload-engine/goodload-engine.iml" />
       <module fileurl="file://$PROJECT_DIR$/goodload-http/goodload-http.iml" filepath="$PROJECT_DIR$/goodload-http/goodload-http.iml" />
       <module fileurl="file://$PROJECT_DIR$/goodload-sample/goodload-sample.iml" filepath="$PROJECT_DIR$/goodload-sample/goodload-sample.iml" />
     </modules>
