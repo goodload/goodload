@@ -3,7 +3,6 @@ package org.divsgaur.goodload.dsl;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import org.divsgaur.goodload.core.ActionType;
 import org.divsgaur.goodload.core.Mutable;
 
 import java.util.Arrays;
@@ -25,9 +24,6 @@ public class Action implements SequenceElement {
     private Group group;
 
     private List<SequenceElement> executionSequence;
-
-    @Getter
-    private ActionType actionType;
 
     Action(String name) {
         this.name = name;

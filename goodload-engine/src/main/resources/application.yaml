@@ -1,0 +1,25 @@
+spring:
+  main:
+    banner-mode: "off"
+logging:
+  pattern:
+    console:
+server:
+  error:
+    include-stacktrace: never
+---
+spring:
+  config:
+    activate:
+      on-profile: log-dev
+  main:
+    banner-mode: "console"
+logging:
+  pattern:
+    console: "%clr(%d{yy-MM-dd E HH:mm:ss.SSS}){blue} %clr(%-5p) %clr(${PID}){faint} %clr(---){faint} %clr([%8.15t]){cyan} %clr(%-40.40logger{0}){blue} %clr(:){red} %clr(%m){faint}%n"
+  level:
+    org.divsgaur.goodload: debug
+server:
+  error:
+    include-stacktrace: always
+
