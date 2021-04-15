@@ -1,13 +1,22 @@
 package org.divsgaur.goodload;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.*;
+import org.divsgaur.goodload.exceptions.InvalidSimulationConfigFileException;
+import org.divsgaur.goodload.userconfig.SimulationConfig;
+import org.divsgaur.goodload.userconfig.UserArgs;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.lang.NonNull;
 
 import javax.annotation.Resource;
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 
 @SpringBootApplication
@@ -26,8 +35,31 @@ public class GoodloadApplication implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws ParseException {
+    public void run(String... args) throws ParseException, InvalidSimulationConfigFileException {
+        log.debug("Current path: {}", System.getProperty("user.dir"));
         parseArguments(args);
+
+        loadExecutionConfiguration();
+    }
+
+    private void loadExecutionConfiguration() throws InvalidSimulationConfigFileException {
+        var mapper = new ObjectMapper(new YAMLFactory());
+        try {
+            var config = mapper.readValue(new File(userArgs.getConfigFilePath()), SimulationConfig.class);
+            userArgs.setConfiguration(config);
+        } catch(JsonParseException | JsonMappingException e) {
+            throw new InvalidSimulationConfigFileException(
+                    String.format("The configuration file %s is not well-formed." +
+                            "Make sure that the syntax is correct and all the required fields (if any) " +
+                            "have been provided.", userArgs.getConfigFilePath()),
+                    e);
+        } catch(IOException e) {
+            throw new InvalidSimulationConfigFileException(
+                    String.format("Failed to read the configuration file %s. " +
+                            "Make sure that the file is present and accessible.",
+                            userArgs.getConfigFilePath()),
+                    e);
+        }
     }
 
     /**
@@ -52,8 +84,8 @@ public class GoodloadApplication implements CommandLineRunner {
             throw e;
         }
 
-        userArgs.setConfigFileName(cmd.getOptionValue(CommandLineOptions.CONFIG_FILE_OPTION.getLongOpt()));
-        userArgs.setJarFileName(cmd.getOptionValue(CommandLineOptions.JAR_FILE_OPTION.getLongOpt()));
+        userArgs.setConfigFilePath(cmd.getOptionValue(CommandLineOptions.CONFIG_FILE_OPTION.getLongOpt()));
+        userArgs.setJarFilePath(cmd.getOptionValue(CommandLineOptions.JAR_FILE_OPTION.getLongOpt()));
         userArgs.setSimulationsToExecute(cmd.getOptionValues(CommandLineOptions.SIMULATION_OPTION.getLongOpt()));
     }
 
@@ -84,7 +116,7 @@ public class GoodloadApplication implements CommandLineRunner {
      * The identifier can be anything.
      * Any option that is defined here will be automatically picked up by the CommandLineParser and hence,
      * no need to add them manually to a {@link org.apache.commons.cli.Options} object.
-     * You only need to process the args once they have been parsed using {@link CommandLine.getOptionValue(String)}
+     * You only need to process the args once they have been parsed using {@code CommandLine.getOptionValue(String)}
      */
     private static class CommandLineOptions {
         static final Option CONFIG_FILE_OPTION = Option

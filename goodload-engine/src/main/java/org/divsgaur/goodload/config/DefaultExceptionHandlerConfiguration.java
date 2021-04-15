@@ -1,7 +1,9 @@
-package org.divsgaur.goodload.exceptions;
+package org.divsgaur.goodload.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.divsgaur.goodload.exceptions.InvalidSimulationConfigFileException;
 import org.springframework.boot.ExitCodeExceptionMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,8 +18,15 @@ public class DefaultExceptionHandlerConfiguration {
         return exception -> {
             if(exception.getCause() instanceof ParseException)
                 return 2;
-            else
+            else if(exception.getCause() instanceof InvalidSimulationConfigFileException) {
+                log.error(exception.getCause().getMessage());
+                return 3;
+            }
+            else {
+                log.error("Some error occurred during execution.");
+                log.debug("Error details: {}", ExceptionUtils.getStackTrace(exception));
                 return 1;
+            }
         };
     }
 }
