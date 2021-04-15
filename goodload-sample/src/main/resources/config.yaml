@@ -1,7 +1,16 @@
 goodload:
   simulations:
-    - name: Smaple Simulation
+    - name: Sample Simulation
       class: org.divsgaur.goodload.samples.SampleSimulation
+      throughput: 100
+      concurrency: 100
+      hold-for: 10m
+      ramp-up: 5s
+      ramp-down: 10s
+      iterations: 5
+
+    - name: Sample Http Simulation
+      class: org.divsgaur.goodload.samples.SampleHttpSimulation
       throughput: 100
       concurrency: 100
       hold-for: 10m

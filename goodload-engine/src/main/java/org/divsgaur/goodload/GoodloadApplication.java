@@ -7,6 +7,9 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.*;
 import org.divsgaur.goodload.exceptions.InvalidSimulationConfigFileException;
+import org.divsgaur.goodload.exceptions.JarFileNotFoundException;
+import org.divsgaur.goodload.execution.Simulator;
+import org.divsgaur.goodload.userconfig.ExecutionConfig;
 import org.divsgaur.goodload.userconfig.SimulationConfig;
 import org.divsgaur.goodload.userconfig.UserArgs;
 import org.springframework.boot.CommandLineRunner;
@@ -17,7 +20,13 @@ import org.springframework.lang.NonNull;
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.NoSuchElementException;
+import java.util.concurrent.Executors;
 
 @SpringBootApplication
 @Slf4j
@@ -25,6 +34,9 @@ public class GoodloadApplication implements CommandLineRunner {
 
     @Resource
     private UserArgs userArgs;
+
+    @Resource
+    private Simulator simulator;
 
     public static void main(String... args) {
         System.exit(
@@ -35,11 +47,50 @@ public class GoodloadApplication implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws ParseException, InvalidSimulationConfigFileException {
+    public void run(String... args) throws Exception {
+
         log.debug("Current path: {}", System.getProperty("user.dir"));
+
         parseArguments(args);
 
         loadExecutionConfiguration();
+
+        loadSimulationJar();
+
+        createSimulationExecutionThreadPool();
+
+        for(ExecutionConfig simulation: userArgs.getConfiguration().getSimulations()) {
+            simulator.execute(simulation);
+        }
+    }
+
+    private void createSimulationExecutionThreadPool() {
+        int maxConcurrency = userArgs.getConfiguration().getSimulations().stream()
+                .map(ExecutionConfig::getConcurrency)
+                .max(Comparator.comparingInt(o -> o))
+                .orElseThrow(NoSuchElementException::new);
+
+        userArgs.setSimulationExecutorService(Executors.newFixedThreadPool(maxConcurrency));
+    }
+
+    private void loadSimulationJar() throws JarFileNotFoundException {
+        try {
+            File jarFile = new File(userArgs.getJarFilePath());
+            if(!jarFile.exists() || !jarFile.canRead()) {
+                throw new JarFileNotFoundException(
+                        String.format("Could not open jar file %s. Make sure that the file exists and is readable.",
+                        jarFile.getAbsolutePath()));
+            }
+
+            userArgs.setUserSimulationsClassLoader(new URLClassLoader(
+                    new URL[] { new File(userArgs.getJarFilePath()).toURI().toURL() },
+                    ClassLoader.getSystemClassLoader()));
+        } catch (MalformedURLException e) {
+            throw new JarFileNotFoundException(
+                    String.format("The path to jar file is invalid.",
+                            userArgs.getJarFilePath()),
+                    e);
+        }
     }
 
     private void loadExecutionConfiguration() throws InvalidSimulationConfigFileException {
@@ -47,6 +98,7 @@ public class GoodloadApplication implements CommandLineRunner {
         try {
             var config = mapper.readValue(new File(userArgs.getConfigFilePath()), SimulationConfig.class);
             userArgs.setConfiguration(config);
+
         } catch(JsonParseException | JsonMappingException e) {
             throw new InvalidSimulationConfigFileException(
                     String.format("The configuration file %s is not well-formed." +

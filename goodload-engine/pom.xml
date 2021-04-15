@@ -41,6 +41,10 @@
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.divsgaur.goodload</groupId>
+            <artifactId>goodload-dsl</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

@@ -3,6 +3,7 @@ package org.divsgaur.goodload.userconfig;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -13,6 +14,7 @@ import java.util.List;
  *
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
  */
+@Data
 @JsonTypeName(value = "goodload")
 @JsonTypeInfo(include = JsonTypeInfo.As.WRAPPER_OBJECT, use = JsonTypeInfo.Id.NAME)
 public class SimulationConfig implements Serializable {
