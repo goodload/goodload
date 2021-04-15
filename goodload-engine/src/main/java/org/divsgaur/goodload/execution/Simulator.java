@@ -9,6 +9,11 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutorCompletionService;
 
 /**
  * As the name suggests,
@@ -48,18 +53,16 @@ public class Simulator {
         // detected and handled before the runners are even started.
         var simulationInstance = simulationClass.getDeclaredConstructor().newInstance();
 
-        Thread[] runners = new Thread[simulationConfig.getConcurrency()];
+        CompletionService<String> completionService = new ExecutorCompletionService<>(userArgs.getSimulationExecutorService());
+
+        List<Callable<String>> runners = new ArrayList<>(simulationConfig.getConcurrency());
         for(int runnerId=0; runnerId < simulationConfig.getConcurrency(); runnerId++) {
-            runners[runnerId] = new Thread(new SimulationRunner(runnerId, simulationConfig, simulationClass));
-            userArgs.getSimulationExecutorService().execute(runners[runnerId]);
+            var runner = new SimulationRunner(runnerId, 0, simulationConfig, simulationClass);
+            runners.add(runner);
         }
 
         try {
-            for (var runner : runners) {
-                synchronized (runner) {
-                    runner.wait();
-                }
-            }
+            userArgs.getSimulationExecutorService().invokeAll(runners);
         } catch (InterruptedException e) {
             throw new SimulatorInterruptedException(
                     String.format("The simulation `%s` was interrupted before completion.",
@@ -69,7 +72,9 @@ public class Simulator {
         log.info("Simulation `{}` completed.", simulationConfig.getName());
     }
 
-    private static class SimulationRunner implements Runnable {
+    private static class SimulationRunner implements Callable<String> {
+
+        private final long runAfterMillis;
 
         private final ExecutionConfig simulationConfig;
 
@@ -77,26 +82,36 @@ public class Simulator {
 
         private final String TAG;
 
-        SimulationRunner(int runnerId, ExecutionConfig simulationConfig, Class<? extends Simulation>  simulationClass) {
+        SimulationRunner(int runnerId, int runAfterMillis, ExecutionConfig simulationConfig, Class<? extends Simulation>  simulationClass) {
+            this.runAfterMillis = runAfterMillis;
             this.simulationConfig = simulationConfig;
             this.simulationClass = simulationClass;
 
             TAG = String.format("Simulation `%s` : Runner %d:", simulationConfig.getName(), runnerId);
         }
 
-        public void run() {
+        @Override
+        public String call() {
             log.debug("{} : Started", TAG);
 
             try {
+                Thread.sleep(runAfterMillis);
+
                 var simulation = simulationClass.getDeclaredConstructor().newInstance();
                 simulation.execute();
 
             } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException ignored) {
                 // No handling required because the runner is only created after the parent thread has verified
                 // that these exceptions won't occur.
+                return null;
+            } catch (InterruptedException e) {
+                log.error("{} was interrupted before completion.", TAG);
+                return null;
             }
 
             log.debug("{} : Ended", TAG);
+
+            return null;
         }
     }
 }

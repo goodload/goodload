@@ -87,7 +87,7 @@ public class GoodloadApplication implements CommandLineRunner {
                     ClassLoader.getSystemClassLoader()));
         } catch (MalformedURLException e) {
             throw new JarFileNotFoundException(
-                    String.format("The path to jar file is invalid.",
+                    String.format("The path to jar file (%s) is invalid",
                             userArgs.getJarFilePath()),
                     e);
         }
