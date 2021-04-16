@@ -39,6 +39,11 @@ public class Simulator {
             InvocationTargetException,
             InstantiationException,
             IllegalAccessException {
+        if(!simulationConfig.isEnabled()) {
+            log.info("Simulation `{}` ignored as it is disabled.", simulationConfig.getName());
+            return;
+        }
+
         log.info("Starting simulation `{}`", simulationConfig.getName());
 
         var simulationClass = Class.forName(

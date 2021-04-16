@@ -28,4 +28,10 @@ public class SimulationConfiguration implements Serializable {
 
     @JsonProperty(value = "ramp-down")
     private String rampDown;
+
+    /**
+     * Switch to enable or disable a simulation.
+     * {@code true} by default.
+     */
+    private boolean enabled = true;
 }
