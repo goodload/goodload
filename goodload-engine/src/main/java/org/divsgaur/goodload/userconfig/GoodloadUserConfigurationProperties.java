@@ -17,14 +17,14 @@ import java.util.List;
 @Data
 @JsonTypeName(value = "goodload")
 @JsonTypeInfo(include = JsonTypeInfo.As.WRAPPER_OBJECT, use = JsonTypeInfo.Id.NAME)
-public class SimulationConfig implements Serializable {
+public class GoodloadUserConfigurationProperties implements Serializable {
     public static final long serialVersionUID = 1L;
 
     /**
      * List of executions and their configuration.
      */
     @JsonProperty(value="simulations")
-    private List<ExecutionConfig> simulations;
+    private List<SimulationConfiguration> simulations;
 
     /**
      * Allows the user to define some properties that they require.

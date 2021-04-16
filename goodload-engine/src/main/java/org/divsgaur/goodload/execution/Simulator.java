@@ -1,9 +1,10 @@
 package org.divsgaur.goodload.execution;
 
 import lombok.extern.slf4j.Slf4j;
-import org.divsgaur.goodload.dsl.Simulation;
+import org.divsgaur.goodload.dsl.*;
+import org.divsgaur.goodload.exceptions.CheckFailedException;
 import org.divsgaur.goodload.exceptions.SimulatorInterruptedException;
-import org.divsgaur.goodload.userconfig.ExecutionConfig;
+import org.divsgaur.goodload.userconfig.SimulationConfiguration;
 import org.divsgaur.goodload.userconfig.UserArgs;
 import org.springframework.stereotype.Component;
 
@@ -12,8 +13,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutorCompletionService;
 
 /**
  * As the name suggests,
@@ -33,7 +32,7 @@ public class Simulator {
      * Also generates the report for that simulation.
      * @param simulationConfig The simulation to execute.
      */
-    public void execute(ExecutionConfig simulationConfig) throws
+    public void execute(SimulationConfiguration simulationConfig) throws
             SimulatorInterruptedException,
             ClassNotFoundException,
             NoSuchMethodException,
@@ -52,8 +51,6 @@ public class Simulator {
         // It will also prevent the same errors from being thrown by every runner thread because the error will be
         // detected and handled before the runners are even started.
         var simulationInstance = simulationClass.getDeclaredConstructor().newInstance();
-
-        CompletionService<String> completionService = new ExecutorCompletionService<>(userArgs.getSimulationExecutorService());
 
         List<Callable<String>> runners = new ArrayList<>(simulationConfig.getConcurrency());
         for(int runnerId=0; runnerId < simulationConfig.getConcurrency(); runnerId++) {
@@ -76,13 +73,13 @@ public class Simulator {
 
         private final long runAfterMillis;
 
-        private final ExecutionConfig simulationConfig;
+        private final SimulationConfiguration simulationConfig;
 
         private final Class<? extends Simulation> simulationClass;
 
         private final String TAG;
 
-        SimulationRunner(int runnerId, int runAfterMillis, ExecutionConfig simulationConfig, Class<? extends Simulation>  simulationClass) {
+        SimulationRunner(int runnerId, int runAfterMillis, SimulationConfiguration simulationConfig, Class<? extends Simulation>  simulationClass) {
             this.runAfterMillis = runAfterMillis;
             this.simulationConfig = simulationConfig;
             this.simulationClass = simulationClass;
@@ -97,8 +94,12 @@ public class Simulator {
             try {
                 Thread.sleep(runAfterMillis);
 
+                var session = new Session();
+
                 var simulation = simulationClass.getDeclaredConstructor().newInstance();
-                simulation.execute();
+
+                List<Action> actionList = simulation.init();
+                actionList.forEach(action -> execute(session, action));
 
             } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException ignored) {
                 // No handling required because the runner is only created after the parent thread has verified
@@ -112,6 +113,23 @@ public class Simulator {
             log.debug("{} : Ended", TAG);
 
             return null;
+        }
+
+        private void execute(Session session, Action action) {
+            action.getExecutionSequence().forEach((step -> {
+                if(step instanceof Check) {
+                    Check check = (Check) step;
+                    if(!check.condition(session)) {
+                        throw new CheckFailedException(simulationConfig.getName(), action);
+                    }
+                } else if(step instanceof Executable) {
+                    Executable executable = (Executable) step;
+                    executable.function(session);
+                } else if(step instanceof Action) {
+                    Action nestedAction = (Action) step;
+                    execute(session, nestedAction);
+                }
+            }));
         }
     }
 }

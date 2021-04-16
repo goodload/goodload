@@ -32,7 +32,7 @@ public class UserArgs {
     /**
      * The configuration properties deserialized from configuration yaml file.
      */
-    private SimulationConfig configuration;
+    private GoodloadUserConfigurationProperties configuration;
 
     /**
      * The loader used to load classes from user's simulation jar file.

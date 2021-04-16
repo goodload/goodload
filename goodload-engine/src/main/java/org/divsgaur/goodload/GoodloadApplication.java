@@ -9,8 +9,8 @@ import org.apache.commons.cli.*;
 import org.divsgaur.goodload.exceptions.InvalidSimulationConfigFileException;
 import org.divsgaur.goodload.exceptions.JarFileNotFoundException;
 import org.divsgaur.goodload.execution.Simulator;
-import org.divsgaur.goodload.userconfig.ExecutionConfig;
-import org.divsgaur.goodload.userconfig.SimulationConfig;
+import org.divsgaur.goodload.userconfig.GoodloadUserConfigurationProperties;
+import org.divsgaur.goodload.userconfig.SimulationConfiguration;
 import org.divsgaur.goodload.userconfig.UserArgs;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -59,14 +59,14 @@ public class GoodloadApplication implements CommandLineRunner {
 
         createSimulationExecutionThreadPool();
 
-        for(ExecutionConfig simulation: userArgs.getConfiguration().getSimulations()) {
+        for(SimulationConfiguration simulation: userArgs.getConfiguration().getSimulations()) {
             simulator.execute(simulation);
         }
     }
 
     private void createSimulationExecutionThreadPool() {
         int maxConcurrency = userArgs.getConfiguration().getSimulations().stream()
-                .map(ExecutionConfig::getConcurrency)
+                .map(SimulationConfiguration::getConcurrency)
                 .max(Comparator.comparingInt(o -> o))
                 .orElseThrow(NoSuchElementException::new);
 
@@ -96,7 +96,7 @@ public class GoodloadApplication implements CommandLineRunner {
     private void loadExecutionConfiguration() throws InvalidSimulationConfigFileException {
         var mapper = new ObjectMapper(new YAMLFactory());
         try {
-            var config = mapper.readValue(new File(userArgs.getConfigFilePath()), SimulationConfig.class);
+            var config = mapper.readValue(new File(userArgs.getConfigFilePath()), GoodloadUserConfigurationProperties.class);
             userArgs.setConfiguration(config);
 
         } catch(JsonParseException | JsonMappingException e) {

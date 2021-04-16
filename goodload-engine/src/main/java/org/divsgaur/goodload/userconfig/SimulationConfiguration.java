@@ -6,7 +6,7 @@ import lombok.Data;
 import java.io.Serializable;
 
 @Data
-public class ExecutionConfig implements Serializable {
+public class SimulationConfiguration implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private String name;

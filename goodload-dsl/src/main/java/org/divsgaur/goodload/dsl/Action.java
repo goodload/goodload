@@ -23,6 +23,7 @@ public class Action implements SequenceElement {
     @Setter
     private Group group;
 
+    @Getter
     private List<SequenceElement> executionSequence;
 
     Action(String name) {
