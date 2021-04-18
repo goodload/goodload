@@ -4,6 +4,7 @@ import lombok.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Getter
 @Setter
@@ -16,7 +17,7 @@ public class Session {
     public void put(String name, Object value) {
         properties.put(name, value);
     }
-    public Object get(String name) {
-        return properties.get(name);
+    public Optional<Object> get(String name) {
+        return Optional.of(properties.get(name));
     }
 }
