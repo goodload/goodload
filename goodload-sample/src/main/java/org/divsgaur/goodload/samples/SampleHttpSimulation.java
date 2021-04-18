@@ -2,6 +2,7 @@ package org.divsgaur.goodload.samples;
 
 import org.divsgaur.goodload.dsl.Action;
 import org.divsgaur.goodload.dsl.Simulation;
+import org.divsgaur.goodload.samples.data.Sample;
 
 import java.util.Collections;
 import java.util.List;
@@ -19,10 +20,10 @@ public class SampleHttpSimulation extends Simulation {
                                 .post("https://www.google.com")
                                 .header("AUTHENTICATION", "")
                                 .header("X-Cache-Control", "")
-                                .body(jsonBody(new Object()))
-                                .go())
-                        ,exec("sdf", (session) -> {})
-                        ,check((session) -> true)),
+                                .body(jsonBody(new Sample("sample name", "sample descr")))
+                                .go()),
+                        exec("sdf", (session) -> {}),
+                        check((session) -> true)),
                 /*.check((session) -> {
                     return ((String) session.get("HEADER-AUTHENTICATION")).equals("401");
                 })*/

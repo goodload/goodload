@@ -18,7 +18,7 @@ public class SampleSimulation extends Simulation {
                         check(session -> true),
                         exec("Login: Exec3", (session) -> {})),
                 check((session) -> {
-                    return ((String) session.get("HEADER-AUTHENTICATION")).equals("401");
+                    return ((String) session.get("HEADER-AUTHENTICATION").orElse("")).equals("401");
                 }),
                 exec("Execution 1: ", (session) -> {String random = "Some random execution";}),
                 group("Logout",
