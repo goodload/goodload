@@ -54,7 +54,8 @@ public class Simulator {
                 true,
                 userArgs.getUserSimulationsClassLoader()).asSubclass(Simulation.class);
 
-        // Create an instance just to verify that it can be created and the user's simulation class is not invalid.
+        // DO NOT REMOVE UNUSED VARIABLE simulationInstance
+        // We are creating an instance just to verify that it can be created and the user's simulation class is not invalid.
         // It will be harder to properly report the error if this verification is left for the runner threads.
         // It will also prevent the same errors from being thrown by every runner thread because the error will be
         // detected and handled before the runners are even started.
