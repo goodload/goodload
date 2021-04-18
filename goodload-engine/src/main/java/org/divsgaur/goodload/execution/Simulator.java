@@ -13,6 +13,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 
 /**
  * As the name suggests,
@@ -64,11 +65,14 @@ public class Simulator {
         }
 
         try {
-            userArgs.getSimulationExecutorService().invokeAll(runners);
-        } catch (InterruptedException e) {
+            var futures = userArgs.getSimulationExecutorService().invokeAll(runners);
+            for(var future: futures) {
+                future.get();
+            }
+        } catch (InterruptedException | ExecutionException e) {
             throw new SimulatorInterruptedException(
                     String.format("The simulation `%s` was interrupted before completion.",
-                            simulationConfig.getName()));
+                            simulationConfig.getName()), e);
         }
 
         log.info("Simulation `{}` completed.", simulationConfig.getName());
@@ -97,8 +101,6 @@ public class Simulator {
             log.debug("{} : Started", TAG);
 
             try {
-                Thread.sleep(runAfterMillis);
-
                 var session = new Session();
 
                 var simulation = simulationClass.getDeclaredConstructor().newInstance();
@@ -110,9 +112,8 @@ public class Simulator {
                 // No handling required because the runner is only created after the parent thread has verified
                 // that these exceptions won't occur.
                 return null;
-            } catch (InterruptedException e) {
-                log.error("{} was interrupted before completion.", TAG);
-                return null;
+            } catch (Exception e) {
+                log.error("{} : Unknown exception occurred during execution: ", TAG, e);
             }
 
             log.debug("{} : Ended", TAG);

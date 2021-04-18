@@ -1,21 +1,20 @@
 package org.divsgaur.goodload.dsl;
 
-import lombok.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.UUID;
 
-@AllArgsConstructor
 @Getter
 @Setter
-@EqualsAndHashCode
-@Data
-public class Group {
-    private String name;
-    private String id;
+@EqualsAndHashCode(callSuper = true)
+public class Group extends Action {
+    private String groupId;
 
-    public Group(String name) {
-        this.name = name;
-        this.id = createGroupId();
+    public Group(String name, SequenceElement... steps) {
+        super("name", steps);
+        this.groupId = createGroupId();
     }
 
     private String createGroupId() {
