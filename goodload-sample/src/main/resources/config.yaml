@@ -1,14 +1,25 @@
-executions:
-  execution-title: Smaple Simulation
-  execution-class: org.divsgaur.goodload.samples.SampleSimulation
-  throughput: 100
-  concurrency: 100
-  hold-for: 10m
-  ramp-up: 5s
-  ramp-down: 10s
-  iterations:
-    - it1:
-        dfdsf: dfsfs
-        dfsd: dsfds
-    - sfds:
-        sfd: sfds
+goodload:
+  simulations:
+    - name: Sample Simulation
+      class: org.divsgaur.goodload.samples.SampleSimulation
+      throughput: 100
+      concurrency: 1
+      hold-for: 10m
+      ramp-up: 5s
+      ramp-down: 10s
+      iterations: 5
+      enabled: true
+
+    - name: Sample Http Simulation
+      class: org.divsgaur.goodload.samples.SampleHttpSimulation
+      throughput: 100
+      concurrency: 1
+      hold-for: 10m
+      ramp-up: 5s
+      ramp-down: 10s
+      iterations: 5
+      enabled: true
+
+  custom:
+    key1: value1
+    key2: value2

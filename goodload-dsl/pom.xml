@@ -10,5 +10,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>goodload-dsl</artifactId>
+    <dependencies>
+        <dependency>
+            <groupId>org.divsgaur.goodload</groupId>
+            <artifactId>goodload-core</artifactId>
+        </dependency>
+    </dependencies>
 
 </project>
