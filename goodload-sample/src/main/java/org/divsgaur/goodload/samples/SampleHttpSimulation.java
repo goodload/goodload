@@ -20,7 +20,8 @@ public class SampleHttpSimulation extends Simulation {
                                 .post("https://www.google.com")
                                 .header("AUTHENTICATION", "")
                                 .header("X-Cache-Control", "")
-                                .body(jsonBody(new Sample("sample name", "sample descr")))
+                                //.body(jsonBody(new Sample("sample name", "sample descr")))
+                                .body(jsonBody(new Sample()))
                                 .go()),
                         exec("sdf", (session) -> {}),
                         check((session) -> true)),
