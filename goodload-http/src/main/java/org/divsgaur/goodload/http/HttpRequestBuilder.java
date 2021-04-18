@@ -4,6 +4,7 @@ import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import lombok.NoArgsConstructor;
+import org.divsgaur.goodload.core.exceptions.ExecutionFailedException;
 import org.divsgaur.goodload.dsl.Executable;
 import org.divsgaur.goodload.http.exceptions.HttpMethodDoesNotSupportBodyException;
 import org.divsgaur.goodload.http.exceptions.HttpMethodRequiresNonNullBodyException;
@@ -151,11 +152,14 @@ public class HttpRequestBuilder {
         }
 
         return (session -> {
-            // TODO: Add reporting and logging here
+            // TODO: Add logging here
+            // TODO: Decide what happens when the request fails.
+            //      Should we report the actual time or 0 to signify error occurred?
+
             try {
                 okHttpClient.newCall(httpRequest.build()).execute();
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new ExecutionFailedException(e);
             }
         });
     }
