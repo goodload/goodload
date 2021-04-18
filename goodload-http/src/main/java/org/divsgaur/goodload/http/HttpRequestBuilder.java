@@ -126,8 +126,7 @@ public class HttpRequestBuilder {
     public Executable go() throws HttpMethodDoesNotSupportBodyException, HttpMethodRequiresNonNullBodyException {
         if(requestBody != null && !com.squareup.okhttp.internal.http.HttpMethod.permitsRequestBody(httpMethod.name())) {
             throw HttpMethodDoesNotSupportBodyException.forMethod(httpMethod);
-        }
-        if(requestBody == null && com.squareup.okhttp.internal.http.HttpMethod.requiresRequestBody(httpMethod.name())) {
+        } else if(requestBody == null && com.squareup.okhttp.internal.http.HttpMethod.requiresRequestBody(httpMethod.name())) {
             throw HttpMethodRequiresNonNullBodyException.forMethod(httpMethod);
         }
 
