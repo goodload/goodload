@@ -1,10 +1,12 @@
 package org.divsgaur.goodload.execution;
 
 import lombok.extern.slf4j.Slf4j;
-import org.divsgaur.goodload.core.Report;
 import org.divsgaur.goodload.dsl.*;
 import org.divsgaur.goodload.exceptions.CheckFailedException;
 import org.divsgaur.goodload.exceptions.SimulatorInterruptedException;
+import org.divsgaur.goodload.reporting.AggregateReport;
+import org.divsgaur.goodload.reporting.Report;
+import org.divsgaur.goodload.reporting.ReportAggregator;
 import org.divsgaur.goodload.userconfig.SimulationConfiguration;
 import org.divsgaur.goodload.userconfig.UserArgs;
 import org.springframework.stereotype.Component;
@@ -12,10 +14,11 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+
+import static org.divsgaur.goodload.execution.Util.currentTimestamp;
 
 /**
  * As the name suggests,
@@ -30,12 +33,15 @@ public class Simulator {
     @Resource
     private UserArgs userArgs;
 
+    @Resource
+    private ReportAggregator reportAggregator;
+
     /**
      * Takes a simulation configuration and executes it.
      * Also generates the report for that simulation.
      * @param simulationConfig The simulation to execute.
      */
-    public List<Report> execute(SimulationConfiguration simulationConfig) throws
+    public AggregateReport execute(SimulationConfiguration simulationConfig) throws
             SimulatorInterruptedException,
             ClassNotFoundException,
             NoSuchMethodException,
@@ -63,6 +69,8 @@ public class Simulator {
 
         var simulationReport = new ArrayList<Report>();
 
+        long simulationStartTime = currentTimestamp();
+
         List<Callable<Report>> runners = new ArrayList<>(simulationConfig.getConcurrency());
         for(int runnerId=0; runnerId < simulationConfig.getConcurrency(); runnerId++) {
             var runner = new SimulationRunner(runnerId, 0, simulationConfig, simulationClass);
@@ -80,8 +88,13 @@ public class Simulator {
                             simulationConfig.getName()), e);
         }
 
+        long simulationEndTime = currentTimestamp();
         log.info("Simulation `{}` completed.", simulationConfig.getName());
-        return simulationReport;
+        log.info("Simulation `{}`: Generating aggregate report...", simulationConfig.getName());
+        return reportAggregator.aggregate(
+                simulationConfig.getName(),
+                simulationReport,
+                simulationEndTime - simulationStartTime);
     }
 
     private static class SimulationRunner implements Callable<Report> {
@@ -131,7 +144,7 @@ public class Simulator {
                 });
                 long endTimestamp = currentTimestamp();
 
-                report.setTimeInMillis(endTimestamp - startTimestamp);
+                report.setTotalTimeInMillis(endTimestamp - startTimestamp);
 
             } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException ignored) {
                 // No handling required because the runner is only created after the parent thread has verified
@@ -172,13 +185,9 @@ public class Simulator {
                 actionReport.setEndedNormally(false);
             }
             long actionEndTimestamp = currentTimestamp();
-            actionReport.setTimeInMillis(actionEndTimestamp - actionStartTimestamp);
+            actionReport.setTotalTimeInMillis(actionEndTimestamp - actionStartTimestamp);
 
             return actionReport;
-        }
-
-        private long currentTimestamp() {
-            return new Date().getTime();
         }
     }
 }

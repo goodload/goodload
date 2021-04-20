@@ -1,0 +1,128 @@
+[
+    {
+        "stepName": "Root",
+        "subSteps": [
+            {
+                "stepName": "Level1 Step 1",
+                "subSteps": [
+                    {
+                        "stepName": "Level2 Step 1",
+                        "subSteps": [
+                            {
+                                "stepName": "Level3 Step 1",
+                                "subSteps": [
+                                    
+                                ],
+                                "totalTimeInMillis": 25,
+                                "runnerId": 2,
+                                "endedNormally":false
+                            }
+                        ],
+                        "totalTimeInMillis": 25,
+                        "runnerId": 2,
+                        "endedNormally":false
+                    }        
+                ],
+                "totalTimeInMillis": 24,
+                "runnerId": 2,
+                "endedNormally":true
+            },      
+            {
+                "stepName": "Level1 Step 2",
+                "subSteps": [
+                    
+                ],
+                "totalTimeInMillis": 25,
+                "runnerId": 2,
+                "endedNormally":false
+            }
+        ],
+        "totalTimeInMillis": 24,
+        "runnerId": 2,
+        "endedNormally":true
+    },
+    {
+        "stepName": "Root",
+        "subSteps": [
+            {
+                "stepName": "Level1 Step 1",
+                "subSteps": [
+                    {
+                        "stepName": "Level2 Step 1",
+                        "subSteps": [
+                            {
+                                "stepName": "Level3 Step 1",
+                                "subSteps": [
+                                    
+                                ],
+                                "totalTimeInMillis": 25,
+                                "runnerId": 0,
+                                "endedNormally":false
+                            }
+                        ],
+                        "totalTimeInMillis": 25,
+                        "runnerId": 0,
+                        "endedNormally":false
+                    }        
+                ],
+                "totalTimeInMillis": 24,
+                "runnerId": 0,
+                "endedNormally":true
+            },      
+            {
+                "stepName": "Level1 Step 2",
+                "subSteps": [
+                    
+                ],
+                "totalTimeInMillis": 25,
+                "runnerId": 0,
+                "endedNormally":false
+            }
+        ],
+        "totalTimeInMillis": 24,
+        "runnerId": 0,
+        "endedNormally":true
+    },
+    {
+        "stepName": "Root",
+        "subSteps": [
+            {
+                "stepName": "Level1 Step 1",
+                "subSteps": [
+                    {
+                        "stepName": "Level2 Step 1",
+                        "subSteps": [
+                            {
+                                "stepName": "Level3 Step 1",
+                                "subSteps": [
+                                    
+                                ],
+                                "totalTimeInMillis": 25,
+                                "runnerId": 1,
+                                "endedNormally":false
+                            }
+                        ],
+                        "totalTimeInMillis": 25,
+                        "runnerId": 1,
+                        "endedNormally":false
+                    }        
+                ],
+                "totalTimeInMillis": 24,
+                "runnerId": 1,
+                "endedNormally":true
+            },      
+            {
+                "stepName": "Level1 Step 2",
+                "subSteps": [
+                    
+                ],
+                "totalTimeInMillis": 25,
+                "runnerId": 1,
+                "endedNormally":false
+            }
+        ],
+        "totalTimeInMillis": 24,
+        "runnerId": 1,
+        "endedNormally":true
+    }
+]

@@ -1,0 +1,38 @@
+
+{
+    "stepName": "Root",
+    "subSteps": [
+        {
+            "stepName": "Level1 Step 1",
+            "subSteps": [
+                {
+                    "stepName": "Level2 Step 1",
+                    "subSteps": [
+                        {
+                            "stepName": "Level3 Step 1",
+                            "subSteps": [
+                                
+                            ],
+                            "avgTimeInMillis": 25,                            
+                            "errorsOccured":true
+                        }
+                    ],
+                    "avgTimeInMillis": 25,                    
+                    "errorsOccured":true
+                }        
+            ],
+            "avgTimeInMillis": 24,            
+            "endedNormally":true
+        },      
+        {
+            "stepName": "Level1 Step 2",
+            "subSteps": [
+                
+            ],
+            "avgTimeInMillis": 25,
+            "errorsOccured":true
+        }
+    ],
+    "avgTimeInMillis": 24,
+    "endedNormally":true
+}

@@ -9,6 +9,7 @@ import org.apache.commons.cli.*;
 import org.divsgaur.goodload.exceptions.InvalidSimulationConfigFileException;
 import org.divsgaur.goodload.exceptions.JarFileNotFoundException;
 import org.divsgaur.goodload.execution.Simulator;
+import org.divsgaur.goodload.reporting.DraftAggregator;
 import org.divsgaur.goodload.userconfig.GoodloadUserConfigurationProperties;
 import org.divsgaur.goodload.userconfig.SimulationConfiguration;
 import org.divsgaur.goodload.userconfig.UserArgs;
@@ -48,6 +49,12 @@ public class GoodloadApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+
+        DraftAggregator draftAggregator = new DraftAggregator();
+        draftAggregator.aggregate(null, null, 0L);
+        if('a' == 'a') {
+            return;
+        }
 
         log.debug("Current path: {}", System.getProperty("user.dir"));
 

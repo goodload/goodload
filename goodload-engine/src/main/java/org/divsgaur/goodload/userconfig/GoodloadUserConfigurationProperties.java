@@ -27,6 +27,12 @@ public class GoodloadUserConfigurationProperties implements Serializable {
     private List<SimulationConfiguration> simulations;
 
     /**
+     * Properties and configuration that affect how the reports are generated.
+     */
+    @JsonProperty(value="reporting")
+    private ReportingConfiguration reporting;
+
+    /**
      * Allows the user to define some properties that they require.
      * These are not validated by goodload.
      */

@@ -21,6 +21,7 @@
         <module>goodload-http</module>
         <module>goodload-sample</module>
         <module>goodload-engine</module>
+        <module>goodload-reporting</module>
     </modules>
 
     <properties>
@@ -124,6 +125,12 @@
             <dependency>
                 <groupId>org.divsgaur.goodload</groupId>
                 <artifactId>goodload-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.divsgaur.goodload</groupId>
+                <artifactId>goodload-reporting</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

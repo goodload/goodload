@@ -1,15 +1,18 @@
-package org.divsgaur.goodload.core;
+package org.divsgaur.goodload.reporting;
 
-import lombok.Data;
+import lombok.*;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * The performance report generated for a step.
  */
-@Data
+@Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Report implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -21,13 +24,12 @@ public class Report implements Serializable {
     /**
      * The total time (in milliseconds) taken by a step to execute.
      */
-    private long timeInMillis;
+    private long totalTimeInMillis;
 
     /**
-     * Report of the child steps.
+     * Report of children steps.
      */
-    private List<Report> subSteps = new ArrayList<>();
-
+    private List<Report> subSteps;
     /**
      * If false, then the execution of the step failed due to some error.
      * If true, then the execution completed successfully.
