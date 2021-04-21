@@ -13,17 +13,17 @@
                                 "subSteps": [
                                     
                                 ],
-                                "totalTimeInMillis": 25,
+                                "totalTimeInMillis": 10,
                                 "runnerId": 2,
                                 "endedNormally":false
                             }
                         ],
-                        "totalTimeInMillis": 25,
+                        "totalTimeInMillis": 15,
                         "runnerId": 2,
                         "endedNormally":false
                     }        
                 ],
-                "totalTimeInMillis": 24,
+                "totalTimeInMillis": 21,
                 "runnerId": 2,
                 "endedNormally":true
             },      
@@ -32,12 +32,12 @@
                 "subSteps": [
                     
                 ],
-                "totalTimeInMillis": 25,
+                "totalTimeInMillis": 500,
                 "runnerId": 2,
                 "endedNormally":false
             }
         ],
-        "totalTimeInMillis": 24,
+        "totalTimeInMillis": 3000,
         "runnerId": 2,
         "endedNormally":true
     },
@@ -55,17 +55,17 @@
                                 "subSteps": [
                                     
                                 ],
-                                "totalTimeInMillis": 25,
+                                "totalTimeInMillis": 70,
                                 "runnerId": 0,
                                 "endedNormally":false
                             }
                         ],
-                        "totalTimeInMillis": 25,
+                        "totalTimeInMillis": 60,
                         "runnerId": 0,
                         "endedNormally":false
                     }        
                 ],
-                "totalTimeInMillis": 24,
+                "totalTimeInMillis": 21,
                 "runnerId": 0,
                 "endedNormally":true
             },      
@@ -74,12 +74,12 @@
                 "subSteps": [
                     
                 ],
-                "totalTimeInMillis": 25,
+                "totalTimeInMillis": 91,
                 "runnerId": 0,
                 "endedNormally":false
             }
         ],
-        "totalTimeInMillis": 24,
+        "totalTimeInMillis": 1000,
         "runnerId": 0,
         "endedNormally":true
     },
@@ -97,17 +97,17 @@
                                 "subSteps": [
                                     
                                 ],
-                                "totalTimeInMillis": 25,
+                                "totalTimeInMillis": 20,
                                 "runnerId": 1,
                                 "endedNormally":false
                             }
                         ],
-                        "totalTimeInMillis": 25,
+                        "totalTimeInMillis": 18,
                         "runnerId": 1,
                         "endedNormally":false
                     }        
                 ],
-                "totalTimeInMillis": 24,
+                "totalTimeInMillis": 21,
                 "runnerId": 1,
                 "endedNormally":true
             },      
@@ -116,12 +116,12 @@
                 "subSteps": [
                     
                 ],
-                "totalTimeInMillis": 25,
+                "totalTimeInMillis": 28,
                 "runnerId": 1,
                 "endedNormally":false
             }
         ],
-        "totalTimeInMillis": 24,
+        "totalTimeInMillis": 4000,
         "runnerId": 1,
         "endedNormally":true
     }

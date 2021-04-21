@@ -1,163 +1,29 @@
 package org.divsgaur.goodload.reporting;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.divsgaur.goodload.userconfig.UserArgs;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
  */
+@Component
 public class ReportAggregator {
     private ObjectMapper mapper = new ObjectMapper();
 
-    public AggregateReport aggregate(String simulationName, List<Report> reportPerThread, long totalSimulationRunTime) {
+    @Resource
+    private UserArgs userArgs;
 
-        try {
-            List<Report> rawReports = mapper.readValue("[\n" +
-                    "    {\n" +
-                    "        \"stepName\": \"Root\",\n" +
-                    "        \"subSteps\": [\n" +
-                    "            {\n" +
-                    "                \"stepName\": \"Level1 Step 1\",\n" +
-                    "                \"subSteps\": [\n" +
-                    "                    {\n" +
-                    "                        \"stepName\": \"Level2 Step 1\",\n" +
-                    "                        \"subSteps\": [\n" +
-                    "                            {\n" +
-                    "                                \"stepName\": \"Level3 Step 1\",\n" +
-                    "                                \"subSteps\": [\n" +
-                    "                                    \n" +
-                    "                                ],\n" +
-                    "                                \"totalTimeInMillis\": 25,\n" +
-                    "                                \"runnerId\": 2,\n" +
-                    "                                \"endedNormally\":false\n" +
-                    "                            }\n" +
-                    "                        ],\n" +
-                    "                        \"totalTimeInMillis\": 25,\n" +
-                    "                        \"runnerId\": 2,\n" +
-                    "                        \"endedNormally\":false\n" +
-                    "                    }        \n" +
-                    "                ],\n" +
-                    "                \"totalTimeInMillis\": 24,\n" +
-                    "                \"runnerId\": 2,\n" +
-                    "                \"endedNormally\":true\n" +
-                    "            },      \n" +
-                    "            {\n" +
-                    "                \"stepName\": \"Level1 Step 2\",\n" +
-                    "                \"subSteps\": [\n" +
-                    "                    \n" +
-                    "                ],\n" +
-                    "                \"totalTimeInMillis\": 25,\n" +
-                    "                \"runnerId\": 2,\n" +
-                    "                \"endedNormally\":false\n" +
-                    "            }\n" +
-                    "        ],\n" +
-                    "        \"totalTimeInMillis\": 24,\n" +
-                    "        \"runnerId\": 2,\n" +
-                    "        \"endedNormally\":true\n" +
-                    "    },\n" +
-                    "    {\n" +
-                    "        \"stepName\": \"Root\",\n" +
-                    "        \"subSteps\": [\n" +
-                    "            {\n" +
-                    "                \"stepName\": \"Level1 Step 1\",\n" +
-                    "                \"subSteps\": [\n" +
-                    "                    {\n" +
-                    "                        \"stepName\": \"Level2 Step 1\",\n" +
-                    "                        \"subSteps\": [\n" +
-                    "                            {\n" +
-                    "                                \"stepName\": \"Level3 Step 1\",\n" +
-                    "                                \"subSteps\": [\n" +
-                    "                                    \n" +
-                    "                                ],\n" +
-                    "                                \"totalTimeInMillis\": 25,\n" +
-                    "                                \"runnerId\": 0,\n" +
-                    "                                \"endedNormally\":false\n" +
-                    "                            }\n" +
-                    "                        ],\n" +
-                    "                        \"totalTimeInMillis\": 25,\n" +
-                    "                        \"runnerId\": 0,\n" +
-                    "                        \"endedNormally\":false\n" +
-                    "                    }        \n" +
-                    "                ],\n" +
-                    "                \"totalTimeInMillis\": 24,\n" +
-                    "                \"runnerId\": 0,\n" +
-                    "                \"endedNormally\":true\n" +
-                    "            },      \n" +
-                    "            {\n" +
-                    "                \"stepName\": \"Level1 Step 2\",\n" +
-                    "                \"subSteps\": [\n" +
-                    "                    \n" +
-                    "                ],\n" +
-                    "                \"totalTimeInMillis\": 25,\n" +
-                    "                \"runnerId\": 0,\n" +
-                    "                \"endedNormally\":false\n" +
-                    "            }\n" +
-                    "        ],\n" +
-                    "        \"totalTimeInMillis\": 24,\n" +
-                    "        \"runnerId\": 0,\n" +
-                    "        \"endedNormally\":true\n" +
-                    "    },\n" +
-                    "    {\n" +
-                    "        \"stepName\": \"Root\",\n" +
-                    "        \"subSteps\": [\n" +
-                    "            {\n" +
-                    "                \"stepName\": \"Level1 Step 1\",\n" +
-                    "                \"subSteps\": [\n" +
-                    "                    {\n" +
-                    "                        \"stepName\": \"Level2 Step 1\",\n" +
-                    "                        \"subSteps\": [\n" +
-                    "                            {\n" +
-                    "                                \"stepName\": \"Level3 Step 1\",\n" +
-                    "                                \"subSteps\": [\n" +
-                    "                                    \n" +
-                    "                                ],\n" +
-                    "                                \"totalTimeInMillis\": 25,\n" +
-                    "                                \"runnerId\": 1,\n" +
-                    "                                \"endedNormally\":false\n" +
-                    "                            }\n" +
-                    "                        ],\n" +
-                    "                        \"totalTimeInMillis\": 25,\n" +
-                    "                        \"runnerId\": 1,\n" +
-                    "                        \"endedNormally\":false\n" +
-                    "                    }        \n" +
-                    "                ],\n" +
-                    "                \"totalTimeInMillis\": 24,\n" +
-                    "                \"runnerId\": 1,\n" +
-                    "                \"endedNormally\":true\n" +
-                    "            },      \n" +
-                    "            {\n" +
-                    "                \"stepName\": \"Level1 Step 2\",\n" +
-                    "                \"subSteps\": [\n" +
-                    "                    \n" +
-                    "                ],\n" +
-                    "                \"totalTimeInMillis\": 25,\n" +
-                    "                \"runnerId\": 1,\n" +
-                    "                \"endedNormally\":false\n" +
-                    "            }\n" +
-                    "        ],\n" +
-                    "        \"totalTimeInMillis\": 24,\n" +
-                    "        \"runnerId\": 1,\n" +
-                    "        \"endedNormally\":true\n" +
-                    "    }\n" +
-                    "]", new TypeReference<>() {
-            });
-            var finalReport = aggregate(rawReports, rawReports.size(), rawReports.get(0).getSubSteps().size());
-            //AggregateReport aggregateReport = aggregate(rawReports, );
-            return finalReport;
-        } catch(Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+    public AggregateReport aggregate(String simulationName, List<Report> rawReports, long totalSimulationRunTime) {
+        var finalReport = aggregate(rawReports, rawReports.size(), rawReports.get(0).getSubSteps().size());
+        return finalReport;
     }
 
-    private AggregateReport aggregate(List<Report> rawReportList, int threadCount, int subStepCount) throws JsonProcessingException {
-        long totalTimeSum = 0;
-        long avgTime = 0;
-
+    private AggregateReport aggregate(List<Report> rawReportList, int threadCount, int subStepCount) {
         if(rawReportList == null || rawReportList.isEmpty()) {
             return null;
         }
@@ -181,6 +47,12 @@ public class ReportAggregator {
             }
         }
         if(!aggregateReportForStep.getRawReports().isEmpty()) {
+            aggregateReportForStep.setErrorsOccured(
+                    aggregateReportForStep
+                            .getRawReports()
+                            .stream().anyMatch(report -> !report.isEndedNormally())
+            );
+
             aggregateReportForStep.setAverageTimeInMillis(
                     aggregateReportForStep
                             .getRawReports()
@@ -189,8 +61,20 @@ public class ReportAggregator {
                             .reduce(0L, Long::sum)
                             / aggregateReportForStep.getRawReports().size()
             );
+
+            redactRawReports(aggregateReportForStep);
         };
 
         return aggregateReportForStep;
+    }
+
+    private void redactRawReports(AggregateReport aggregateReport) {
+        if(userArgs.getConfiguration().getReporting().isIncludeRawReport()) {
+            for (Report rawReport : aggregateReport.getRawReports()) {
+                rawReport.setSubSteps(null);
+            }
+        } else {
+            aggregateReport.setRawReports(null);
+        }
     }
 }
