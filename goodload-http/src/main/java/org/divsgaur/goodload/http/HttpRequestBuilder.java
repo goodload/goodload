@@ -154,19 +154,18 @@ public class HttpRequestBuilder {
                 httpRequest.post(requestBody);
         }
 
+        // TODO: Add logging here
+        // TODO: Decide what happens when the request fails.
+        //      Should we report the actual time or 0 to signify error occurred?
 
-            // TODO: Add logging here
-            // TODO: Decide what happens when the request fails.
-            //      Should we report the actual time or 0 to signify error occurred?
-
-            try {
-                var response = okHttpClient.newCall(httpRequest.build()).execute();
-                log.debug("HTTP Module: Response Code {}", response.code());
-                log.debug("HTTP Module: Response Headers {}", response.headers().toString());
-                log.debug("HTTP Module: Response Body {}", response.body().string());
-            } catch (IOException e) {
-                throw new ExecutionFailedException(e);
-            }
+        try {
+            var response = okHttpClient.newCall(httpRequest.build()).execute();
+            log.debug("HTTP Module: Response Code {}", response.code());
+            log.debug("HTTP Module: Response Headers {}", response.headers().toString());
+            log.debug("HTTP Module: Response Body {}", response.body().string());
+        } catch (IOException e) {
+            throw new ExecutionFailedException(e);
+        }
     }
 
     private void setUrl(String url) {
