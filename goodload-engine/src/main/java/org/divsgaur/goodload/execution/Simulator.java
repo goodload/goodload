@@ -165,20 +165,28 @@ public class Simulator {
             long actionStartTimestamp = currentTimestamp();
             try {
                 action.getExecutionSequence().forEach((step -> {
-                    if (step instanceof Check) {
-                        Check check = (Check) step;
-                        if (!check.condition(session)) {
-                            throw new CheckFailedException(simulationConfig.getName(), action);
+                    try {
+                        if (step instanceof Check) {
+                            Check check = (Check) step;
+                            if (!check.condition(session)) {
+                                throw new CheckFailedException(simulationConfig.getName(), action);
+                            }
+                        } else if (step instanceof Executable) {
+                            Executable executable = (Executable) step;
+                            executable.function(session);
+                        } else if (step instanceof Action) {
+                            Action nestedAction = (Action) step;
+
+                            var nestedReport = execute(session, nestedAction);
+
+                            if(!nestedReport.isEndedNormally()) {
+                                actionReport.setEndedNormally(false);
+                            }
+
+                            actionReport.getSubSteps().add(nestedReport);
                         }
-                    } else if (step instanceof Executable) {
-                        Executable executable = (Executable) step;
-                        executable.function(session);
-                    } else if (step instanceof Action) {
-                        Action nestedAction = (Action) step;
-
-                        var nestedReport = execute(session, nestedAction);
-
-                        actionReport.getSubSteps().add(nestedReport);
+                    } catch (Exception e) {
+                        actionReport.setEndedNormally(false);
                     }
                 }));
             } catch (Exception e) {
