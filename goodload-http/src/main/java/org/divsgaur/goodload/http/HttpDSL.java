@@ -5,11 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.RequestBody;
 import lombok.extern.slf4j.Slf4j;
+import org.divsgaur.goodload.dsl.Session;
 
 @Slf4j
 public class HttpDSL {
-    public static HttpRequestBuilder http() {
-        return new HttpRequestBuilder();
+    public static HttpRequestBuilder http(Session session) {
+        return new HttpRequestBuilder(session);
     }
 
     public static RequestBody jsonBody(Object object) {

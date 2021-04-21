@@ -186,6 +186,7 @@ public class Simulator {
                             actionReport.getSubSteps().add(nestedReport);
                         }
                     } catch (Exception e) {
+                        log.debug("Error occurred in step {}: {}", actionReport.getStepName(), ExceptionUtils.getStackTrace(e));
                         actionReport.setEndedNormally(false);
                     }
                 }));
