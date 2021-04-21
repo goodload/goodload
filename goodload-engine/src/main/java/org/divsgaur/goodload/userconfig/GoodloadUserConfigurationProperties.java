@@ -30,7 +30,7 @@ public class GoodloadUserConfigurationProperties implements Serializable {
      * Properties and configuration that affect how the reports are generated.
      */
     @JsonProperty(value="reporting")
-    private ReportingConfiguration reporting;
+    private ReportingConfiguration reporting = new ReportingConfiguration();
 
     /**
      * Allows the user to define some properties that they require.

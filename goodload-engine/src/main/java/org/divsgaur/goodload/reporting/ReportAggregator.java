@@ -6,14 +6,16 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
  */
 @Component
 public class ReportAggregator {
-    private ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
 
     @Resource
     private UserArgs userArgs;
@@ -29,7 +31,7 @@ public class ReportAggregator {
             return null;
         }
 
-        int subStepCount = rawReportList.get(0).getSubSteps().size();
+        int subStepCount = Optional.ofNullable(rawReportList.get(0).getSubSteps()).orElse(Collections.emptyList()).size();
 
         AggregateReport aggregateReportForStep = new AggregateReport();
         aggregateReportForStep.setRawReports(rawReportList);
