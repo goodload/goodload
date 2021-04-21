@@ -1,6 +1,9 @@
 package org.divsgaur.goodload.reporting;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.List;
@@ -9,10 +12,9 @@ import java.util.List;
  * The performance report generated for a step.
  */
 @Builder
-@Getter
-@Setter
-@NoArgsConstructor
+@Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class Report implements Serializable {
     private static final long serialVersionUID = 1L;
 
