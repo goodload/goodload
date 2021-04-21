@@ -19,14 +19,17 @@ public class ReportAggregator {
     private UserArgs userArgs;
 
     public AggregateReport aggregate(String simulationName, List<Report> rawReports, long totalSimulationRunTime) {
-        var finalReport = aggregate(rawReports, rawReports.size(), rawReports.get(0).getSubSteps().size());
+        var finalReport = aggregate(rawReports);
+        finalReport.setTotalTimeInMillis(totalSimulationRunTime);
         return finalReport;
     }
 
-    private AggregateReport aggregate(List<Report> rawReportList, int threadCount, int subStepCount) {
+    private AggregateReport aggregate(List<Report> rawReportList) {
         if(rawReportList == null || rawReportList.isEmpty()) {
             return null;
         }
+
+        int subStepCount = rawReportList.get(0).getSubSteps().size();
 
         AggregateReport aggregateReportForStep = new AggregateReport();
         aggregateReportForStep.setRawReports(rawReportList);
@@ -36,13 +39,12 @@ public class ReportAggregator {
         for(int subStepIndex =0; subStepIndex < subStepCount; subStepIndex++) {
             List<Report> nestedRawReportList = new ArrayList<>();
             if(rawReportList.get(0).getSubSteps() != null && !rawReportList.get(0).getSubSteps().isEmpty()) {
-                for (int threadIndex = 0; threadIndex < threadCount; threadIndex++) {
-                    nestedRawReportList.add(rawReportList
-                            .get(threadIndex)
+                for (Report report : rawReportList) {
+                    nestedRawReportList.add(report
                             .getSubSteps()
                             .get(subStepIndex));
                 }
-                AggregateReport aggregateReportForSubStep = aggregate(nestedRawReportList, threadCount, nestedRawReportList.get(0).getSubSteps().size());
+                AggregateReport aggregateReportForSubStep = aggregate(nestedRawReportList);
                 aggregateReportForStep.getSubSteps().add(aggregateReportForSubStep);
             }
         }
@@ -63,7 +65,7 @@ public class ReportAggregator {
             );
 
             redactRawReports(aggregateReportForStep);
-        };
+        }
 
         return aggregateReportForStep;
     }
