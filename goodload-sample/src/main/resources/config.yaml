@@ -8,7 +8,7 @@ goodload:
       ramp-up: 5s
       ramp-down: 10s
       iterations: 5
-      enabled: true
+      enabled: false
 
     - name: Sample Http Simulation
       class: org.divsgaur.goodload.samples.SampleHttpSimulation
@@ -19,6 +19,14 @@ goodload:
       ramp-down: 10s
       iterations: 5
       enabled: true
+
+  reporting:
+    include-raw-report: true
+    export-directory-path: "./goodload-sample/target/"
+    export-formats:
+      - "yaml"
+      - "json"
+      - "json-pretty"
 
   custom:
     key1: value1

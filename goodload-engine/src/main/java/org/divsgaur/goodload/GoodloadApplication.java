@@ -9,6 +9,8 @@ import org.apache.commons.cli.*;
 import org.divsgaur.goodload.exceptions.InvalidSimulationConfigFileException;
 import org.divsgaur.goodload.exceptions.JarFileNotFoundException;
 import org.divsgaur.goodload.execution.Simulator;
+import org.divsgaur.goodload.reporting.AggregateReport;
+import org.divsgaur.goodload.reporting.ReportExporter;
 import org.divsgaur.goodload.userconfig.GoodloadUserConfigurationProperties;
 import org.divsgaur.goodload.userconfig.SimulationConfiguration;
 import org.divsgaur.goodload.userconfig.UserArgs;
@@ -23,6 +25,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.NoSuchElementException;
@@ -37,6 +40,9 @@ public class GoodloadApplication implements CommandLineRunner {
 
     @Resource
     private Simulator simulator;
+
+    @Resource
+    private ReportExporter reportExporter;
 
     public static void main(String... args) {
         System.exit(
@@ -59,9 +65,16 @@ public class GoodloadApplication implements CommandLineRunner {
 
         createSimulationExecutionThreadPool();
 
+        var reports = new ArrayList<AggregateReport>();
+
         for(SimulationConfiguration simulation: userArgs.getConfiguration().getSimulations()) {
-            simulator.execute(simulation);
+            var report = simulator.execute(simulation);
+            if(report != null) {
+                reports.add(report);
+            }
         }
+
+        reportExporter.export(reports);
     }
 
     private void createSimulationExecutionThreadPool() {

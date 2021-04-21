@@ -6,13 +6,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@Getter
-@Setter
 @EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
 public class Session {
-    private Map<String, Object> properties = new HashMap<>();
+    private final Map<String, Object> properties = new HashMap<>();
+
+    /**
+     * Holds the name of current step being executed.
+     * Helpful in logging and reporting.
+     */
+    @Getter
+    @Setter
+    private String currentStepName;
 
     public void put(String name, Object value) {
         properties.put(name, value);

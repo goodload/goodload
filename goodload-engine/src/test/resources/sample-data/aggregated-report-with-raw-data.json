@@ -1,0 +1,137 @@
+{
+    "stepName": "Root",
+    "subSteps": [
+        {
+            "stepName": "Level1 Step 1",
+            "subSteps": [
+                {
+                    "stepName": "Level2 Step 1",
+                    "subSteps": [
+                        {
+                            "stepName": "Level3 Step 1",
+                            "subSteps": [
+
+                            ],
+                            "averageTimeInMillis": 33,
+                            "errorsOccured":true,
+                            "rawReports": [
+                                {
+                                    "stepName": "Level3 Step 1",
+                                    "totalTimeInMillis": 10,
+                                    "runnerId": 2,
+                                    "endedNormally":false
+                                },
+                                {
+                                    "stepName": "Level3 Step 1",
+                                    "totalTimeInMillis": 70,
+                                    "runnerId": 0,
+                                    "endedNormally":false
+                                },
+                                {
+                                    "stepName": "Level3 Step 1",
+                                    "totalTimeInMillis": 20,
+                                    "runnerId": 1,
+                                    "endedNormally":false
+                                }
+                            ]
+                        }
+                    ],
+                    "averageTimeInMillis": 31,
+                    "errorsOccured":true,
+                    "rawReports": [
+                        {
+                            "stepName": "Level2 Step 1",
+                            "totalTimeInMillis": 15,
+                            "runnerId": 2,
+                            "endedNormally":false
+                        },
+                        {
+                            "stepName": "Level2 Step 1",
+                            "totalTimeInMillis": 60,
+                            "runnerId": 0,
+                            "endedNormally":false
+                        },
+                        {
+                            "stepName": "Level2 Step 1",
+                            "totalTimeInMillis": 18,
+                            "runnerId": 1,
+                            "endedNormally":false
+                        }
+                    ]
+                }
+            ],
+            "averageTimeInMillis": 21,
+            "errorsOccured":false,
+            "rawReports": [
+                {
+                    "stepName": "Level1 Step 1",
+                    "totalTimeInMillis": 21,
+                    "runnerId": 2,
+                    "endedNormally":true
+                },
+                {
+                    "stepName": "Level1 Step 1",
+                    "totalTimeInMillis": 21,
+                    "runnerId": 0,
+                    "endedNormally":true
+                },
+                {
+                    "stepName": "Level1 Step 1",
+                    "totalTimeInMillis": 21,
+                    "runnerId": 1,
+                    "endedNormally":true
+                }
+            ]
+        },
+        {
+            "stepName": "Level1 Step 2",
+            "subSteps": [
+
+            ],
+            "averageTimeInMillis": 206,
+            "errorsOccured":true,
+            "rawReports": [
+                {
+                    "stepName": "Level1 Step 2",
+                    "totalTimeInMillis": 500,
+                    "runnerId": 2,
+                    "endedNormally":false
+                },
+                {
+                    "stepName": "Level1 Step 2",
+                    "totalTimeInMillis": 91,
+                    "runnerId": 0,
+                    "endedNormally":false
+                },
+                {
+                    "stepName": "Level1 Step 2",
+                    "totalTimeInMillis": 28,
+                    "runnerId": 1,
+                    "endedNormally":false
+                }
+            ]
+        }
+    ],
+    "averageTimeInMillis": 2666,
+    "errorsOccured":false,
+    "rawReports": [
+        {
+            "stepName": "Root",
+            "totalTimeInMillis": 3000,
+            "runnerId": 2,
+            "endedNormally":true
+        },
+        {
+            "stepName": "Root",
+            "totalTimeInMillis": 1000,
+            "runnerId": 0,
+            "endedNormally":true
+        },
+        {
+            "stepName": "Root",
+            "totalTimeInMillis": 4000,
+            "runnerId": 1,
+            "endedNormally":true
+        }
+    ]
+}
