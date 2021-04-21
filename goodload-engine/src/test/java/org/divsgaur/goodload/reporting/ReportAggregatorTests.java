@@ -3,6 +3,7 @@ package org.divsgaur.goodload.reporting;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.divsgaur.goodload.config.GoodloadConfiguration;
+import org.divsgaur.goodload.config.TestConfiguration;
 import org.divsgaur.goodload.userconfig.GoodloadUserConfigurationProperties;
 import org.divsgaur.goodload.userconfig.ReportingConfiguration;
 import org.divsgaur.goodload.userconfig.UserArgs;
@@ -26,7 +27,7 @@ import static org.mockito.Mockito.when;
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
  */
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {GoodloadConfiguration.class})
+@ContextConfiguration(classes = {GoodloadConfiguration.class, TestConfiguration.class})
 public class ReportAggregatorTests {
     @Resource
     private ObjectMapper objectMapper;
