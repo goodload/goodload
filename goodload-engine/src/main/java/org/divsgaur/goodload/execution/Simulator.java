@@ -146,10 +146,11 @@ public class Simulator {
 
                 report.setTotalTimeInMillis(endTimestamp - startTimestamp);
 
+                return report;
+
             } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException ignored) {
                 // No handling required because the runner is only created after the parent thread has verified
                 // that these exceptions won't occur.
-                return null;
             } catch (Exception e) {
                 log.error("{} : Unknown exception occurred during execution: ", TAG, e);
             }
