@@ -43,7 +43,7 @@ public class AggregateReport implements Serializable {
      * If true, then the execution of the step failed due to some error.
      * If false, then the execution completed successfully.
      */
-    private boolean errorsOccured = true;
+    private boolean errorsOccured = false;
 
     public AggregateReport(String stepName) {
         this.stepName = stepName;
