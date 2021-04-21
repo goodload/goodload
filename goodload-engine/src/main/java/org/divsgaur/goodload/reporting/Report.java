@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -31,7 +32,7 @@ public class Report implements Serializable {
     /**
      * Report of children steps.
      */
-    private List<Report> subSteps;
+    private List<Report> subSteps = new ArrayList<>();
     /**
      * If false, then the execution of the step failed due to some error.
      * If true, then the execution completed successfully.

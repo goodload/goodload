@@ -1,6 +1,7 @@
 package org.divsgaur.goodload.execution;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.divsgaur.goodload.dsl.*;
 import org.divsgaur.goodload.exceptions.CheckFailedException;
 import org.divsgaur.goodload.exceptions.SimulatorInterruptedException;
@@ -138,6 +139,7 @@ public class Simulator {
                 long startTimestamp = currentTimestamp();
                 actionList.forEach(action -> {
                     var actionReport = execute(session, action);
+                    report.getSubSteps().add(actionReport);
                     if(!actionReport.isEndedNormally()) {
                         report.setEndedNormally(false);
                     }
@@ -148,9 +150,6 @@ public class Simulator {
 
                 return report;
 
-            } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException ignored) {
-                // No handling required because the runner is only created after the parent thread has verified
-                // that these exceptions won't occur.
             } catch (Exception e) {
                 log.error("{} : Unknown exception occurred during execution: ", TAG, e);
             }
@@ -177,12 +176,13 @@ public class Simulator {
                     } else if (step instanceof Action) {
                         Action nestedAction = (Action) step;
 
-                        Report nestedReport = execute(session, nestedAction);
+                        var nestedReport = execute(session, nestedAction);
 
                         actionReport.getSubSteps().add(nestedReport);
                     }
                 }));
             } catch (Exception e) {
+                log.debug("Error occurred in step {}: {}", actionReport.getStepName(), ExceptionUtils.getStackTrace(e));
                 actionReport.setEndedNormally(false);
             }
             long actionEndTimestamp = currentTimestamp();

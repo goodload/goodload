@@ -65,10 +65,13 @@ public class GoodloadApplication implements CommandLineRunner {
 
         createSimulationExecutionThreadPool();
 
-        var reports = new ArrayList<AggregateReport>(userArgs.getConfiguration().getSimulations().size());
+        var reports = new ArrayList<AggregateReport>();
 
         for(SimulationConfiguration simulation: userArgs.getConfiguration().getSimulations()) {
-            reports.add(simulator.execute(simulation));
+            var report = simulator.execute(simulation);
+            if(report != null) {
+                reports.add(report);
+            }
         }
 
         reportExporter.export(reports);
