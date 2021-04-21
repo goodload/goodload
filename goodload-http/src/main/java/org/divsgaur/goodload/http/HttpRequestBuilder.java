@@ -3,26 +3,30 @@ package org.divsgaur.goodload.http;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
-import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.divsgaur.goodload.core.exceptions.ExecutionFailedException;
-import org.divsgaur.goodload.dsl.Executable;
+import org.divsgaur.goodload.dsl.Session;
 import org.divsgaur.goodload.http.exceptions.HttpMethodDoesNotSupportBodyException;
 import org.divsgaur.goodload.http.exceptions.HttpMethodRequiresNonNullBodyException;
 
-import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.function.Function;
 
-@NoArgsConstructor
+@RequiredArgsConstructor
+@Slf4j
 public class HttpRequestBuilder {
     private final Request.Builder httpRequest = new Request.Builder();
 
-    @Resource
-    private OkHttpClient okHttpClient;
+    private final OkHttpClient okHttpClient = new OkHttpClient();
 
     private RequestBody requestBody;
 
     private HttpMethod httpMethod;
+
+    @NonNull
+    private Session session;
 
     /**
      * Configures the current request as HTTP DELETE request.
@@ -119,12 +123,11 @@ public class HttpRequestBuilder {
 
     /**
      * Finalize the current http request.
-     * @return An Executable that sends the request.
      * @throws HttpMethodDoesNotSupportBodyException If the HTTP method does not allow sending a request body.
      * @throws HttpMethodRequiresNonNullBodyException if the HTTP method requires request body to be provided
 *                                                     but the provided request body is null.
      */
-    public Executable go() throws HttpMethodDoesNotSupportBodyException, HttpMethodRequiresNonNullBodyException {
+    public void go() throws HttpMethodDoesNotSupportBodyException, HttpMethodRequiresNonNullBodyException {
         if(requestBody != null && !com.squareup.okhttp.internal.http.HttpMethod.permitsRequestBody(httpMethod.name())) {
             throw HttpMethodDoesNotSupportBodyException.forMethod(httpMethod);
         } else if(requestBody == null && com.squareup.okhttp.internal.http.HttpMethod.requiresRequestBody(httpMethod.name())) {
@@ -151,17 +154,19 @@ public class HttpRequestBuilder {
                 httpRequest.post(requestBody);
         }
 
-        return (session -> {
+
             // TODO: Add logging here
             // TODO: Decide what happens when the request fails.
             //      Should we report the actual time or 0 to signify error occurred?
 
             try {
-                okHttpClient.newCall(httpRequest.build()).execute();
+                var response = okHttpClient.newCall(httpRequest.build()).execute();
+                log.debug("HTTP Module: Response Code {}", response.code());
+                log.debug("HTTP Module: Response Headers {}", response.headers().toString());
+                log.debug("HTTP Module: Response Body {}", response.body().string());
             } catch (IOException e) {
                 throw new ExecutionFailedException(e);
             }
-        });
     }
 
     private void setUrl(String url) {

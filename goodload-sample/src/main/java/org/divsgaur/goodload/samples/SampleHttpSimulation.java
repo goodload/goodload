@@ -16,7 +16,7 @@ public class SampleHttpSimulation extends Simulation {
     public List<Action> init() {
         Action scenario = scenario("Sample scenario",
                 group("Login",
-                        exec("Get request", (session) -> http()
+                        exec("Get request", (session) -> http(session)
                                 .post("https://www.google.com")
                                 .header("AUTHENTICATION", "")
                                 .header("X-Cache-Control", "")
