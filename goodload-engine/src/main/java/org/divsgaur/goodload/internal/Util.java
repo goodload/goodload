@@ -1,4 +1,4 @@
-package org.divsgaur.goodload.execution;
+package org.divsgaur.goodload.internal;
 
 import java.util.Date;
 

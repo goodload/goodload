@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
-import static org.divsgaur.goodload.execution.Util.currentTimestamp;
+import static org.divsgaur.goodload.internal.Util.currentTimestamp;
 
 /**
  * As the name suggests,

@@ -20,6 +20,14 @@ goodload:
       iterations: 5
       enabled: true
 
+  reporting:
+    include-raw-report: true
+    export-directory-path: "./goodload-sample/target/"
+    export-formats:
+      - "yaml"
+      - "json"
+      - "json-pretty"
+
   custom:
     key1: value1
     key2: value2
