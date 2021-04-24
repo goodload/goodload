@@ -22,7 +22,7 @@ public class SampleHttpSimulation extends Simulation {
                                 .header("X-Cache-Control", "")
                                 .body(jsonBody(new Sample("sample name", "sample descr")))
                                 .go()),
-                        exec("sdf", (session) -> { throw new Exception("dfsdf"); }),
+                        exec("sdf", (session) -> { }),
                         check((session) -> true)),
                 /*.check((session) -> {
                     return ((String) session.get("HEADER-AUTHENTICATION")).equals("401");

@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -37,5 +37,5 @@ public class GoodloadUserConfigurationProperties implements Serializable {
      * These are not validated by goodload.
      */
     @JsonProperty(value="custom")
-    private HashMap<String, Object> custom;
+    private LinkedHashMap<String, Object> custom;
 }

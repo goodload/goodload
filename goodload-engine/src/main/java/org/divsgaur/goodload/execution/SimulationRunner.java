@@ -7,6 +7,7 @@ import org.divsgaur.goodload.exceptions.CheckFailedException;
 import org.divsgaur.goodload.internal.Util;
 import org.divsgaur.goodload.reporting.Report;
 import org.divsgaur.goodload.userconfig.SimulationConfiguration;
+import org.divsgaur.goodload.userconfig.UserArgs;
 
 import java.util.concurrent.Callable;
 
@@ -21,7 +22,7 @@ import static org.divsgaur.goodload.internal.Util.currentTimestamp;
 @Slf4j
 class SimulationRunner implements Callable<Report> {
 
-private final long runAfterMillis;
+    private final long runAfterMillis;
 
     private final SimulationConfiguration simulationConfig;
 
@@ -33,17 +34,21 @@ private final long runAfterMillis;
 
     private final long holdForMillis;
 
+    private UserArgs userArgs;
+
     SimulationRunner(
             int runnerId,
             int runAfterMillis,
             SimulationConfiguration simulationConfig,
             Class<? extends Simulation>  simulationClass,
-            long holdForMillis) {
+            long holdForMillis,
+            UserArgs userArgs) {
         this.runAfterMillis = runAfterMillis;
         this.simulationConfig = simulationConfig;
         this.simulationClass = simulationClass;
         this.runnerId = runnerId;
         this.holdForMillis = holdForMillis;
+        this.userArgs = userArgs;
 
         TAG = String.format("Simulation `%s` : Runner %d:", simulationConfig.getName(), runnerId);
     }
@@ -78,6 +83,7 @@ private final long runAfterMillis;
                 var actionList = simulation.init();
 
                 var session = new Session();
+                session.setCustomConfigurationProperties(userArgs.getConfiguration().getCustom());
                 final int finalIterationIndex = iterationIndex;
                 actionList.forEach(action -> {
                     var actionReport = execute(session, action, runnerIdStr, finalIterationIndex);

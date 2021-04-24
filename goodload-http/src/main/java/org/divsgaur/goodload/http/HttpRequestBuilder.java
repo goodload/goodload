@@ -1,5 +1,6 @@
 package org.divsgaur.goodload.http;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
@@ -8,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.divsgaur.goodload.core.exceptions.ExecutionFailedException;
 import org.divsgaur.goodload.dsl.Session;
+import org.divsgaur.goodload.http.config.HttpConfigurationProperties;
 import org.divsgaur.goodload.http.exceptions.HttpMethodDoesNotSupportBodyException;
 import org.divsgaur.goodload.http.exceptions.HttpMethodRequiresNonNullBodyException;
 
@@ -24,6 +26,8 @@ public class HttpRequestBuilder {
     private RequestBody requestBody;
 
     private HttpMethod httpMethod;
+
+    private HttpConfigurationProperties httpConfigurationProperties;
 
     @NonNull
     private Session session;
@@ -127,7 +131,12 @@ public class HttpRequestBuilder {
      * @throws HttpMethodRequiresNonNullBodyException if the HTTP method requires request body to be provided
 *                                                     but the provided request body is null.
      */
-    public void go() throws HttpMethodDoesNotSupportBodyException, HttpMethodRequiresNonNullBodyException {
+    public void go()
+            throws HttpMethodDoesNotSupportBodyException,
+            HttpMethodRequiresNonNullBodyException {
+
+        readHttpConfigurationProperties(session);
+
         if(requestBody != null && !com.squareup.okhttp.internal.http.HttpMethod.permitsRequestBody(httpMethod.name())) {
             throw HttpMethodDoesNotSupportBodyException.forMethod(httpMethod);
         } else if(requestBody == null && com.squareup.okhttp.internal.http.HttpMethod.requiresRequestBody(httpMethod.name())) {
@@ -154,15 +163,25 @@ public class HttpRequestBuilder {
                 httpRequest.post(requestBody);
         }
 
-        // TODO: Add logging here
-        // TODO: Decide what happens when the request fails.
-        //      Should we report the actual time or 0 to signify error occurred?
-
         try {
-            var response = okHttpClient.newCall(httpRequest.build()).execute();
-            //log.debug("HTTP Module: Response Code {}", response.code());
-            //log.debug("HTTP Module: Response Headers {}", response.headers().toString());
-            //log.debug("HTTP Module: Response Body {}", response.body().string());
+            var request = httpRequest.build();
+            var response = okHttpClient.newCall(request).execute();
+
+            if(httpConfigurationProperties.getLogging().isRequestHeaders()) {
+                log.debug("HTTP: Request headers {}", request.headers().toString());
+            }
+            if(httpConfigurationProperties.getLogging().isRequestBody()) {
+                log.debug("HTTP: Request body {}", request.body().toString());
+            }
+            if(httpConfigurationProperties.getLogging().isResponseCode()) {
+                log.debug("HTTP: Response code {}", response.code());
+            }
+            if(httpConfigurationProperties.getLogging().isResponseHeaders()) {
+                log.debug("HTTP: Response headers {}", response.headers().toString());
+            }
+            if(httpConfigurationProperties.getLogging().isResponseBody()) {
+                log.debug("HTTP: Response body {}", response.body().string());
+            }
         } catch (IOException e) {
             throw new ExecutionFailedException(e);
         }
@@ -170,5 +189,21 @@ public class HttpRequestBuilder {
 
     private void setUrl(String url) {
         httpRequest.url(url);
+    }
+
+    private void readHttpConfigurationProperties(Session session) {
+        if(session.getCustomConfigurationProperties() == null
+                || session.getCustomConfigurationProperties().get("http") == null) {
+            return;
+        }
+
+        var objectMapper = new ObjectMapper();
+        httpConfigurationProperties = objectMapper
+                .convertValue(
+                        session.getCustomConfigurationProperties().get("http"),
+                        HttpConfigurationProperties.class);
+        if(httpConfigurationProperties == null) {
+            log.error("The configuration for http module goodload.custom.http is invalid.");
+        }
     }
 }
