@@ -38,7 +38,7 @@ public class ReportExporter {
     }
 
     public void exportRawIfEnabled(String simulationName, List<Report> report) {
-        if(configuration.isExportRawReport()) {
+        if(configuration.getDebugging().isExportRawReport()) {
             try {
                 long currentTimestamp = Util.currentTimestamp();
                 var exportFileName = simulationName + "-raw-report-" + currentTimestamp;
@@ -52,7 +52,7 @@ public class ReportExporter {
     }
 
     public void exportTransformedIfEnabled(String simulationName, List<Report> report) {
-        if(configuration.isExportTransformedRawReport()) {
+        if(configuration.getDebugging().isExportTransformedRawReport()) {
             try {
                 long currentTimestamp = Util.currentTimestamp();
                 var exportFileName = simulationName + "-transformed-raw-report-" + currentTimestamp;

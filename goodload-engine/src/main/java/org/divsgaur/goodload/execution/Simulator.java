@@ -2,6 +2,7 @@ package org.divsgaur.goodload.execution;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.divsgaur.goodload.config.GoodloadConfigurationProperties;
 import org.divsgaur.goodload.dsl.*;
 import org.divsgaur.goodload.exceptions.CheckFailedException;
 import org.divsgaur.goodload.exceptions.SimulatorInterruptedException;
@@ -37,6 +38,9 @@ public class Simulator {
     @Resource
     private ReportAggregator reportAggregator;
 
+    @Resource
+    private GoodloadConfigurationProperties goodloadConfigurationProperties;
+
     /**
      * Takes a simulation configuration and executes it.
      * Also generates the report for that simulation.
@@ -70,9 +74,17 @@ public class Simulator {
 
         var simulationReport = new ArrayList<Report>();
 
-        long simulationStartTime = currentTimestamp();
+        long maxHoldFor = Util.parseDurationToMillis(goodloadConfigurationProperties.getMaxHoldFor());
+        long simulationHoldFor = Util.parseDurationToMillis(simulationConfig.getHoldFor());
+        if(maxHoldFor < simulationHoldFor) {
+            log.warn("The hold-for duration {} is greater than max allowed value of {}, " +
+                    "hence the simulation will be run only for {} duration.",
+                    simulationConfig.getHoldFor(),
+                    goodloadConfigurationProperties.getMaxHoldFor(),
+                    goodloadConfigurationProperties.getMaxHoldFor());
+        }
 
-        long holdForMillis = Util.parseDurationToMillis(simulationConfig.getHoldFor());
+        long holdForMillis = Math.min(maxHoldFor, simulationHoldFor);
 
         var runners = new ArrayList<Callable<Report>>(simulationConfig.getConcurrency());
         for(int runnerId=0; runnerId < simulationConfig.getConcurrency(); runnerId++) {
@@ -80,6 +92,8 @@ public class Simulator {
             runners.add(runner);
         }
 
+
+        long simulationStartTime = currentTimestamp();
         try {
             var futures = userArgs.getSimulationExecutorService().invokeAll(runners);
             for(var future: futures) {

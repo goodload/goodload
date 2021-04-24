@@ -160,9 +160,9 @@ public class HttpRequestBuilder {
 
         try {
             var response = okHttpClient.newCall(httpRequest.build()).execute();
-            log.debug("HTTP Module: Response Code {}", response.code());
-            log.debug("HTTP Module: Response Headers {}", response.headers().toString());
-            log.debug("HTTP Module: Response Body {}", response.body().string());
+            //log.debug("HTTP Module: Response Code {}", response.code());
+            //log.debug("HTTP Module: Response Headers {}", response.headers().toString());
+            //log.debug("HTTP Module: Response Body {}", response.body().string());
         } catch (IOException e) {
             throw new ExecutionFailedException(e);
         }
