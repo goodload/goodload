@@ -14,11 +14,11 @@ public class SimulationConfiguration implements Serializable {
     @JsonProperty(value = "class")
     private String fullClassName;
 
-    private int throughput;
+    private Integer throughput;
 
     private int concurrency;
 
-    private int iterations;
+    private Integer iterations;
 
     @JsonProperty(value = "hold-for")
     private String holdFor;
