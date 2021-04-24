@@ -30,6 +30,11 @@ public class AggregateReport implements Serializable {
     private long averageTimeInMillis;
 
     /**
+     * Number of times the simulation was executed.
+     */
+    private int iterations;
+
+    /**
      * Report of children steps.
      */
     private List<AggregateReport> subSteps;

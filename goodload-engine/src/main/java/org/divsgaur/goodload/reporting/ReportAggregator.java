@@ -1,6 +1,5 @@
 package org.divsgaur.goodload.reporting;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.divsgaur.goodload.userconfig.UserArgs;
 import org.springframework.stereotype.Component;
 
@@ -15,14 +14,25 @@ import java.util.Optional;
  */
 @Component
 public class ReportAggregator {
-    private final ObjectMapper mapper = new ObjectMapper();
-
     @Resource
     private UserArgs userArgs;
 
+    @Resource
+    private ReportExporter reportExporter;
+
     public AggregateReport aggregate(String simulationName, List<Report> rawReports, long totalSimulationRunTime) {
-        var finalReport = aggregate(rawReports);
+        reportExporter.exportRawIfEnabled(simulationName, rawReports);
+
+        List<Report> transformedRawReport = new ArrayList<>(rawReports.size());
+
+        for(var report: rawReports) {
+            transformedRawReport.addAll(report.getIterations());
+        }
+        reportExporter.exportTransformedIfEnabled(simulationName, transformedRawReport);
+
+        var finalReport = aggregate(transformedRawReport);
         finalReport.setTotalTimeInMillis(totalSimulationRunTime);
+        finalReport.setIterations(rawReports.size());
         return finalReport;
     }
 

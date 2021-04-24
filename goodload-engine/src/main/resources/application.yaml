@@ -23,3 +23,8 @@ server:
   error:
     include-stacktrace: always
 
+goodload:
+  debugging:
+    export-raw-report: true
+    export-transformed-raw-report: true
+

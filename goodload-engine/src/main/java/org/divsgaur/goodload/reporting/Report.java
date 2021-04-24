@@ -25,14 +25,26 @@ public class Report implements Serializable {
     private String stepName;
 
     /**
-     * The total time (in milliseconds) taken by a step to execute.
+     * When the execution started for the step/action/scenario this report belongs to.
      */
-    private long totalTimeInMillis;
+    private long startTimestampInMillis;
+
+    /**
+     * When the execution started for the step/action/scenario this report belongs to
+     */
+    private long endTimestampInMillis;
 
     /**
      * Report of children steps.
      */
     private List<Report> subSteps = new ArrayList<>();
+
+    /**
+     * Report of iterations that happened for the simulation.
+     * It is null for substeps of a simulation.
+     */
+    private List<Report> iterations = new ArrayList<>();
+
     /**
      * If false, then the execution of the step failed due to some error.
      * If true, then the execution completed successfully.
@@ -43,4 +55,13 @@ public class Report implements Serializable {
      * Id of the simulation runner. Can be used for debugging.
      */
     private String runnerId;
+
+    /**
+     * Denotes the iteration for which this report was generated.
+     */
+    private int iterationIndex;
+
+    public long getTotalTimeInMillis() {
+        return endTimestampInMillis - startTimestampInMillis;
+    }
 }

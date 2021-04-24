@@ -1,5 +1,6 @@
 package org.divsgaur.goodload.internal;
 
+import java.time.Duration;
 import java.util.Date;
 
 /**
@@ -8,5 +9,10 @@ import java.util.Date;
 public class Util {
     public static long currentTimestamp() {
         return new Date().getTime();
+    }
+
+    public static long parseDurationToMillis(String timePeriod) {
+        var duration = Duration.parse("PT" + timePeriod);
+        return duration.toMillis();
     }
 }
