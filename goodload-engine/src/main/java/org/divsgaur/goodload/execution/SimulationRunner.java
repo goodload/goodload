@@ -109,37 +109,35 @@ class SimulationRunner implements Callable<Report> {
             long actionStartTimestamp = currentTimestamp();
             actionReport.setStartTimestampInMillis(actionStartTimestamp);
 
-            try {
-                action.getExecutionSequence().forEach((step -> {
-                    try {
-                        if (step instanceof Check) {
-                            Check check = (Check) step;
-                            if (!check.condition(session)) {
-                                throw new CheckFailedException(simulationConfig.getName(), action);
-                            }
-                        } else if (step instanceof Executable) {
-                            Executable executable = (Executable) step;
-                            executable.function(session);
-                        } else if (step instanceof Action) {
-                            Action nestedAction = (Action) step;
-
-                            var nestedReport = execute(session, nestedAction, runnerId, iterationIndex);
-
-                            if(!nestedReport.isEndedNormally()) {
-                                actionReport.setEndedNormally(false);
-                            }
-
-                            actionReport.getSubSteps().add(nestedReport);
+            action.getExecutionSequence().forEach((step -> {
+                try {
+                    if (step instanceof Check) {
+                        Check check = (Check) step;
+                        if (!check.condition(session)) {
+                            throw new CheckFailedException(simulationConfig.getName(), action);
                         }
-                    } catch (Exception e) {
-                        log.debug("Error occurred in step {}: {}", actionReport.getStepName(), ExceptionUtils.getStackTrace(e));
-                        actionReport.setEndedNormally(false);
+                    } else if (step instanceof Executable) {
+                        Executable executable = (Executable) step;
+                        executable.function(session);
+                    } else if (step instanceof Action) {
+                        Action nestedAction = (Action) step;
+
+                        var nestedReport = execute(session, nestedAction, runnerId, iterationIndex);
+
+                        if(!nestedReport.isEndedNormally()) {
+                            actionReport.setEndedNormally(false);
+                        }
+
+                        actionReport.getSubSteps().add(nestedReport);
                     }
-                }));
-            } catch (Exception e) {
-                log.debug("Error occurred in step {}: {}", actionReport.getStepName(), ExceptionUtils.getStackTrace(e));
-                actionReport.setEndedNormally(false);
-            }
+                }
+                catch(CheckFailedException e) {
+                    actionReport.setEndedNormally(false);
+                } catch (Exception e) {
+                    log.debug("Error occurred in step {}: {}", actionReport.getStepName(), ExceptionUtils.getStackTrace(e));
+                    actionReport.setEndedNormally(false);
+                }
+            }));
             actionReport.setEndTimestampInMillis(currentTimestamp());
 
             return actionReport;
