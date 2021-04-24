@@ -183,7 +183,10 @@ public class Simulator {
                 report.setRunnerId(runnerIdStr);
                 report.setStartTimestampInMillis(startTimestamp);
 
-                for(int iterationIndex = 0; Util.currentTimestamp() <= endIterationsWhenTimestamp; iterationIndex++) {
+                for(int iterationIndex = 0;
+                    Util.currentTimestamp() <= endIterationsWhenTimestamp
+                        && iterationIndex < simulationConfig.getIterations();
+                    iterationIndex++) {
 
                     var simulation = simulationClass.getDeclaredConstructor().newInstance();
 
