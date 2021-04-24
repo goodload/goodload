@@ -32,7 +32,7 @@ public class ReportAggregator {
 
         var finalReport = aggregate(transformedRawReport);
         finalReport.setTotalTimeInMillis(totalSimulationRunTime);
-        finalReport.setIterations(rawReports.size());
+        finalReport.setIterations(transformedRawReport.size());
         return finalReport;
     }
 
@@ -75,6 +75,7 @@ public class ReportAggregator {
                             .reduce(0L, Long::sum)
                             / aggregateReportForStep.getRawReports().size()
             );
+            aggregateReportForStep.setIterations(aggregateReportForStep.getRawReports().size());
 
             redactRawReports(aggregateReportForStep);
         }
