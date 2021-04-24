@@ -25,6 +25,12 @@ public class ReportAggregator {
 
         List<Report> transformedRawReport = new ArrayList<>(rawReports.size());
 
+        /*
+         * Raw reports contain n iterations level report in 1 thread level report, and there are m such thread reports.
+         * Linearize thread level reports and thread-iteration level reports.
+         * The transformed report will have all the reports flattened as list of iterations, and hence will be a list of
+         * n*m reports.
+         */
         for(var report: rawReports) {
             transformedRawReport.addAll(report.getIterations());
         }
