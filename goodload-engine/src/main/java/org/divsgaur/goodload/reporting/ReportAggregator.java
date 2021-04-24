@@ -1,6 +1,5 @@
 package org.divsgaur.goodload.reporting;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.divsgaur.goodload.userconfig.UserArgs;
 import org.springframework.stereotype.Component;
 
@@ -15,14 +14,31 @@ import java.util.Optional;
  */
 @Component
 public class ReportAggregator {
-    private final ObjectMapper mapper = new ObjectMapper();
-
     @Resource
     private UserArgs userArgs;
 
+    @Resource
+    private ReportExporter reportExporter;
+
     public AggregateReport aggregate(String simulationName, List<Report> rawReports, long totalSimulationRunTime) {
-        var finalReport = aggregate(rawReports);
+        reportExporter.exportRawIfEnabled(simulationName, rawReports);
+
+        List<Report> transformedRawReport = new ArrayList<>(rawReports.size());
+
+        /*
+         * Raw reports contain n iterations level report in 1 thread level report, and there are m such thread reports.
+         * Linearize thread level reports and thread-iteration level reports.
+         * The transformed report will have all the reports flattened as list of iterations, and hence will be a list of
+         * n*m reports.
+         */
+        for(var report: rawReports) {
+            transformedRawReport.addAll(report.getIterations());
+        }
+        reportExporter.exportTransformedIfEnabled(simulationName, transformedRawReport);
+
+        var finalReport = aggregate(transformedRawReport);
         finalReport.setTotalTimeInMillis(totalSimulationRunTime);
+        finalReport.setIterations(transformedRawReport.size());
         return finalReport;
     }
 
@@ -65,6 +81,7 @@ public class ReportAggregator {
                             .reduce(0L, Long::sum)
                             / aggregateReportForStep.getRawReports().size()
             );
+            aggregateReportForStep.setIterations(aggregateReportForStep.getRawReports().size());
 
             redactRawReports(aggregateReportForStep);
         }

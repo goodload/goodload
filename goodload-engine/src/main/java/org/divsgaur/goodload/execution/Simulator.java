@@ -2,9 +2,11 @@ package org.divsgaur.goodload.execution;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.divsgaur.goodload.config.GoodloadConfigurationProperties;
 import org.divsgaur.goodload.dsl.*;
 import org.divsgaur.goodload.exceptions.CheckFailedException;
 import org.divsgaur.goodload.exceptions.SimulatorInterruptedException;
+import org.divsgaur.goodload.internal.Util;
 import org.divsgaur.goodload.reporting.AggregateReport;
 import org.divsgaur.goodload.reporting.Report;
 import org.divsgaur.goodload.reporting.ReportAggregator;
@@ -15,9 +17,10 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import static org.divsgaur.goodload.internal.Util.currentTimestamp;
 
@@ -36,6 +39,9 @@ public class Simulator {
 
     @Resource
     private ReportAggregator reportAggregator;
+
+    @Resource
+    private GoodloadConfigurationProperties goodloadConfigurationProperties;
 
     /**
      * Takes a simulation configuration and executes it.
@@ -70,26 +76,58 @@ public class Simulator {
 
         var simulationReport = new ArrayList<Report>();
 
-        long simulationStartTime = currentTimestamp();
+        long maxHoldFor = Util.parseDurationToMillis(goodloadConfigurationProperties.getMaxHoldFor());
+        long simulationHoldFor = Util.parseDurationToMillis(simulationConfig.getHoldFor());
 
-        List<Callable<Report>> runners = new ArrayList<>(simulationConfig.getConcurrency());
+        if(maxHoldFor < simulationHoldFor) {
+            log.warn("The hold-for duration {} is greater than max allowed value of {}, " +
+                    "hence the simulation will be run only for {} duration.",
+                    simulationConfig.getHoldFor(),
+                    goodloadConfigurationProperties.getMaxHoldFor(),
+                    goodloadConfigurationProperties.getMaxHoldFor());
+        }
+
+        long holdForMillis = Math.min(maxHoldFor, simulationHoldFor);
+
+        // Forcibly terminate the runner threads if some long running step in simulation is causing
+        // it to run for more than 120% of the hold for value.
+        // This prevents Denial of Service attacks due to infinite recursions or loops in simulation.
+        long forceEndAfterDuration = (long)
+                ((100.0 + goodloadConfigurationProperties.getGracePeriodPercentage()) / 100 * maxHoldFor);
+
+        var runners = new ArrayList<Callable<Report>>(simulationConfig.getConcurrency());
         for(int runnerId=0; runnerId < simulationConfig.getConcurrency(); runnerId++) {
-            var runner = new SimulationRunner(runnerId, 0, simulationConfig, simulationClass);
+            var runner = new SimulationRunner(runnerId, 0, simulationConfig, simulationClass, holdForMillis);
             runners.add(runner);
         }
 
+        long simulationStartTime = currentTimestamp();
         try {
-            var futures = userArgs.getSimulationExecutorService().invokeAll(runners);
+            var futures = userArgs.getSimulationExecutorService().invokeAll(
+                    runners,
+                    forceEndAfterDuration,
+                    TimeUnit.MILLISECONDS);
             for(var future: futures) {
                 simulationReport.add(future.get());
             }
-        } catch (InterruptedException | ExecutionException e) {
+        } catch(CancellationException e) {
+            throw new SimulatorInterruptedException(
+                    String.format(
+                            "The simulation %s was cancelled forcefully because it exceeded max duration " +
+                                    "(including %d grace period) of %d milliseconds.",
+                            simulationConfig.getName(),
+                            goodloadConfigurationProperties.getGracePeriodPercentage(),
+                            forceEndAfterDuration),
+                    e);
+        }
+        catch (InterruptedException | ExecutionException e) {
             throw new SimulatorInterruptedException(
                     String.format("The simulation `%s` was interrupted before completion.",
                             simulationConfig.getName()), e);
         }
 
         long simulationEndTime = currentTimestamp();
+
         log.info("Simulation `{}` completed.", simulationConfig.getName());
         log.info("Simulation `{}`: Generating aggregate report...", simulationConfig.getName());
         return reportAggregator.aggregate(
@@ -110,11 +148,19 @@ public class Simulator {
 
         private final int runnerId;
 
-        SimulationRunner(int runnerId, int runAfterMillis, SimulationConfiguration simulationConfig, Class<? extends Simulation>  simulationClass) {
+        private final long holdForMillis;
+
+        SimulationRunner(
+                int runnerId,
+                int runAfterMillis,
+                SimulationConfiguration simulationConfig,
+                Class<? extends Simulation>  simulationClass,
+                long holdForMillis) {
             this.runAfterMillis = runAfterMillis;
             this.simulationConfig = simulationConfig;
             this.simulationClass = simulationClass;
             this.runnerId = runnerId;
+            this.holdForMillis = holdForMillis;
 
             TAG = String.format("Simulation `%s` : Runner %d:", simulationConfig.getName(), runnerId);
         }
@@ -126,27 +172,38 @@ public class Simulator {
             try {
                 Thread.sleep(runAfterMillis);
 
-                var session = new Session();
+                final var runnerIdStr = String.valueOf(runnerId);
 
-                var simulation = simulationClass.getDeclaredConstructor().newInstance();
-
-                var actionList = simulation.init();
+                long startTimestamp = Util.currentTimestamp();
+                // When the last iteration should be initiated
+                long endIterationsWhenTimestamp = startTimestamp + holdForMillis;
 
                 var report = new Report();
                 report.setStepName(simulationConfig.getName());
-                report.setRunnerId(String.valueOf(runnerId));
+                report.setRunnerId(runnerIdStr);
+                report.setStartTimestampInMillis(startTimestamp);
 
-                long startTimestamp = currentTimestamp();
-                actionList.forEach(action -> {
-                    var actionReport = execute(session, action);
-                    report.getSubSteps().add(actionReport);
-                    if(!actionReport.isEndedNormally()) {
-                        report.setEndedNormally(false);
-                    }
-                });
+                for(int iterationIndex = 0; Util.currentTimestamp() <= endIterationsWhenTimestamp; iterationIndex++) {
+
+                    var simulation = simulationClass.getDeclaredConstructor().newInstance();
+
+                    var actionList = simulation.init();
+
+                    var session = new Session();
+                    final int finalIterationIndex = iterationIndex;
+                    actionList.forEach(action -> {
+                        var actionReport = execute(session, action, runnerIdStr, finalIterationIndex);
+                        report.getIterations().add(actionReport);
+                        if (!actionReport.isEndedNormally()) {
+                            report.setEndedNormally(false);
+                        }
+                    });
+                }
+
+                // When the last iteration completed.
                 long endTimestamp = currentTimestamp();
 
-                report.setTotalTimeInMillis(endTimestamp - startTimestamp);
+                report.setEndTimestampInMillis(endTimestamp);
 
                 return report;
 
@@ -159,10 +216,14 @@ public class Simulator {
             return null;
         }
 
-        private Report execute(Session session, Action action) {
+        private Report execute(Session session, Action action, String runnerId, int iterationIndex) {
             Report actionReport = new Report();
             actionReport.setStepName(action.getName());
+            actionReport.setRunnerId(runnerId);
+            actionReport.setIterationIndex(iterationIndex);
             long actionStartTimestamp = currentTimestamp();
+            actionReport.setStartTimestampInMillis(actionStartTimestamp);
+
             try {
                 action.getExecutionSequence().forEach((step -> {
                     try {
@@ -177,7 +238,7 @@ public class Simulator {
                         } else if (step instanceof Action) {
                             Action nestedAction = (Action) step;
 
-                            var nestedReport = execute(session, nestedAction);
+                            var nestedReport = execute(session, nestedAction, runnerId, iterationIndex);
 
                             if(!nestedReport.isEndedNormally()) {
                                 actionReport.setEndedNormally(false);
@@ -194,8 +255,7 @@ public class Simulator {
                 log.debug("Error occurred in step {}: {}", actionReport.getStepName(), ExceptionUtils.getStackTrace(e));
                 actionReport.setEndedNormally(false);
             }
-            long actionEndTimestamp = currentTimestamp();
-            actionReport.setTotalTimeInMillis(actionEndTimestamp - actionStartTimestamp);
+            actionReport.setEndTimestampInMillis(Util.currentTimestamp());
 
             return actionReport;
         }
