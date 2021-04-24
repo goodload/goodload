@@ -15,7 +15,16 @@ public class GoodloadConfigurationProperties {
      * Maximum value for hold-for. If hold-for value is more than this in simulation configuration,
      * it will be ignored and this value will be used instead.
      */
-    private String maxHoldFor = "1h";
+    private String maxHoldFor = "2h";
+
+    /**
+     * Percentage of max hold for value to use as grace period for long running tasks.
+     * hold-for prevents only execution of next steps.
+     * But if some simulation's step is stuck in a loop or infinite recursion then the engine will wait for
+     * some grace period after the hold-for duration has expired for the step to complete.
+     * If it is still not completed then the simulation will end forcefully with exception.
+     */
+    private int gracePeriodPercentage = 20;
 
     /**
      * Properties related to debugging

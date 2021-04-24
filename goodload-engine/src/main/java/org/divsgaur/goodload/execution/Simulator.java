@@ -92,7 +92,8 @@ public class Simulator {
         // Forcibly terminate the runner threads if some long running step in simulation is causing
         // it to run for more than 120% of the hold for value.
         // This prevents Denial of Service attacks due to infinite recursions or loops in simulation.
-        long forceEndAfterDuration = (long) (1.2 * maxHoldFor);
+        long forceEndAfterDuration = (long)
+                ((100.0 + goodloadConfigurationProperties.getGracePeriodPercentage()) / 100 * maxHoldFor);
 
         var runners = new ArrayList<Callable<Report>>(simulationConfig.getConcurrency());
         for(int runnerId=0; runnerId < simulationConfig.getConcurrency(); runnerId++) {
@@ -115,7 +116,7 @@ public class Simulator {
                             "The simulation %s was cancelled forcefully because it exceeded max duration " +
                                     "(including %d grace period) of %d milliseconds.",
                             simulationConfig.getName(),
-                            20,
+                            goodloadConfigurationProperties.getGracePeriodPercentage(),
                             forceEndAfterDuration),
                     e);
         }
