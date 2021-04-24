@@ -162,13 +162,13 @@ private final long runAfterMillis;
         if(maxThroughput == null) {
             return;
         }
-        long simulationDuration = Util.currentTimestamp() - startTimestamp;
+        long simulationDurationInSeconds = (Util.currentTimestamp() - startTimestamp) / 1000;
         float currentThroughput = (float) iterationCount /
-                (simulationDuration);
-        if(currentThroughput < maxThroughput) {
-            long requiredWaitTime = iterationCount / maxThroughput - simulationDuration;
-            if(requiredWaitTime > 0) {
-                Thread.sleep(requiredWaitTime);
+                simulationDurationInSeconds;
+        if(currentThroughput > maxThroughput) {
+            long requiredWaitTimeInSeconds = iterationCount / maxThroughput - simulationDurationInSeconds;
+            if(requiredWaitTimeInSeconds * 1000 > 0) {
+                Thread.sleep(requiredWaitTimeInSeconds * 1000);
             }
         }
     }
