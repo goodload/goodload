@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 /**
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
  */
-@ConfigurationProperties(value= "goodload")
+@ConfigurationProperties(value= "goodload.engine")
 @Data
 public class GoodloadConfigurationProperties {
     private static final long serialVersionUID = 1L;

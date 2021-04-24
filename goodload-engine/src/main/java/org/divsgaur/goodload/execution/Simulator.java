@@ -95,7 +95,13 @@ public class Simulator {
 
         var runners = new ArrayList<Callable<Report>>(simulationConfig.getConcurrency());
         for(int runnerId=0; runnerId < simulationConfig.getConcurrency(); runnerId++) {
-            var runner = new SimulationRunner(runnerId, 0, simulationConfig, simulationClass, holdForMillis);
+            var runner = new SimulationRunner(
+                    runnerId,
+                    0,
+                    simulationConfig,
+                    simulationClass,
+                    holdForMillis,
+                    userArgs);
             runners.add(runner);
         }
 

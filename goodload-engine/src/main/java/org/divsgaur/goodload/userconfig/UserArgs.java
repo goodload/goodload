@@ -30,6 +30,12 @@ public class UserArgs {
     private String[] simulationsToExecute;
 
     /**
+     * Contents of the user's simulation config file.
+     * Can be used extended submodules such as http-dsl to read module-specific configuration.
+     */
+    private String originalConfigFileContents;
+
+    /**
      * The configuration properties deserialized from configuration yaml file.
      */
     private GoodloadUserConfigurationProperties configuration;
