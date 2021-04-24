@@ -35,6 +35,9 @@ public class ReportExporter {
         var exportFileName = "goodload-report-" + currentTimestamp;
 
         export(report, exportFileName);
+
+        log.info("Exported aggregate reports to {} directory.",
+                new File(userArgs.getConfiguration().getReporting().getExportDirectoryPath()).getAbsolutePath());
     }
 
     public void exportRawIfEnabled(String simulationName, List<Report> report) {
