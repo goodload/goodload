@@ -18,7 +18,9 @@ import javax.annotation.Resource;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import static org.divsgaur.goodload.internal.Util.currentTimestamp;
 
@@ -76,6 +78,7 @@ public class Simulator {
 
         long maxHoldFor = Util.parseDurationToMillis(goodloadConfigurationProperties.getMaxHoldFor());
         long simulationHoldFor = Util.parseDurationToMillis(simulationConfig.getHoldFor());
+
         if(maxHoldFor < simulationHoldFor) {
             log.warn("The hold-for duration {} is greater than max allowed value of {}, " +
                     "hence the simulation will be run only for {} duration.",
@@ -86,20 +89,37 @@ public class Simulator {
 
         long holdForMillis = Math.min(maxHoldFor, simulationHoldFor);
 
+        // Forcibly terminate the runner threads if some long running step in simulation is causing
+        // it to run for more than 120% of the hold for value.
+        // This prevents Denial of Service attacks due to infinite recursions or loops in simulation.
+        long forceEndAfterDuration = (long) (1.2 * maxHoldFor);
+
         var runners = new ArrayList<Callable<Report>>(simulationConfig.getConcurrency());
         for(int runnerId=0; runnerId < simulationConfig.getConcurrency(); runnerId++) {
             var runner = new SimulationRunner(runnerId, 0, simulationConfig, simulationClass, holdForMillis);
             runners.add(runner);
         }
 
-
         long simulationStartTime = currentTimestamp();
         try {
-            var futures = userArgs.getSimulationExecutorService().invokeAll(runners);
+            var futures = userArgs.getSimulationExecutorService().invokeAll(
+                    runners,
+                    forceEndAfterDuration,
+                    TimeUnit.MILLISECONDS);
             for(var future: futures) {
                 simulationReport.add(future.get());
             }
-        } catch (InterruptedException | ExecutionException e) {
+        } catch(CancellationException e) {
+            throw new SimulatorInterruptedException(
+                    String.format(
+                            "The simulation %s was cancelled forcefully because it exceeded max duration " +
+                                    "(including %d grace period) of %d milliseconds.",
+                            simulationConfig.getName(),
+                            20,
+                            forceEndAfterDuration),
+                    e);
+        }
+        catch (InterruptedException | ExecutionException e) {
             throw new SimulatorInterruptedException(
                     String.format("The simulation `%s` was interrupted before completion.",
                             simulationConfig.getName()), e);
