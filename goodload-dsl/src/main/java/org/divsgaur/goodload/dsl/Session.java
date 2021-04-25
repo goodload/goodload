@@ -7,6 +7,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Each scenario iteration is executed in a separate session.
+ * A session holds information about the current iteration.
+ * It can be used to keep track of results of previous steps that have been executed.
+ * It is not thread-safe.
+ */
 @EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
