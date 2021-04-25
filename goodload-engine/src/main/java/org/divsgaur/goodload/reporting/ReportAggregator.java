@@ -2,7 +2,6 @@ package org.divsgaur.goodload.reporting;
 
 import lombok.extern.slf4j.Slf4j;
 import org.divsgaur.goodload.reporting.reports.aggregate.AggregateActionReport;
-import org.divsgaur.goodload.reporting.reports.aggregate.AggregateReport;
 import org.divsgaur.goodload.reporting.reports.aggregate.AggregateSimulationReport;
 import org.divsgaur.goodload.reporting.reports.raw.ActionReport;
 import org.divsgaur.goodload.reporting.reports.raw.Report;
@@ -33,7 +32,7 @@ public class ReportAggregator {
     private ReportExporter reportExporter;
 
     @Nullable
-    public AggregateReport aggregate(String simulationName, List<SimulationReport> rawReports, long totalSimulationRunTime) {
+    public AggregateSimulationReport aggregate(String simulationName, List<SimulationReport> rawReports, long totalSimulationRunTime) {
         reportExporter.exportRawIfEnabled(simulationName, rawReports);
 
         if(rawReports == null || rawReports.isEmpty()) {

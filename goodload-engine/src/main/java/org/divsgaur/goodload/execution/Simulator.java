@@ -6,7 +6,7 @@ import org.divsgaur.goodload.dsl.Simulation;
 import org.divsgaur.goodload.exceptions.SimulatorInterruptedException;
 import org.divsgaur.goodload.internal.Util;
 import org.divsgaur.goodload.reporting.ReportAggregator;
-import org.divsgaur.goodload.reporting.reports.aggregate.AggregateReport;
+import org.divsgaur.goodload.reporting.reports.aggregate.AggregateSimulationReport;
 import org.divsgaur.goodload.reporting.reports.raw.SimulationReport;
 import org.divsgaur.goodload.userconfig.SimulationConfiguration;
 import org.divsgaur.goodload.userconfig.UserArgs;
@@ -47,7 +47,7 @@ public class Simulator {
      * Also generates the report for that simulation.
      * @param simulationConfig The simulation to execute.
      */
-    public AggregateReport execute(SimulationConfiguration simulationConfig) throws
+    public AggregateSimulationReport execute(SimulationConfiguration simulationConfig) throws
             SimulatorInterruptedException,
             ClassNotFoundException,
             NoSuchMethodException,
