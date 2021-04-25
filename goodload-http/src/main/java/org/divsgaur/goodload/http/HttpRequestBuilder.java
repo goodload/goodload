@@ -165,14 +165,21 @@ public class HttpRequestBuilder {
                 break;
             case HEAD:
                 httpRequest.head();
+                break;
             case GET:
                 httpRequest.get();
+                break;
             case PATCH:
                 httpRequest.patch(requestBody);
+                break;
             case PUT:
                 httpRequest.put(requestBody);
+                break;
             case POST:
                 httpRequest.post(requestBody);
+                break;
+            default:
+                throw new UnsupportedOperationException("The http method " + httpMethod + "is not yet supported.");
         }
 
         try {
