@@ -5,7 +5,8 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.divsgaur.goodload.dsl.*;
 import org.divsgaur.goodload.exceptions.CheckFailedException;
 import org.divsgaur.goodload.internal.Util;
-import org.divsgaur.goodload.reporting.Report;
+import org.divsgaur.goodload.reporting.reports.raw.ActionReport;
+import org.divsgaur.goodload.reporting.reports.raw.SimulationReport;
 import org.divsgaur.goodload.userconfig.SimulationConfiguration;
 import org.divsgaur.goodload.userconfig.UserArgs;
 
@@ -21,7 +22,7 @@ import static org.divsgaur.goodload.internal.Util.currentTimestamp;
  * @since 1.0
  */
 @Slf4j
-class SimulationRunner implements Callable<Report> {
+class SimulationRunner implements Callable<SimulationReport> {
 
     /**
      * After how many milliseconds the runner should start execution.
@@ -94,7 +95,7 @@ class SimulationRunner implements Callable<Report> {
     }
 
     @Override
-    public Report call() {
+    public SimulationReport call() {
         log.debug("{} : Started", TAG);
 
         try {
@@ -106,46 +107,55 @@ class SimulationRunner implements Callable<Report> {
             // Time after which no iterations will be started
             long endIterationsWhenTimestamp = startTimestamp + holdForMillis;
 
-            var report = new Report();
-            report.setStepName(simulationConfig.getName());
-            report.setRunnerId(runnerIdStr);
-            report.setStartTimestampInMillis(startTimestamp);
+            var simulationReport = new SimulationReport(simulationConfig.getName());
+            simulationReport.setRunnerId(runnerIdStr);
+            simulationReport.setStartTimestampInMillis(startTimestamp);
 
-            // Run iterations until the hold for duration is over, or user-defined number of iterations
-            // have been completed.
-            for(int iterationIndex = 0;
-                currentTimestamp() <= endIterationsWhenTimestamp
-                    && (simulationConfig.getIterations() == null || iterationIndex < simulationConfig.getIterations());
-                iterationIndex++
-            ) {
-                maintainThroughput(startTimestamp, iterationIndex);
+            var simulation = simulationClass.getDeclaredConstructor().newInstance();
+            var scenariosTemp = simulation.init();
 
-                // Create a new instance for each iteration so that any modifications made to the simulation
-                // in previous iteration do not affect the current iteration.
-                var simulation = simulationClass.getDeclaredConstructor().newInstance();
+            // Sequentially execute all scenarios in the given simulation
+            for(int scenarioIndex = 0; scenarioIndex < scenariosTemp.size(); scenarioIndex++) {
+                var scenarioReport = new ActionReport(scenariosTemp.get(scenarioIndex).getName());
+                scenarioReport.setRunnerId(runnerIdStr);
+                scenarioReport.setStartTimestampInMillis(Util.currentTimestamp());
 
-                var actionList = simulation.init();
+                // Run iterations until the hold for duration is over, or user-defined number of iterations
+                // have been completed.
+                for(int iterationIndex = 0;
+                    currentTimestamp() <= endIterationsWhenTimestamp
+                            && (simulationConfig.getIterations() == null || iterationIndex < simulationConfig.getIterations());
+                    iterationIndex++
+                ) {
+                    maintainThroughput(startTimestamp, iterationIndex);
 
-                var session = new Session();
-                session.setCustomConfigurationProperties(userArgs.getConfiguration().getCustom());
+                    // Create a new instance for each iteration so that any modifications made to the simulation
+                    // in previous iteration do not affect the current iteration.
+                    simulation = simulationClass.getDeclaredConstructor().newInstance();
 
-                // Sequentially execute all scenarios in the given simulation
-                final int finalIterationIndex = iterationIndex;
-                actionList.forEach(action -> {
-                    var actionReport = execute(session, action, runnerIdStr, finalIterationIndex);
-                    report.getIterations().add(actionReport);
-                    if (!actionReport.isEndedNormally()) {
-                        report.setEndedNormally(false);
+                    var currentScenario = simulation.init().get(scenarioIndex);
+
+                    var session = new Session();
+                    session.setCustomConfigurationProperties(userArgs.getConfiguration().getCustom());
+
+                    var iterationReport = execute(session, currentScenario, runnerIdStr, iterationIndex);
+                    scenarioReport.getIterations().add(iterationReport);
+                    if (!iterationReport.isEndedNormally()) {
+                        scenarioReport.setEndedNormally(false);
                     }
-                });
+                }
+                simulationReport.getScenarios().add(scenarioReport);
+                if(scenarioReport.isEndedNormally()) {
+                    simulationReport.setEndedNormally(false);
+                }
             }
 
             // When the last iteration completed.
             long endTimestamp = currentTimestamp();
 
-            report.setEndTimestampInMillis(endTimestamp);
+            simulationReport.setEndTimestampInMillis(endTimestamp);
 
-            return report;
+            return simulationReport;
 
         } catch (Exception e) {
             log.error("{} : Unknown exception occurred during execution: ", TAG, e);
@@ -165,9 +175,8 @@ class SimulationRunner implements Callable<Report> {
      * @return Report for the action after it has been executed. The report is generated even
      *         if the execution has failed.
      */
-    private Report execute(Session session, Action action, String runnerId, int iterationIndex) {
-        Report actionReport = new Report();
-        actionReport.setStepName(action.getName());
+    private ActionReport execute(Session session, Action action, String runnerId, int iterationIndex) {
+        var actionReport = new ActionReport(action.getName());
         actionReport.setRunnerId(runnerId);
         actionReport.setIterationIndex(iterationIndex);
         long actionStartTimestamp = currentTimestamp();

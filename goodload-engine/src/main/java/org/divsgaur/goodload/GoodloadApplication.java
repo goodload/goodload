@@ -9,8 +9,8 @@ import org.apache.commons.cli.*;
 import org.divsgaur.goodload.exceptions.InvalidSimulationConfigFileException;
 import org.divsgaur.goodload.exceptions.JarFileNotFoundException;
 import org.divsgaur.goodload.execution.Simulator;
-import org.divsgaur.goodload.reporting.AggregateReport;
 import org.divsgaur.goodload.reporting.ReportExporter;
+import org.divsgaur.goodload.reporting.reports.aggregate.AggregateSimulationReport;
 import org.divsgaur.goodload.userconfig.GoodloadUserConfigurationProperties;
 import org.divsgaur.goodload.userconfig.SimulationConfiguration;
 import org.divsgaur.goodload.userconfig.UserArgs;
@@ -78,7 +78,7 @@ public class GoodloadApplication implements CommandLineRunner {
 
         createSimulationExecutionThreadPool();
 
-        var reports = new ArrayList<AggregateReport>();
+        var reports = new ArrayList<AggregateSimulationReport>();
 
         for(SimulationConfiguration simulation: userArgs.getConfiguration().getSimulations()) {
             var report = simulator.execute(simulation);

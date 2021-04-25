@@ -4,7 +4,7 @@ import org.divsgaur.goodload.dsl.Action;
 import org.divsgaur.goodload.dsl.Simulation;
 import org.divsgaur.goodload.samples.data.Sample;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.divsgaur.goodload.dsl.DSL.*;
@@ -23,7 +23,7 @@ public class SampleHttpSimulation extends Simulation {
                                 .body(jsonBody(new Sample("sample name", "sample descr")))
                                 .go()),
                         exec("sdf", (session) -> { }),
-                        check((session) -> true)),
+                        check("Login check", (session) -> true)),
                 /*.check((session) -> {
                     return ((String) session.get("HEADER-AUTHENTICATION")).equals("401");
                 })*/
@@ -33,7 +33,26 @@ public class SampleHttpSimulation extends Simulation {
                         exec("Logout: Exec 2", (session) -> {}),
                         exec("Logout: Exec 3", (session) -> {}))
         );
+        var scenario2 = scenario("Sample scenario 2",
+                group("Login 2",
+                        exec("Get request 2", (session) -> http(session)
+                                .post("https://www.google.com")
+                                .header("AUTHENTICATION", "")
+                                .header("X-Cache-Control", "")
+                                .body(jsonBody(new Sample("sample name", "sample descr")))
+                                .go()),
+                        exec("sdf 2", (session) -> { }),
+                        check((session) -> true)),
+                /*.check((session) -> {
+                    return ((String) session.get("HEADER-AUTHENTICATION")).equals("401");
+                })*/
+                exec("Execution 2: ", (session) -> {String random = "Some random execution";}),
+                group("Logout 2",
+                        exec("Logout 2: Exec 1", (session) -> {}),
+                        exec("Logout 2: Exec 2", (session) -> {}),
+                        exec("Logout 2: Exec 3", (session) -> {}))
+        );
 
-        return Collections.singletonList(scenario);
+        return Arrays.asList(scenario, scenario2);
     }
 }

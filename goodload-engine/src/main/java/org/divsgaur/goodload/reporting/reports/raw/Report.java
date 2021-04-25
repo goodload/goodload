@@ -1,23 +1,19 @@
-package org.divsgaur.goodload.reporting;
+package org.divsgaur.goodload.reporting.reports.raw;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The performance report generated for a step, or group of steps.
  * @since 1.0
  */
-@Builder
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
-public class Report implements Serializable {
+@RequiredArgsConstructor
+public abstract class Report implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -34,17 +30,6 @@ public class Report implements Serializable {
      * When the execution started for the step/action/scenario this report belongs to
      */
     private long endTimestampInMillis;
-
-    /**
-     * Report of children steps.
-     */
-    private List<Report> subSteps = new ArrayList<>();
-
-    /**
-     * Report of iterations that happened for the simulation.
-     * It is null for substeps of a simulation.
-     */
-    private List<Report> iterations = new ArrayList<>();
 
     /**
      * If false, then the execution of the step failed due to some error.
@@ -64,5 +49,9 @@ public class Report implements Serializable {
 
     public long getTotalTimeInMillis() {
         return endTimestampInMillis - startTimestampInMillis;
+    }
+
+    public Report(String stepName) {
+        this.stepName = stepName;
     }
 }

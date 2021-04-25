@@ -1,10 +1,9 @@
-package org.divsgaur.goodload.reporting;
+package org.divsgaur.goodload.reporting.reports.aggregate;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * Report generated after aggregating individual reports generated when simulations are run.
@@ -14,7 +13,7 @@ import java.util.List;
  */
 @Data
 @NoArgsConstructor
-public class AggregateReport implements Serializable {
+public abstract class AggregateReport implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -31,21 +30,6 @@ public class AggregateReport implements Serializable {
      * Average time in milliseconds.
      */
     private long averageTimeInMillis;
-
-    /**
-     * Number of times the simulation was executed.
-     */
-    private int iterations;
-
-    /**
-     * Report of children steps.
-     */
-    private List<AggregateReport> subSteps;
-
-    /**
-     * Raw report used for calculating aggregate.
-     */
-    private List<Report> rawReports;
 
     /**
      * If true, then the execution of the step failed due to some error.

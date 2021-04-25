@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.divsgaur.goodload.config.GoodloadConfiguration;
 import org.divsgaur.goodload.config.TestConfiguration;
+import org.divsgaur.goodload.reporting.reports.aggregate.AggregateReport;
+import org.divsgaur.goodload.reporting.reports.raw.SimulationReport;
 import org.divsgaur.goodload.userconfig.GoodloadUserConfigurationProperties;
 import org.divsgaur.goodload.userconfig.ReportingConfiguration;
 import org.divsgaur.goodload.userconfig.UserArgs;
@@ -45,7 +47,7 @@ public class ReportAggregatorTests {
     }
 
     public void testAggregator(boolean rawDataIncludedInAggregate) throws IOException {
-        List<Report> rawReports = objectMapper.readValue(
+        List<SimulationReport> rawReports = objectMapper.readValue(
                 ResourceUtils.getFile("classpath:sample-data/raw-report.json"),
                 new TypeReference<>(){});
         AggregateReport aggregateReport = objectMapper.readValue(

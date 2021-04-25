@@ -5,9 +5,9 @@ import org.divsgaur.goodload.config.GoodloadConfigurationProperties;
 import org.divsgaur.goodload.dsl.Simulation;
 import org.divsgaur.goodload.exceptions.SimulatorInterruptedException;
 import org.divsgaur.goodload.internal.Util;
-import org.divsgaur.goodload.reporting.AggregateReport;
-import org.divsgaur.goodload.reporting.Report;
 import org.divsgaur.goodload.reporting.ReportAggregator;
+import org.divsgaur.goodload.reporting.reports.aggregate.AggregateSimulationReport;
+import org.divsgaur.goodload.reporting.reports.raw.SimulationReport;
 import org.divsgaur.goodload.userconfig.SimulationConfiguration;
 import org.divsgaur.goodload.userconfig.UserArgs;
 import org.springframework.stereotype.Component;
@@ -47,7 +47,7 @@ public class Simulator {
      * Also generates the report for that simulation.
      * @param simulationConfig The simulation to execute.
      */
-    public AggregateReport execute(SimulationConfiguration simulationConfig) throws
+    public AggregateSimulationReport execute(SimulationConfiguration simulationConfig) throws
             SimulatorInterruptedException,
             ClassNotFoundException,
             NoSuchMethodException,
@@ -73,7 +73,7 @@ public class Simulator {
         // detected and handled before the runners are even started.
         var simulationInstance = simulationClass.getDeclaredConstructor().newInstance();
 
-        var simulationReport = new ArrayList<Report>();
+        var simulationReport = new ArrayList<SimulationReport>();
 
         long maxHoldFor = Util.parseDurationToMillis(goodloadConfigurationProperties.getMaxHoldFor());
         long simulationHoldFor = Util.parseDurationToMillis(simulationConfig.getHoldFor());
@@ -94,7 +94,7 @@ public class Simulator {
         long forceEndAfterDuration = (long)
                 ((100.0 + goodloadConfigurationProperties.getGracePeriodPercentage()) / 100 * maxHoldFor);
 
-        var runners = new ArrayList<Callable<Report>>(simulationConfig.getConcurrency());
+        var runners = new ArrayList<Callable<SimulationReport>>(simulationConfig.getConcurrency());
         for(int runnerId=0; runnerId < simulationConfig.getConcurrency(); runnerId++) {
             var runner = new SimulationRunner(
                     runnerId,
