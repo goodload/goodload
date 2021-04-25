@@ -4,6 +4,9 @@ package org.divsgaur.goodload.core.exceptions;
  * Thrown when execution of an executable failed due to some error.
  *
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
+ *
+ * @version %I% %G%
+ * @since 1.0
  */
 public class ExecutionFailedException extends RuntimeException {
     public ExecutionFailedException() {
