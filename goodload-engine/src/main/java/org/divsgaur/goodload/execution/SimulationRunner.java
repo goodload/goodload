@@ -165,6 +165,9 @@ class SimulationRunner implements Callable<SimulationReport> {
 
             return simulationReport;
 
+        } catch(InterruptedException e) {
+            log.error("{} : The runner thread was interrupted. {}", tag, e);
+            Thread.currentThread().interrupt();
         } catch (Exception e) {
             log.error("{} : Unknown exception occurred during execution: ", tag, e);
         }

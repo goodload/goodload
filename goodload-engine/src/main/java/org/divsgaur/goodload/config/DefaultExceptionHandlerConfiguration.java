@@ -35,7 +35,8 @@ public class DefaultExceptionHandlerConfiguration {
             } else if(exception.getCause() instanceof InvalidSimulationConfigFileException) {
                 log.error(exception.getCause().getMessage());
                 return 3;
-            } else if(exception.getCause() instanceof SimulatorInterruptedException) {
+            } else if(exception.getCause() instanceof SimulatorInterruptedException
+                    || exception.getCause() instanceof InterruptedException) {
                 log.error(exception.getCause().getMessage());
                 return 4;
             } else if(exception.getCause() instanceof ClassNotFoundException) {
