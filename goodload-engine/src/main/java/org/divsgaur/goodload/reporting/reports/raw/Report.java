@@ -51,7 +51,7 @@ public abstract class Report implements Serializable {
         return endTimestampInMillis - startTimestampInMillis;
     }
 
-    public Report(String stepName) {
+    protected Report(String stepName) {
         this.stepName = stepName;
     }
 }
