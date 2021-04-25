@@ -11,7 +11,7 @@ import static org.divsgaur.goodload.dsl.DSL.*;
 import static org.divsgaur.goodload.http.HttpDSL.http;
 import static org.divsgaur.goodload.http.HttpDSL.jsonBody;
 
-public class SampleHttpSimulation extends Simulation {
+public class SampleHttpSimulation implements Simulation {
     @Override
     public List<Action> init() {
         Action scenario = scenario("Sample scenario",

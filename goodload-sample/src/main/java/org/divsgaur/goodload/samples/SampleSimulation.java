@@ -8,7 +8,7 @@ import java.util.List;
 
 import static org.divsgaur.goodload.dsl.DSL.*;
 
-public class SampleSimulation extends Simulation {
+public class SampleSimulation implements Simulation {
     @Override
     public List<Action> init() {
         Action scenario = scenario("Sample scenario",
