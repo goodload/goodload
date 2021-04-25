@@ -7,6 +7,7 @@ import java.io.IOException;
  * e.g. missing file, permissions issue, syntax error, missing required fields, etc.
  *
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
+ * @since 1.0
  */
 public class InvalidSimulationConfigFileException extends IOException {
     public InvalidSimulationConfigFileException(String message, Throwable cause) {

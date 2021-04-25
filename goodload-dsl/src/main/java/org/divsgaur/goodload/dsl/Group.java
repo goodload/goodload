@@ -32,6 +32,7 @@ import java.util.UUID;
  * </ul>
  *
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
+ * @since 1.0
  */
 @Getter
 @Setter

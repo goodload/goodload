@@ -18,6 +18,7 @@ import static org.divsgaur.goodload.internal.Util.currentTimestamp;
  * n instances of SimulationRunner should be run for n concurrency.
  *
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
+ * @since 1.0
  */
 @Slf4j
 class SimulationRunner implements Callable<Report> {

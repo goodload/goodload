@@ -5,13 +5,18 @@ package org.divsgaur.goodload.core.exceptions;
  *
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
  *
- * @version %I% %G%
  * @since 1.0
  */
 public class ExecutionFailedException extends RuntimeException {
+    /**
+     * @since 1.0
+     */
     public ExecutionFailedException() {
     }
 
+    /**
+     * @since 1.0
+     */
     public ExecutionFailedException(String message, Throwable cause) {
         super(message, cause);
     }

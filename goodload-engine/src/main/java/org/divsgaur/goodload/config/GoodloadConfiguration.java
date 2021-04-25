@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
  * Provides default bean configuration for engine.
  *
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
+ * @since 1.0
  */
 @Configuration
 @EnableConfigurationProperties

@@ -6,6 +6,7 @@ package org.divsgaur.goodload.dsl;
  * @see Check
  * @see Executable
  * @see Action
+ * @since 1.0
  */
 public interface SequenceElement {
 

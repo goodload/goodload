@@ -13,6 +13,7 @@ import java.util.Optional;
  * Aggregates the raw thread-wise report generated for a simulation.
  *
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
+ * @since 1.0
  */
 @Component
 public class ReportAggregator {

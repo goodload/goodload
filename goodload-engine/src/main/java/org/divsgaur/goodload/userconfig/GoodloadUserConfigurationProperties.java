@@ -13,6 +13,7 @@ import java.util.List;
  * Contents of the simulation configuration YAML file passed by user.
  *
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
+ * @since 1.0
  */
 @Data
 @JsonTypeName(value = "goodload")
@@ -22,12 +23,14 @@ public class GoodloadUserConfigurationProperties implements Serializable {
 
     /**
      * List of executions and their configuration.
+     * @since 1.0
      */
     @JsonProperty(value="simulations")
     private List<SimulationConfiguration> simulations;
 
     /**
      * Properties and configuration that affect how the reports are generated.
+     * @since 1.0
      */
     @JsonProperty(value="reporting")
     private ReportingConfiguration reporting = new ReportingConfiguration();
@@ -35,6 +38,7 @@ public class GoodloadUserConfigurationProperties implements Serializable {
     /**
      * Allows the user to define some properties that they require.
      * These are not validated by goodload.
+     * @since 1.0
      */
     @JsonProperty(value="custom")
     private LinkedHashMap<String, Object> custom;

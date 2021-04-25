@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
  * Handles various exceptions thrown by the engine at runtime and return the proper exit code.
  *
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
+ * @since 1.0
  */
 @Configuration
 @Slf4j
@@ -23,6 +24,7 @@ public class DefaultExceptionHandlerConfiguration {
     /**
      * Maps the exceptions to corresponding exit codes.
      * @return Mapper containing information about which exception to map with which exit code.
+     * @since 1.0
      */
     @Bean
     ExitCodeExceptionMapper exitCodeExceptionMapper() {

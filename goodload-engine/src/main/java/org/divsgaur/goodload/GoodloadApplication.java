@@ -34,6 +34,9 @@ import java.util.concurrent.Executors;
 
 /**
  * The main class that starts the simulation.
+ *
+ * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
+ * @since 1.0
  */
 @SpringBootApplication
 @Slf4j

@@ -6,6 +6,8 @@ package org.divsgaur.goodload.dsl;
  * fail in simulation.
  *
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
+ *
+ * @since 1.0
  */
 public interface Check extends SequenceElement {
     /**
@@ -14,7 +16,9 @@ public interface Check extends SequenceElement {
      *                iteration and information stored by any other steps that have been executed previously in the
      *                current iteration.
      * @return {@code true} if the conditions have passed, false if the conditions have failed. If any of the checks
- *              return false, the group of steps and the simulation therefore, is treated as failed.
+     *                      return false, the group of steps and the simulation therefore, is treated as failed.
+     *
+     * @since 1.0
      */
     boolean condition(Session session);
 }

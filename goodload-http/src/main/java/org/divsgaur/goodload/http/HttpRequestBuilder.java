@@ -21,6 +21,7 @@ import java.util.function.Function;
  * Each method in the builder acts as a DSL element to easily create requests.
  *
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
+ * @since 1.0
  */
 @RequiredArgsConstructor
 @Slf4j

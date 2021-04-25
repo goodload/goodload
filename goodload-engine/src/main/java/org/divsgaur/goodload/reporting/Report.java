@@ -11,6 +11,7 @@ import java.util.List;
 
 /**
  * The performance report generated for a step, or group of steps.
+ * @since 1.0
  */
 @Builder
 @Data

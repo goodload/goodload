@@ -27,6 +27,7 @@ import static org.divsgaur.goodload.internal.Util.currentTimestamp;
  * it is responsible for running a simulation and generating report for that simulation.
  *
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
+ * @since 1.0
  */
 @Slf4j
 @Component

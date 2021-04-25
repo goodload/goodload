@@ -14,13 +14,17 @@ import java.util.List;
  * Note that the simulation, and the scenarios defined within them run sequentially and not
  * concurrently. We believe this is more user-friendly and helpful than having the simulations
  * and scenarios run concurrently as it allows you to define all the simulations at once and they
- * won't falsely overload your software and negatively affect the performance metrics. *
+ * won't falsely overload your software and negatively affect the performance metrics.
+ *
+ * @since 1.0
+ * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
  */
 public abstract class Simulation {
     /**
      * Override this method to define your simulation and provide a list of scenarios to be
      * executed as part of the simulation.
      * @return The list of scenarios to be executed when the performance tests are run.
+     * @since 1.0
      */
     public abstract List<Action> init();
 }

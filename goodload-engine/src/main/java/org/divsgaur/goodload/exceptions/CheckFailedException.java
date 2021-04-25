@@ -6,6 +6,7 @@ import org.divsgaur.goodload.dsl.Action;
  * Thrown when a check step in a scenario fails.
  *
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
+ * @since 1.0
  */
 public class CheckFailedException extends RuntimeException {
 

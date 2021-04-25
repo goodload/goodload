@@ -5,6 +5,7 @@ package org.divsgaur.goodload.dsl;
  * It defines special functions that are used to create simulations.
  *
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
+ * @since 1.0
  */
 public class DSL {
     /**
@@ -18,6 +19,7 @@ public class DSL {
      * @param steps The steps to execute as part of the scenario. These will be executed sequentially.
      *              You can also provide group of steps as a step.
      * @return The scenario created by the defined steps.
+     * @since 1.0
      */
     public static Action scenario(String name, SequenceElement... steps) {
         return new Action(name, steps);
@@ -30,6 +32,7 @@ public class DSL {
      * @param executable The code to execute and log performance. Override the functional interface
      *                   {@link Executable} to provide the statements to execute.
      * @return An {@link Action} object encapsulating the provided Executable and its name.
+     * @since 1.0
      */
     public static Action exec(String name, Executable executable) {
         return new Action(name, executable);
@@ -44,6 +47,7 @@ public class DSL {
      * @param check The check to perform. Override the functional interface {@link Check} to provide
      *              your custom logic to perform the check.
      * @return An {@link Action} object encapsulating the check and its name.
+     * @since 1.0
      */
     public static Action check(String name, Check check) {
         return new Action(name, check);
@@ -57,6 +61,7 @@ public class DSL {
      * @param check The check to perform. Override the functional interface {@link Check} to provide
      *              your custom logic to perform the check.
      * @return An {@link Action} object encapsulating the check and {@code null} as its name.
+     * @since 1.0
      */
     public static Action check(Check check) {
         return check(null, check);
@@ -71,6 +76,7 @@ public class DSL {
      * @param name The name by which to identify the group in report.
      * @param steps The steps you want to put into the group.
      * @return An Action object with the same name and steps as the group.
+     * @since 1.0
      */
     public static Action group(String name, SequenceElement... steps) {
         return new Action(name, steps);
