@@ -44,21 +44,29 @@ public abstract class Simulation {
 
     /**
      * This will run before the first iteration of each scenario.
+     * @param scenarioName The name of the scenario which will be run after this.
      */
-    public void beforeEachScenario() {}
+    public void beforeEachScenario(String scenarioName) {}
 
     /**
      * This will run after the last iteration of each scenario.
+     * @param scenarioName The name of the scenario which has just completed.
      */
-    public void afterEachScenario() {}
+    public void afterEachScenario(String scenarioName) {}
 
     /**
      * This will run before each iteration.
+     * @param scenarioName The name of the scenario whose iteration is going to start.
+     * @param iterationIndex The index of the iteration which is going to run for
+     *                       the given scenario. Starts from 0.
      */
-    public void beforeEachIteration() {}
+    public void beforeEachIteration(String scenarioName, int iterationIndex) {}
 
     /**
      * This will run after each iteration.
+     * @param scenarioName The name of the scenario whose iteration has completed.
+     * @param iterationIndex The index of the iteration which has completed for
+     *                       the given scenario. Starts from 0.
      */
-    public void afterEachIteration() {}
+    public void afterEachIteration(String scenarioName, int iterationIndex) {}
 }

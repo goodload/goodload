@@ -116,15 +116,17 @@ class SimulationRunner implements Callable<SimulationReport> {
 
             simulationReport.setStartTimestampInMillis(startTimestamp);
 
-            var scenariosTemp = simulation.init();
+            var scenarios = simulation.init();
 
             // Sequentially execute all scenarios in the given simulation
-            for(int scenarioIndex = 0; scenarioIndex < scenariosTemp.size(); scenarioIndex++) {
-                var scenarioReport = new ActionReport(scenariosTemp.get(scenarioIndex).getName());
+            for(int scenarioIndex = 0; scenarioIndex < scenarios.size(); scenarioIndex++) {
+                var currentScenario = scenarios.get(scenarioIndex);
+
+                var scenarioReport = new ActionReport(scenarios.get(scenarioIndex).getName());
                 scenarioReport.setRunnerId(runnerIdStr);
                 scenarioReport.setStartTimestampInMillis(Util.currentTimestamp());
 
-                simulation.beforeEachScenario();
+                simulation.beforeEachScenario(currentScenario.getName());
 
                 // Run iterations until the hold for duration is over, or user-defined number of iterations
                 // have been completed.
@@ -135,9 +137,7 @@ class SimulationRunner implements Callable<SimulationReport> {
                 ) {
                     maintainThroughput(startTimestamp, iterationIndex);
 
-                    var currentScenario = simulation.init().get(scenarioIndex);
-
-                    simulation.beforeEachIteration();
+                    simulation.beforeEachIteration(currentScenario.getName(), iterationIndex);
 
                     var session = new Session();
                     session.setCustomConfigurationProperties(userArgs.getConfiguration().getCustom());
@@ -148,14 +148,14 @@ class SimulationRunner implements Callable<SimulationReport> {
                         scenarioReport.setEndedNormally(false);
                     }
 
-                    simulation.afterEachIteration();
+                    simulation.afterEachIteration(currentScenario.getName(), iterationIndex);
                 }
                 simulationReport.getScenarios().add(scenarioReport);
                 if(scenarioReport.isEndedNormally()) {
                     simulationReport.setEndedNormally(false);
                 }
 
-                simulation.afterEachScenario();
+                simulation.afterEachScenario(currentScenario.getName());
             }
 
             // When the last iteration completed.
