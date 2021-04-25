@@ -27,4 +27,18 @@ public abstract class Simulation {
      * @since 1.0
      */
     public abstract List<Action> init();
+
+    /**
+     * This will run when the simulation is initialized.
+     * It is run only once.
+     * Override this in your simulation to run some prerequisite steps.
+     */
+    public void beforeSimulation() {}
+
+    /**
+     * This will run after the simulation has ended.
+     * It is run only once.
+     * Override this in your simulation to run some cleanup or post-process steps.
+     */
+    public void afterSimulation() {}
 }

@@ -112,6 +112,11 @@ class SimulationRunner implements Callable<SimulationReport> {
             simulationReport.setStartTimestampInMillis(startTimestamp);
 
             var simulation = simulationClass.getDeclaredConstructor().newInstance();
+
+            simulation.beforeSimulation();
+
+            simulationReport.setStartTimestampInMillis(startTimestamp);
+
             var scenariosTemp = simulation.init();
 
             // Sequentially execute all scenarios in the given simulation
@@ -150,6 +155,8 @@ class SimulationRunner implements Callable<SimulationReport> {
             long endTimestamp = currentTimestamp();
 
             simulationReport.setEndTimestampInMillis(endTimestamp);
+
+            simulation.afterSimulation();
 
             return simulationReport;
 
