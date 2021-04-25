@@ -27,4 +27,46 @@ public abstract class Simulation {
      * @since 1.0
      */
     public abstract List<Action> init();
+
+    /**
+     * This will run when the simulation is initialized.
+     * It is run only once.
+     * Override this in your simulation to run some prerequisite steps.
+     */
+    public void beforeSimulation() {}
+
+    /**
+     * This will run after the simulation has ended.
+     * It is run only once.
+     * Override this in your simulation to run some cleanup or post-process steps.
+     */
+    public void afterSimulation() {}
+
+    /**
+     * This will run before the first iteration of each scenario.
+     * @param scenarioName The name of the scenario which will be run after this.
+     */
+    public void beforeEachScenario(String scenarioName) {}
+
+    /**
+     * This will run after the last iteration of each scenario.
+     * @param scenarioName The name of the scenario which has just completed.
+     */
+    public void afterEachScenario(String scenarioName) {}
+
+    /**
+     * This will run before each iteration.
+     * @param scenarioName The name of the scenario whose iteration is going to start.
+     * @param iterationIndex The index of the iteration which is going to run for
+     *                       the given scenario. Starts from 0.
+     */
+    public void beforeEachIteration(String scenarioName, int iterationIndex) {}
+
+    /**
+     * This will run after each iteration.
+     * @param scenarioName The name of the scenario whose iteration has completed.
+     * @param iterationIndex The index of the iteration which has completed for
+     *                       the given scenario. Starts from 0.
+     */
+    public void afterEachIteration(String scenarioName, int iterationIndex) {}
 }

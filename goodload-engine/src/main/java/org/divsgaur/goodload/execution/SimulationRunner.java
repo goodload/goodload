@@ -62,7 +62,7 @@ class SimulationRunner implements Callable<SimulationReport> {
     /**
      * The options set by the user either from command line or parsed from the config file.
      */
-    private UserArgs userArgs;
+    private final UserArgs userArgs;
 
     /**
      * Creates a runner to execute a simulation asynchronously.
@@ -109,31 +109,33 @@ class SimulationRunner implements Callable<SimulationReport> {
 
             var simulationReport = new SimulationReport(simulationConfig.getName());
             simulationReport.setRunnerId(runnerIdStr);
-            simulationReport.setStartTimestampInMillis(startTimestamp);
 
             var simulation = simulationClass.getDeclaredConstructor().newInstance();
-            var scenariosTemp = simulation.init();
+
+            simulation.beforeSimulation();
+
+            simulationReport.setStartTimestampInMillis(startTimestamp);
+
+            var scenarios = simulation.init();
 
             // Sequentially execute all scenarios in the given simulation
-            for(int scenarioIndex = 0; scenarioIndex < scenariosTemp.size(); scenarioIndex++) {
-                var scenarioReport = new ActionReport(scenariosTemp.get(scenarioIndex).getName());
+            for (var currentScenario : scenarios) {
+                var scenarioReport = new ActionReport(currentScenario.getName());
                 scenarioReport.setRunnerId(runnerIdStr);
                 scenarioReport.setStartTimestampInMillis(Util.currentTimestamp());
 
+                simulation.beforeEachScenario(currentScenario.getName());
+
                 // Run iterations until the hold for duration is over, or user-defined number of iterations
                 // have been completed.
-                for(int iterationIndex = 0;
-                    currentTimestamp() <= endIterationsWhenTimestamp
-                            && (simulationConfig.getIterations() == null || iterationIndex < simulationConfig.getIterations());
-                    iterationIndex++
+                for (int iterationIndex = 0;
+                     currentTimestamp() <= endIterationsWhenTimestamp
+                             && (simulationConfig.getIterations() == null || iterationIndex < simulationConfig.getIterations());
+                     iterationIndex++
                 ) {
                     maintainThroughput(startTimestamp, iterationIndex);
 
-                    // Create a new instance for each iteration so that any modifications made to the simulation
-                    // in previous iteration do not affect the current iteration.
-                    simulation = simulationClass.getDeclaredConstructor().newInstance();
-
-                    var currentScenario = simulation.init().get(scenarioIndex);
+                    simulation.beforeEachIteration(currentScenario.getName(), iterationIndex);
 
                     var session = new Session();
                     session.setCustomConfigurationProperties(userArgs.getConfiguration().getCustom());
@@ -143,17 +145,23 @@ class SimulationRunner implements Callable<SimulationReport> {
                     if (!iterationReport.isEndedNormally()) {
                         scenarioReport.setEndedNormally(false);
                     }
+
+                    simulation.afterEachIteration(currentScenario.getName(), iterationIndex);
                 }
                 simulationReport.getScenarios().add(scenarioReport);
-                if(scenarioReport.isEndedNormally()) {
+                if (scenarioReport.isEndedNormally()) {
                     simulationReport.setEndedNormally(false);
                 }
+
+                simulation.afterEachScenario(currentScenario.getName());
             }
 
             // When the last iteration completed.
             long endTimestamp = currentTimestamp();
 
             simulationReport.setEndTimestampInMillis(endTimestamp);
+
+            simulation.afterSimulation();
 
             return simulationReport;
 
