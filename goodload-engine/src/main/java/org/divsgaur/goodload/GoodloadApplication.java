@@ -110,7 +110,7 @@ public class GoodloadApplication implements CommandLineRunner {
      */
     private void loadSimulationJar() throws JarFileNotFoundException {
         try {
-            File jarFile = new File(userArgs.getJarFilePath());
+            var jarFile = new File(userArgs.getJarFilePath());
             if(!jarFile.exists() || !jarFile.canRead()) {
                 throw new JarFileNotFoundException(
                         String.format("Could not open jar file %s. Make sure that the file exists and is readable.",
@@ -163,7 +163,7 @@ public class GoodloadApplication implements CommandLineRunner {
         var options = addAllDefinedOptions();
 
         CommandLineParser parser = new DefaultParser();
-        HelpFormatter formatter = new HelpFormatter();
+        var formatter = new HelpFormatter();
         CommandLine cmd;
 
         try {
@@ -187,12 +187,12 @@ public class GoodloadApplication implements CommandLineRunner {
      */
     @NonNull
     private Options addAllDefinedOptions() {
-        Options options = new Options();
+        var options = new Options();
 
         Arrays.stream(CommandLineOptions.class.getDeclaredFields()).sequential()
-                .filter((field) -> field.getType().equals(Option.class)
+                .filter(field -> field.getType().equals(Option.class)
                         && java.lang.reflect.Modifier.isStatic(field.getModifiers()))
-                .map((field) -> {
+                .map(field -> {
                     try {
                         return (Option) field.get(this);
                     } catch (IllegalAccessException e) {
