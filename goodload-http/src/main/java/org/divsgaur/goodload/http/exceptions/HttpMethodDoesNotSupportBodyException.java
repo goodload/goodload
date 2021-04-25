@@ -2,6 +2,9 @@ package org.divsgaur.goodload.http.exceptions;
 
 import org.divsgaur.goodload.http.HttpMethod;
 
+/**
+ * Thrown when the HTTP method provided doesn't support sending a request body.
+ */
 public class HttpMethodDoesNotSupportBodyException extends RuntimeException {
     public HttpMethodDoesNotSupportBodyException(String message) {
         super(message);

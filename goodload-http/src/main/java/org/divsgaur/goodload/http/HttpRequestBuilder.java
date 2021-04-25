@@ -16,6 +16,11 @@ import org.divsgaur.goodload.http.exceptions.HttpMethodRequiresNonNullBodyExcept
 import java.io.IOException;
 import java.util.function.Function;
 
+/**
+ * Provides DSL for building a HTTP request.
+ * Each method in the builder acts as a DSL element to easily create
+ * requests.
+ */
 @RequiredArgsConstructor
 @Slf4j
 public class HttpRequestBuilder {
@@ -110,6 +115,11 @@ public class HttpRequestBuilder {
         return this;
     }
 
+    /**
+     * Add a body to the request.
+     * @param requestBody The body to add to the request
+     * @return The current builder for chaining calls.
+     */
     public HttpRequestBuilder body(RequestBody requestBody) {
         this.requestBody = requestBody;
         return this;
@@ -187,10 +197,19 @@ public class HttpRequestBuilder {
         }
     }
 
+    /**
+     * Sets URL to the request.
+     * @param url The URL to which the request will be sent.
+     */
     private void setUrl(String url) {
         httpRequest.url(url);
     }
 
+    /**
+     * Reads the configuration properties defined with prefix {@code goodload.custom.http}
+     * as a POJO. Expects the engine to provide these values in the session object as a LinkedHashMap.
+     * @param session
+     */
     private void readHttpConfigurationProperties(Session session) {
         if(session.getCustomConfigurationProperties() == null
                 || session.getCustomConfigurationProperties().get("http") == null) {
