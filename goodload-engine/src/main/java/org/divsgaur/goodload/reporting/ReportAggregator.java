@@ -86,7 +86,8 @@ public class ReportAggregator {
         // Number of substeps of current step
         int subStepCount = Optional.ofNullable(rawReportList.get(0).getSubSteps()).orElse(Collections.emptyList()).size();
 
-        AggregateActionReport aggregateReportForStep = new AggregateActionReport(rawReportList.get(0).getStepName());
+        var aggregateReportForStep = new AggregateActionReport(rawReportList.get(0).getStepName());
+        aggregateReportForStep.setRawReports(rawReportList);
 
         // Recursively aggregate the sub step reports
         aggregateReportForStep.setSubSteps(new ArrayList<>());
