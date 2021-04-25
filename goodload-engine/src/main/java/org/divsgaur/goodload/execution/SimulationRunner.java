@@ -119,10 +119,8 @@ class SimulationRunner implements Callable<SimulationReport> {
             var scenarios = simulation.init();
 
             // Sequentially execute all scenarios in the given simulation
-            for(int scenarioIndex = 0; scenarioIndex < scenarios.size(); scenarioIndex++) {
-                var currentScenario = scenarios.get(scenarioIndex);
-
-                var scenarioReport = new ActionReport(scenarios.get(scenarioIndex).getName());
+            for (var currentScenario : scenarios) {
+                var scenarioReport = new ActionReport(currentScenario.getName());
                 scenarioReport.setRunnerId(runnerIdStr);
                 scenarioReport.setStartTimestampInMillis(Util.currentTimestamp());
 
@@ -130,10 +128,10 @@ class SimulationRunner implements Callable<SimulationReport> {
 
                 // Run iterations until the hold for duration is over, or user-defined number of iterations
                 // have been completed.
-                for(int iterationIndex = 0;
-                    currentTimestamp() <= endIterationsWhenTimestamp
-                            && (simulationConfig.getIterations() == null || iterationIndex < simulationConfig.getIterations());
-                    iterationIndex++
+                for (int iterationIndex = 0;
+                     currentTimestamp() <= endIterationsWhenTimestamp
+                             && (simulationConfig.getIterations() == null || iterationIndex < simulationConfig.getIterations());
+                     iterationIndex++
                 ) {
                     maintainThroughput(startTimestamp, iterationIndex);
 
@@ -151,7 +149,7 @@ class SimulationRunner implements Callable<SimulationReport> {
                     simulation.afterEachIteration(currentScenario.getName(), iterationIndex);
                 }
                 simulationReport.getScenarios().add(scenarioReport);
-                if(scenarioReport.isEndedNormally()) {
+                if (scenarioReport.isEndedNormally()) {
                     simulationReport.setEndedNormally(false);
                 }
 
