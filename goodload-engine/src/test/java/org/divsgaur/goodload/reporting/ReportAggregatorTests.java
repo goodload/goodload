@@ -1,37 +1,12 @@
 package org.divsgaur.goodload.reporting;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.divsgaur.goodload.config.GoodloadConfiguration;
-import org.divsgaur.goodload.config.TestConfiguration;
-import org.divsgaur.goodload.reporting.reports.aggregate.AggregateReport;
-import org.divsgaur.goodload.reporting.reports.raw.SimulationReport;
-import org.divsgaur.goodload.userconfig.GoodloadUserConfigurationProperties;
-import org.divsgaur.goodload.userconfig.ReportingConfiguration;
-import org.divsgaur.goodload.userconfig.UserArgs;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.util.ResourceUtils;
-
-import javax.annotation.Resource;
-import java.io.IOException;
-import java.util.List;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 /**
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
  */
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {GoodloadConfiguration.class, TestConfiguration.class})
+//@ExtendWith(SpringExtension.class)
+//@ContextConfiguration(classes = {GoodloadConfiguration.class, TestConfiguration.class})
 public class ReportAggregatorTests {
-    @Resource
+/*    @Resource
     private ObjectMapper objectMapper;
 
     @Resource
@@ -74,4 +49,5 @@ public class ReportAggregatorTests {
                 .thenReturn(false);
         testAggregator(false);
     }
+    */
 }
