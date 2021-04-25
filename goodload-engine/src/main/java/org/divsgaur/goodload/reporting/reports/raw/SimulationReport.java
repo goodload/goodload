@@ -19,7 +19,7 @@ public class SimulationReport extends Report {
     /**
      * Report of scenarios in the simulation
      */
-    private List<Report> scenarios = new ArrayList<>();
+    private List<ActionReport> scenarios = new ArrayList<>();
 
     public SimulationReport(String name) {
         super(name);
