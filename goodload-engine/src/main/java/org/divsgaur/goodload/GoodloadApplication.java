@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.*;
+import org.divsgaur.goodload.exceptions.GoodloadRuntimeException;
 import org.divsgaur.goodload.exceptions.InvalidSimulationConfigFileException;
 import org.divsgaur.goodload.exceptions.JarFileNotFoundException;
 import org.divsgaur.goodload.execution.Simulator;
@@ -195,7 +196,8 @@ public class GoodloadApplication implements CommandLineRunner {
                     try {
                         return (Option) field.get(this);
                     } catch (IllegalAccessException e) {
-                        throw new RuntimeException(e);
+                        throw new GoodloadRuntimeException(
+                                "Error occurred while adding options to command line parser.", e);
                     }
                 })
                 .forEach(options::addOption);
