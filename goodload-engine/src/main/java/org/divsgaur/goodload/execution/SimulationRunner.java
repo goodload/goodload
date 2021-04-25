@@ -129,10 +129,6 @@ class SimulationRunner implements Callable<SimulationReport> {
                 ) {
                     maintainThroughput(startTimestamp, iterationIndex);
 
-                    // Create a new instance for each iteration so that any modifications made to the simulation
-                    // in previous iteration do not affect the current iteration.
-                    simulation = simulationClass.getDeclaredConstructor().newInstance();
-
                     var currentScenario = simulation.init().get(scenarioIndex);
 
                     var session = new Session();
