@@ -111,7 +111,7 @@ public class ReportExporter {
      */
     private void export(Object object, String exportFileName) throws UnknownExportFormatException, IOException {
         Set<String> exportFormats = new HashSet<>(userArgs.getConfiguration().getReporting().getExportFormats());
-        File exportDirectory = new File(userArgs.getConfiguration().getReporting().getExportDirectoryPath());
+        var exportDirectory = new File(userArgs.getConfiguration().getReporting().getExportDirectoryPath());
         if (exportFormats.contains("json")) {
             var objectMapper = new ObjectMapper();
             objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
