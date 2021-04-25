@@ -32,6 +32,9 @@ import java.util.Comparator;
 import java.util.NoSuchElementException;
 import java.util.concurrent.Executors;
 
+/**
+ * The main class that starts the simulation.
+ */
 @SpringBootApplication
 @Slf4j
 @ConfigurationPropertiesScan
@@ -54,6 +57,11 @@ public class GoodloadApplication implements CommandLineRunner {
         );
     }
 
+    /**
+     * Read the user's arguments and run the simulations.
+     * @param args Command line arguments.
+     * @throws Exception Any exception that occurs while starting or running simulations.
+     */
     @Override
     public void run(String... args) throws Exception {
 
@@ -79,6 +87,10 @@ public class GoodloadApplication implements CommandLineRunner {
         reportExporter.export(reports);
     }
 
+    /**
+     * Creates thread pool to execute simulations.
+     * Uses the maximum value of concurrency across simulations as the size of the pool
+     */
     private void createSimulationExecutionThreadPool() {
         int maxConcurrency = userArgs.getConfiguration().getSimulations().stream()
                 .map(SimulationConfiguration::getConcurrency)
@@ -88,6 +100,10 @@ public class GoodloadApplication implements CommandLineRunner {
         userArgs.setSimulationExecutorService(Executors.newFixedThreadPool(maxConcurrency));
     }
 
+    /**
+     * Loads the simulation jar file from the path passed as command line argument.
+     * @throws JarFileNotFoundException If the jar file couldn't be found or opened.
+     */
     private void loadSimulationJar() throws JarFileNotFoundException {
         try {
             File jarFile = new File(userArgs.getJarFilePath());
@@ -108,6 +124,11 @@ public class GoodloadApplication implements CommandLineRunner {
         }
     }
 
+    /**
+     * Loads/parsed the execution configuration from the config file path passed s command line
+     * argumnent.
+     * @throws InvalidSimulationConfigFileException If the config file couldn't be parsed properly.
+     */
     private void loadExecutionConfiguration() throws InvalidSimulationConfigFileException {
         var mapper = new ObjectMapper(new YAMLFactory());
         try {

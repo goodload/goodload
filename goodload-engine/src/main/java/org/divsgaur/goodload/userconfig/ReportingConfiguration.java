@@ -6,6 +6,9 @@ import lombok.Data;
 import java.util.Set;
 
 /**
+ * The configuration properties relating to how the reports are generated.
+ * The prefix is {@code goodload.reporting}
+ *
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
  */
 @Data

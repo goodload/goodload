@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The performance report generated for a step.
+ * The performance report generated for a step, or group of steps.
  */
 @Builder
 @Data
