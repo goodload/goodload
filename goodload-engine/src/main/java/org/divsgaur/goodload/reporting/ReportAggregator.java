@@ -1,6 +1,14 @@
 package org.divsgaur.goodload.reporting;
 
+import lombok.extern.slf4j.Slf4j;
+import org.divsgaur.goodload.reporting.reports.aggregate.AggregateActionReport;
+import org.divsgaur.goodload.reporting.reports.aggregate.AggregateReport;
+import org.divsgaur.goodload.reporting.reports.aggregate.AggregateSimulationReport;
+import org.divsgaur.goodload.reporting.reports.raw.ActionReport;
+import org.divsgaur.goodload.reporting.reports.raw.Report;
+import org.divsgaur.goodload.reporting.reports.raw.SimulationReport;
 import org.divsgaur.goodload.userconfig.UserArgs;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -16,6 +24,7 @@ import java.util.Optional;
  * @since 1.0
  */
 @Component
+@Slf4j
 public class ReportAggregator {
     @Resource
     private UserArgs userArgs;
@@ -23,26 +32,45 @@ public class ReportAggregator {
     @Resource
     private ReportExporter reportExporter;
 
-    public AggregateReport aggregate(String simulationName, List<Report> rawReports, long totalSimulationRunTime) {
+    @Nullable
+    public AggregateReport aggregate(String simulationName, List<SimulationReport> rawReports, long totalSimulationRunTime) {
         reportExporter.exportRawIfEnabled(simulationName, rawReports);
 
-        List<Report> transformedRawReport = new ArrayList<>(rawReports.size());
-
-        /*
-         * Raw reports contain n iterations level report in 1 thread level report, and there are m such thread reports.
-         * Linearize thread level reports and thread-iteration level reports.
-         * The transformed report will have all the reports flattened as list of iterations, and hence will be a list of
-         * n*m reports.
-         */
-        for(var report: rawReports) {
-            transformedRawReport.addAll(report.getIterations());
+        if(rawReports == null || rawReports.isEmpty()) {
+            log.info("No reports found. Skipping export.");
+            return null;
         }
-        reportExporter.exportTransformedIfEnabled(simulationName, transformedRawReport);
 
-        var finalReport = aggregate(transformedRawReport);
-        finalReport.setTotalTimeInMillis(totalSimulationRunTime);
-        finalReport.setIterations(transformedRawReport.size());
-        return finalReport;
+        int scenarioCount = rawReports.get(0).getScenarios().size();
+
+        var finalSimulationReport = new AggregateSimulationReport(simulationName);
+        finalSimulationReport.setTotalTimeInMillis(totalSimulationRunTime);
+
+        for(int scenarioIndex = 0; scenarioIndex < scenarioCount; scenarioIndex++) {
+            var transformedRawReports = new ArrayList<ActionReport>();
+            /*
+             * Raw reports contain n iterations level report in 1 thread level report,
+             * and there are m such thread reports.
+             * We linearize thread level reports and thread-iteration level reports
+             * as the aggregate only needs to know the total iterations and not the
+             * thread-wise information. However, if thread-wise information is needed,
+             * the information is already preserved in the reports as Report.runnerId.
+             * The transformed report will have all the reports flattened as list of
+             * iterations, and hence will be a list of n*m reports.
+             */
+            for(var report: rawReports) {
+                transformedRawReports.addAll(report.getScenarios().get(scenarioIndex).getIterations());
+            }
+            reportExporter.exportTransformedIfEnabled(simulationName, transformedRawReports);
+
+            var finalScenarioReport = aggregate(transformedRawReports);
+            finalScenarioReport.setTotalTimeInMillis(totalSimulationRunTime);
+            finalScenarioReport.setIterations(transformedRawReports.size());
+
+            finalSimulationReport.getScenarios().add(finalScenarioReport);
+        }
+
+        return finalSimulationReport;
     }
 
     /**
@@ -51,7 +79,7 @@ public class ReportAggregator {
      *                      is report of the same step in different iteration.
      * @return Aggregate report for the step.
      */
-    private AggregateReport aggregate(List<Report> rawReportList) {
+    private AggregateActionReport aggregate(List<ActionReport> rawReportList) {
         if(rawReportList == null || rawReportList.isEmpty()) {
             return null;
         }
@@ -59,21 +87,19 @@ public class ReportAggregator {
         // Number of substeps of current step
         int subStepCount = Optional.ofNullable(rawReportList.get(0).getSubSteps()).orElse(Collections.emptyList()).size();
 
-        AggregateReport aggregateReportForStep = new AggregateReport();
-        aggregateReportForStep.setRawReports(rawReportList);
-        aggregateReportForStep.setStepName(rawReportList.get(0).getStepName());
+        AggregateActionReport aggregateReportForStep = new AggregateActionReport(rawReportList.get(0).getStepName());
 
         // Recursively aggregate the sub step reports
         aggregateReportForStep.setSubSteps(new ArrayList<>());
         for(int subStepIndex =0; subStepIndex < subStepCount; subStepIndex++) {
-            List<Report> nestedRawReportList = new ArrayList<>();
+            List<ActionReport> nestedRawReportList = new ArrayList<>();
             if(rawReportList.get(0).getSubSteps() != null && !rawReportList.get(0).getSubSteps().isEmpty()) {
-                for (Report report : rawReportList) {
+                for (ActionReport report : rawReportList) {
                     nestedRawReportList.add(report
                             .getSubSteps()
                             .get(subStepIndex));
                 }
-                AggregateReport aggregateReportForSubStep = aggregate(nestedRawReportList);
+                AggregateActionReport aggregateReportForSubStep = aggregate(nestedRawReportList);
                 aggregateReportForStep.getSubSteps().add(aggregateReportForSubStep);
             }
         }
@@ -110,9 +136,9 @@ public class ReportAggregator {
      * otherwise removes the complete raw report information.
      * @param aggregateReport The aggregate report from which to remove raw report information.
      */
-    private void redactRawReports(AggregateReport aggregateReport) {
+    private void redactRawReports(AggregateActionReport aggregateReport) {
         if(userArgs.getConfiguration().getReporting().isIncludeRawReport()) {
-            for (Report rawReport : aggregateReport.getRawReports()) {
+            for (var rawReport : aggregateReport.getRawReports()) {
                 rawReport.setSubSteps(null);
             }
         } else {
