@@ -11,46 +11,42 @@ import static org.divsgaur.goodload.dsl.DSL.*;
 import static org.divsgaur.goodload.http.HttpDSL.http;
 import static org.divsgaur.goodload.http.HttpDSL.jsonBody;
 
-public class SampleHttpSimulation extends Simulation {
+public class SampleHttpSimulation implements Simulation {
     @Override
     public List<Action> init() {
         Action scenario = scenario("Sample scenario",
                 group("Login",
-                        exec("Get request", (session) -> http(session)
+                        exec("Get request", session -> http(session)
                                 .post("https://www.google.com")
                                 .header("AUTHENTICATION", "")
                                 .header("X-Cache-Control", "")
                                 .body(jsonBody(new Sample("sample name", "sample descr")))
                                 .go()),
-                        exec("sdf", (session) -> { }),
-                        check("Login check", (session) -> true)),
+                        exec("sdf", session -> { }),
+                        check("Login check", session -> true)),
                 /*.check((session) -> {
                     return ((String) session.get("HEADER-AUTHENTICATION")).equals("401");
                 })*/
-                exec("Execution 1: ", (session) -> {String random = "Some random execution";}),
+                exec("Execution 1: ", session -> {}),
                 group("Logout",
-                        exec("Logout: Exec 1", (session) -> {}),
-                        exec("Logout: Exec 2", (session) -> {}),
-                        exec("Logout: Exec 3", (session) -> {}))
+                        exec("Logout: Exec 1", session -> {}),
+                        exec("Logout: Exec 2", session -> {}),
+                        exec("Logout: Exec 3", session -> {}))
         );
-        var scenario2 = scenario("Sample scenario 2",
-                group("Login 2",
-                        exec("Get request 2", (session) -> http(session)
+        var scenario2 = scenario("Sample scenario",
+                group("Login",
+                        exec("Get request", session -> http(session)
                                 .post("https://www.google.com")
                                 .header("AUTHENTICATION", "")
                                 .header("X-Cache-Control", "")
                                 .body(jsonBody(new Sample("sample name", "sample descr")))
                                 .go()),
-                        exec("sdf 2", (session) -> { }),
-                        check((session) -> true)),
-                /*.check((session) -> {
-                    return ((String) session.get("HEADER-AUTHENTICATION")).equals("401");
-                })*/
-                exec("Execution 2: ", (session) -> {String random = "Some random execution";}),
-                group("Logout 2",
-                        exec("Logout 2: Exec 1", (session) -> {}),
-                        exec("Logout 2: Exec 2", (session) -> {}),
-                        exec("Logout 2: Exec 3", (session) -> {}))
+                        exec("sdf", session -> { }),
+                        check("Login check", session -> true)),
+                group("Logout",
+                        exec("Logout: Exec 1", session -> {}),
+                        exec("Logout: Exec 2", session -> {}),
+                        exec("Logout: Exec 3", session -> {}))
         );
 
         return Arrays.asList(scenario, scenario2);

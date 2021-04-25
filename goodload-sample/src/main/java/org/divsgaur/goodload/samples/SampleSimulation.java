@@ -8,23 +8,21 @@ import java.util.List;
 
 import static org.divsgaur.goodload.dsl.DSL.*;
 
-public class SampleSimulation extends Simulation {
+public class SampleSimulation implements Simulation {
     @Override
     public List<Action> init() {
         Action scenario = scenario("Sample scenario",
                 group("Login",
-                        exec("Login: Exec1", (session) -> {}),
-                        exec("Login: Exec2", (session) -> {}),
+                        exec("Login: Exec1", session -> {}),
+                        exec("Login: Exec2", session -> {}),
                         check(session -> true),
-                        exec("Login: Exec3", (session) -> {})),
-                check((session) -> {
-                    return ((String) session.get("HEADER-AUTHENTICATION").orElse("")).equals("401");
-                }),
-                exec("Execution 1: ", (session) -> {String random = "Some random execution";}),
+                        exec("Login: Exec3", session -> {})),
+                check(session -> session.get("HEADER-AUTHENTICATION").orElse("").equals("401")),
+                exec("Execution 1: ", session -> {}),
                 group("Logout",
-                        exec("Logout: Exec 1", (session) -> {}),
-                        exec("Logout: Exec 2", (session) -> {}),
-                        exec("Logout: Exec 3", (session) -> {}))
+                        exec("Logout: Exec 1", session -> {}),
+                        exec("Logout: Exec 2", session -> {}),
+                        exec("Logout: Exec 3", session -> {}))
         );
 
         return Collections.singletonList(scenario);

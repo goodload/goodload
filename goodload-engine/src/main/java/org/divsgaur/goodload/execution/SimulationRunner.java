@@ -43,7 +43,7 @@ class SimulationRunner implements Callable<SimulationReport> {
      * Tag to identify the runner in the logs. It has the format "Simulation `%s` : Runner %d:"
      * and contains the simulation name and an integer as ID of the runner.
      */
-    private final String TAG;
+    private final String tag;
 
     /**
      * The ID of the current runner.
@@ -91,12 +91,12 @@ class SimulationRunner implements Callable<SimulationReport> {
         this.holdForMillis = holdForMillis;
         this.userArgs = userArgs;
 
-        TAG = String.format("Simulation `%s` : Runner %d:", simulationConfig.getName(), runnerId);
+        tag = String.format("Simulation `%s` : Runner %d:", simulationConfig.getName(), runnerId);
     }
 
     @Override
     public SimulationReport call() {
-        log.debug("{} : Started", TAG);
+        log.debug("{} : Started", tag);
 
         try {
             Thread.sleep(runAfterMillis);
@@ -128,7 +128,7 @@ class SimulationRunner implements Callable<SimulationReport> {
 
                 // Run iterations until the hold for duration is over, or user-defined number of iterations
                 // have been completed.
-                for (int iterationIndex = 0;
+                for (var iterationIndex = 0;
                      currentTimestamp() <= endIterationsWhenTimestamp
                              && (simulationConfig.getIterations() == null || iterationIndex < simulationConfig.getIterations());
                      iterationIndex++
@@ -166,10 +166,10 @@ class SimulationRunner implements Callable<SimulationReport> {
             return simulationReport;
 
         } catch (Exception e) {
-            log.error("{} : Unknown exception occurred during execution: ", TAG, e);
+            log.error("{} : Unknown exception occurred during execution: ", tag, e);
         }
 
-        log.debug("{} : Ended", TAG);
+        log.debug("{} : Ended", tag);
 
         return null;
     }
@@ -193,15 +193,15 @@ class SimulationRunner implements Callable<SimulationReport> {
         action.getExecutionSequence().forEach((step -> {
             try {
                 if (step instanceof Check) {
-                    Check check = (Check) step;
+                    var check = (Check) step;
                     if (!check.condition(session)) {
                         throw new CheckFailedException(simulationConfig.getName(), action);
                     }
                 } else if (step instanceof Executable) {
-                    Executable executable = (Executable) step;
+                    var executable = (Executable) step;
                     executable.function(session);
                 } else if (step instanceof Action) {
-                    Action nestedAction = (Action) step;
+                    var nestedAction = (Action) step;
 
                     var nestedReport = execute(session, nestedAction, runnerId, iterationIndex);
 

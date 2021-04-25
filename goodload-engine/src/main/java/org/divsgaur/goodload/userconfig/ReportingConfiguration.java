@@ -3,6 +3,7 @@ package org.divsgaur.goodload.userconfig;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.Set;
 
 /**
@@ -13,7 +14,8 @@ import java.util.Set;
  * @since 1.0
  */
 @Data
-public class ReportingConfiguration {
+public class ReportingConfiguration implements Serializable {
+    private static final long serialVersionUID = 1L;
     /**
      * If true, the generated report will include raw data.
      * We recommend to keep it disabled (set to {@code false}) for improved

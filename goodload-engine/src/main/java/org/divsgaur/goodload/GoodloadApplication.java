@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.*;
+import org.divsgaur.goodload.exceptions.GoodloadRuntimeException;
 import org.divsgaur.goodload.exceptions.InvalidSimulationConfigFileException;
 import org.divsgaur.goodload.exceptions.JarFileNotFoundException;
 import org.divsgaur.goodload.execution.Simulator;
@@ -109,7 +110,7 @@ public class GoodloadApplication implements CommandLineRunner {
      */
     private void loadSimulationJar() throws JarFileNotFoundException {
         try {
-            File jarFile = new File(userArgs.getJarFilePath());
+            var jarFile = new File(userArgs.getJarFilePath());
             if(!jarFile.exists() || !jarFile.canRead()) {
                 throw new JarFileNotFoundException(
                         String.format("Could not open jar file %s. Make sure that the file exists and is readable.",
@@ -162,14 +163,14 @@ public class GoodloadApplication implements CommandLineRunner {
         var options = addAllDefinedOptions();
 
         CommandLineParser parser = new DefaultParser();
-        HelpFormatter formatter = new HelpFormatter();
+        var formatter = new HelpFormatter();
         CommandLine cmd;
 
         try {
             cmd = parser.parse(options, args);
         } catch (ParseException e) {
-            System.out.println(e.getMessage());
-            String footer = "Report issues at https://github.com/divyanshshekhar/goodload/issues";
+            log.error(e.getMessage());
+            var footer = "Report issues at https://github.com/divyanshshekhar/goodload/issues";
             formatter.printHelp("goodload", null, options, footer, true);
 
             throw e;
@@ -186,16 +187,17 @@ public class GoodloadApplication implements CommandLineRunner {
      */
     @NonNull
     private Options addAllDefinedOptions() {
-        Options options = new Options();
+        var options = new Options();
 
         Arrays.stream(CommandLineOptions.class.getDeclaredFields()).sequential()
-                .filter((field) -> field.getType().equals(Option.class)
+                .filter(field -> field.getType().equals(Option.class)
                         && java.lang.reflect.Modifier.isStatic(field.getModifiers()))
-                .map((field) -> {
+                .map(field -> {
                     try {
                         return (Option) field.get(this);
                     } catch (IllegalAccessException e) {
-                        throw new RuntimeException(e);
+                        throw new GoodloadRuntimeException(
+                                "Error occurred while adding options to command line parser.", e);
                     }
                 })
                 .forEach(options::addOption);

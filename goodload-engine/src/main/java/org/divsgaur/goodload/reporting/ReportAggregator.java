@@ -45,7 +45,7 @@ public class ReportAggregator {
         var finalSimulationReport = new AggregateSimulationReport(simulationName);
         finalSimulationReport.setTotalTimeInMillis(totalSimulationRunTime);
 
-        for(int scenarioIndex = 0; scenarioIndex < scenarioCount; scenarioIndex++) {
+        for(var scenarioIndex = 0; scenarioIndex < scenarioCount; scenarioIndex++) {
             var transformedRawReports = new ArrayList<ActionReport>();
             /*
              * Raw reports contain n iterations level report in 1 thread level report,
@@ -80,7 +80,7 @@ public class ReportAggregator {
      */
     private AggregateActionReport aggregate(List<ActionReport> rawReportList) {
         if(rawReportList == null || rawReportList.isEmpty()) {
-            return null;
+            return new AggregateActionReport(null);
         }
 
         // Number of substeps of current step
@@ -91,7 +91,7 @@ public class ReportAggregator {
 
         // Recursively aggregate the sub step reports
         aggregateReportForStep.setSubSteps(new ArrayList<>());
-        for(int subStepIndex =0; subStepIndex < subStepCount; subStepIndex++) {
+        for(var subStepIndex = 0; subStepIndex < subStepCount; subStepIndex++) {
             List<ActionReport> nestedRawReportList = new ArrayList<>();
             if(rawReportList.get(0).getSubSteps() != null && !rawReportList.get(0).getSubSteps().isEmpty()) {
                 for (ActionReport report : rawReportList) {

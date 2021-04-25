@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Configuration;
 public class GoodloadConfiguration {
     @Bean
     public ObjectMapper objectMapper() {
-        ObjectMapper objectMapper = new ObjectMapper();
+        var objectMapper = new ObjectMapper();
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         return new ObjectMapper();
     }

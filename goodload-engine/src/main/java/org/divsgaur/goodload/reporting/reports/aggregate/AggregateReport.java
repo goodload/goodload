@@ -37,7 +37,7 @@ public abstract class AggregateReport implements Serializable {
      */
     private boolean errorsOccured = false;
 
-    public AggregateReport(String stepName) {
+    protected AggregateReport(String stepName) {
         this.stepName = stepName;
     }
 }

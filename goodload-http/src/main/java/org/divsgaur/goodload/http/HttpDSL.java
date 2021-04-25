@@ -16,6 +16,11 @@ import org.divsgaur.goodload.dsl.Session;
  */
 @Slf4j
 public class HttpDSL {
+    private HttpDSL() {
+        // Hide the default constructor.
+        // No implementation required.
+    }
+
     /**
      * Start a http request builder.
      * @param session The session object will be passed by the engine at runtime.
