@@ -41,4 +41,14 @@ public abstract class Simulation {
      * Override this in your simulation to run some cleanup or post-process steps.
      */
     public void afterSimulation() {}
+
+    /**
+     * This will run before the first iteration of each scenario.
+     */
+    public void beforeEachScenario() {}
+
+    /**
+     * This will run after the last iteration of each scenario.
+     */
+    public void afterEachScenario() {}
 }

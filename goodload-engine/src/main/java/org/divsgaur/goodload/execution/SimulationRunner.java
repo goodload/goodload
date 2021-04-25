@@ -125,6 +125,8 @@ class SimulationRunner implements Callable<SimulationReport> {
                 scenarioReport.setRunnerId(runnerIdStr);
                 scenarioReport.setStartTimestampInMillis(Util.currentTimestamp());
 
+                simulation.beforeEachScenario();
+
                 // Run iterations until the hold for duration is over, or user-defined number of iterations
                 // have been completed.
                 for(int iterationIndex = 0;
@@ -149,6 +151,8 @@ class SimulationRunner implements Callable<SimulationReport> {
                 if(scenarioReport.isEndedNormally()) {
                     simulationReport.setEndedNormally(false);
                 }
+
+                simulation.afterEachScenario();
             }
 
             // When the last iteration completed.
