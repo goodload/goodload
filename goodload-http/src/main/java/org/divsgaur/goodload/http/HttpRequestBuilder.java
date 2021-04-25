@@ -217,7 +217,10 @@ public class HttpRequestBuilder {
     /**
      * Reads the configuration properties defined with prefix {@code goodload.custom.http}
      * as a POJO. Expects the engine to provide these values in the session object as a LinkedHashMap.
-     * @param session
+     * @param session This contains the information about current iteration.
+     *                It is provided by the engine when running the simulation.
+     *                The method expects the engine to put the user-provided
+     *                goodload.custom to be provided in the session.
      */
     private void readHttpConfigurationProperties(Session session) {
         if(session.getCustomConfigurationProperties() == null
