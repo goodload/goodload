@@ -27,7 +27,7 @@ public class SampleHttpSimulation implements Simulation {
                 /*.check((session) -> {
                     return ((String) session.get("HEADER-AUTHENTICATION")).equals("401");
                 })*/
-                exec("Execution 1: ", session -> {var random = "Some random execution";}),
+                exec("Execution 1: ", session -> {}),
                 group("Logout",
                         exec("Logout: Exec 1", session -> {}),
                         exec("Logout: Exec 2", session -> {}),
@@ -43,7 +43,6 @@ public class SampleHttpSimulation implements Simulation {
                                 .go()),
                         exec("sdf", session -> { }),
                         check("Login check", session -> true)),
-                exec("Execution 1: ", session -> {String random = "Some random execution";}),
                 group("Logout",
                         exec("Logout: Exec 1", session -> {}),
                         exec("Logout: Exec 2", session -> {}),
