@@ -18,8 +18,9 @@ import java.util.function.Function;
 
 /**
  * Provides DSL for building a HTTP request.
- * Each method in the builder acts as a DSL element to easily create
- * requests.
+ * Each method in the builder acts as a DSL element to easily create requests.
+ *
+ * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
  */
 @RequiredArgsConstructor
 @Slf4j

@@ -4,6 +4,8 @@ import org.divsgaur.goodload.http.HttpMethod;
 
 /**
  * Thrown when the HTTP method provided doesn't support sending a request body.
+ *
+ * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
  */
 public class HttpMethodDoesNotSupportBodyException extends RuntimeException {
     public HttpMethodDoesNotSupportBodyException(String message) {

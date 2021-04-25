@@ -10,6 +10,8 @@ import org.divsgaur.goodload.dsl.Session;
 /**
  * Defines DSL for the HTTP simulations.
  * Can be used to write simulation for any HTTP service/application.
+ *
+ * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
  */
 @Slf4j
 public class HttpDSL {
