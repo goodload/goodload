@@ -48,7 +48,6 @@ public class Simulator {
      * @param simulationConfig The simulation to execute.
      */
     public AggregateSimulationReport execute(SimulationConfiguration simulationConfig) throws
-            SimulatorInterruptedException,
             ClassNotFoundException,
             NoSuchMethodException,
             InvocationTargetException,
@@ -124,11 +123,12 @@ public class Simulator {
                             goodloadConfigurationProperties.getGracePeriodPercentage(),
                             forceEndAfterDuration),
                     e);
-        }
-        catch (InterruptedException | ExecutionException e) {
-            throw new SimulatorInterruptedException(
-                    String.format("The simulation `%s` was interrupted before completion.",
-                            simulationConfig.getName()), e);
+        } catch (InterruptedException | ExecutionException e) {
+            log.error(String.format(
+                    "The simulation `%s` was interrupted before completion. Nested exception is %s",
+                    simulationConfig.getName(),
+                    e));
+            Thread.currentThread().interrupt();
         }
 
         long simulationEndTime = currentTimestamp();
