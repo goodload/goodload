@@ -95,7 +95,7 @@ public class Simulator {
                 ((100.0 + goodloadConfigurationProperties.getGracePeriodPercentage()) / 100 * maxHoldFor);
 
         var runners = new ArrayList<Callable<SimulationReport>>(simulationConfig.getConcurrency());
-        for(int runnerId=0; runnerId < simulationConfig.getConcurrency(); runnerId++) {
+        for(var runnerId=0; runnerId < simulationConfig.getConcurrency(); runnerId++) {
             var runner = new SimulationRunner(
                     runnerId,
                     0,
