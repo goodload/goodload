@@ -14,14 +14,19 @@ import java.util.List;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ScenarioReport extends Report {
+public class ActionReport extends Report {
     /**
      * Report of iterations that happened for the simulation.
      * It is null for substeps of a simulation.
      */
-    private List<Report> iterations = new ArrayList<>();
+    private List<ActionReport> iterations = new ArrayList<>();
 
-    public ScenarioReport(String name) {
+    /**
+     * Report of children steps.
+     */
+    private List<ActionReport> subSteps = new ArrayList<>();
+
+    public ActionReport(String name) {
         super(name);
     }
 }

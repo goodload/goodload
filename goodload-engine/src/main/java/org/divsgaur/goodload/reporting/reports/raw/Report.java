@@ -1,7 +1,8 @@
 package org.divsgaur.goodload.reporting.reports.raw;
 
-import lombok.*;
-import org.springframework.lang.NonNull;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
 import java.io.Serializable;
 
@@ -9,18 +10,15 @@ import java.io.Serializable;
  * The performance report generated for a step, or group of steps.
  * @since 1.0
  */
-@Builder
 @Data
 @AllArgsConstructor
 @RequiredArgsConstructor
-@NoArgsConstructor
 public abstract class Report implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
      * Name of the step this report belongs to.
      */
-    @NonNull
     private String stepName;
 
     /**
@@ -51,5 +49,9 @@ public abstract class Report implements Serializable {
 
     public long getTotalTimeInMillis() {
         return endTimestampInMillis - startTimestampInMillis;
+    }
+
+    public Report(String stepName) {
+        this.stepName = stepName;
     }
 }
