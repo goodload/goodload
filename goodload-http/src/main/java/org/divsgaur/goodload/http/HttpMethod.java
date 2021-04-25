@@ -1,5 +1,11 @@
 package org.divsgaur.goodload.http;
 
+/**
+ * List of HTTP methods supported by Goodload HTTP module.
+ *
+ * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
+ * @since 1.0
+ */
 public enum HttpMethod {
         DELETE,
         HEAD,

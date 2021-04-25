@@ -7,12 +7,32 @@ import com.squareup.okhttp.RequestBody;
 import lombok.extern.slf4j.Slf4j;
 import org.divsgaur.goodload.dsl.Session;
 
+/**
+ * Defines DSL for the HTTP simulations.
+ * Can be used to write simulation for any HTTP service/application.
+ *
+ * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
+ * @since 1.0
+ */
 @Slf4j
 public class HttpDSL {
+    /**
+     * Start a http request builder.
+     * @param session The session object will be passed by the engine at runtime.
+     * @return A builder to build and send the HTTP request when simulations are run.
+     * @since 1.0
+     */
     public static HttpRequestBuilder http(Session session) {
         return new HttpRequestBuilder(session);
     }
 
+    /**
+     * Converts any object to JSON.
+     * Can be used to add JSON data as request body.
+     * @param object The object to convert into JSON.
+     * @return The body containing the JSON representation of the object.
+     * @since 1.0
+     */
     public static RequestBody jsonBody(Object object) {
         var mapper = new ObjectMapper();
         try {

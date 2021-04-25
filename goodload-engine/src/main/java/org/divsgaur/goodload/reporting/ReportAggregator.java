@@ -10,7 +10,10 @@ import java.util.List;
 import java.util.Optional;
 
 /**
+ * Aggregates the raw thread-wise report generated for a simulation.
+ *
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
+ * @since 1.0
  */
 @Component
 public class ReportAggregator {
@@ -42,17 +45,25 @@ public class ReportAggregator {
         return finalReport;
     }
 
+    /**
+     * Recursively aggregate the raw reports for all the iterations.
+     * @param rawReportList The list of a step where each item in the list
+     *                      is report of the same step in different iteration.
+     * @return Aggregate report for the step.
+     */
     private AggregateReport aggregate(List<Report> rawReportList) {
         if(rawReportList == null || rawReportList.isEmpty()) {
             return null;
         }
 
+        // Number of substeps of current step
         int subStepCount = Optional.ofNullable(rawReportList.get(0).getSubSteps()).orElse(Collections.emptyList()).size();
 
         AggregateReport aggregateReportForStep = new AggregateReport();
         aggregateReportForStep.setRawReports(rawReportList);
         aggregateReportForStep.setStepName(rawReportList.get(0).getStepName());
 
+        // Recursively aggregate the sub step reports
         aggregateReportForStep.setSubSteps(new ArrayList<>());
         for(int subStepIndex =0; subStepIndex < subStepCount; subStepIndex++) {
             List<Report> nestedRawReportList = new ArrayList<>();
@@ -66,6 +77,8 @@ public class ReportAggregator {
                 aggregateReportForStep.getSubSteps().add(aggregateReportForSubStep);
             }
         }
+
+        // Aggregate the report for the current step.
         if(!aggregateReportForStep.getRawReports().isEmpty()) {
             aggregateReportForStep.setErrorsOccured(
                     aggregateReportForStep
@@ -89,6 +102,14 @@ public class ReportAggregator {
         return aggregateReportForStep;
     }
 
+    /**
+     * Remove raw report information from the aggregate report.
+     * <br>
+     * If the configuration property {@code goodload.reporting.include-raw-report} is true,
+     * then removes only the nested report information from raw reports for current step,
+     * otherwise removes the complete raw report information.
+     * @param aggregateReport The aggregate report from which to remove raw report information.
+     */
     private void redactRawReports(AggregateReport aggregateReport) {
         if(userArgs.getConfiguration().getReporting().isIncludeRawReport()) {
             for (Report rawReport : aggregateReport.getRawReports()) {

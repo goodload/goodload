@@ -5,6 +5,7 @@ package org.divsgaur.goodload.dsl;
  * This should not be used by end user.
  *
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
+ * @since 1.0
  */
 public interface Configurer extends SequenceElement {
     void configure(Session session, String simulationConfigFileContents);

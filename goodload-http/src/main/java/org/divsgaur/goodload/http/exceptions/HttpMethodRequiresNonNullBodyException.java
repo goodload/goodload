@@ -2,6 +2,12 @@ package org.divsgaur.goodload.http.exceptions;
 
 import org.divsgaur.goodload.http.HttpMethod;
 
+/**
+ * Thrown when a HTTP method requires request body to be present but none has been provided in the request.
+ *
+ * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
+ * @since 1.0
+ */
 public class HttpMethodRequiresNonNullBodyException extends RuntimeException {
     public HttpMethodRequiresNonNullBodyException(String message) {
         super(message);

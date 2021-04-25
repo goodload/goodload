@@ -6,6 +6,7 @@ import java.io.IOException;
  * Thrown when the simulation jar file couldn't be read/found.
  *
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
+ * @since 1.0
  */
 public class JarFileNotFoundException extends IOException {
     public JarFileNotFoundException(String message, Throwable cause) {

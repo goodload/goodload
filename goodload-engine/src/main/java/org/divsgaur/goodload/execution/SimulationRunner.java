@@ -18,24 +18,64 @@ import static org.divsgaur.goodload.internal.Util.currentTimestamp;
  * n instances of SimulationRunner should be run for n concurrency.
  *
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
+ * @since 1.0
  */
 @Slf4j
 class SimulationRunner implements Callable<Report> {
 
+    /**
+     * After how many milliseconds the runner should start execution.
+     */
     private final long runAfterMillis;
 
+    /**
+     * The configuration of the simulation that this runner will execute.
+     */
     private final SimulationConfiguration simulationConfig;
 
+    /**
+     * The class file containing the simulation that this runner will execute.
+     */
     private final Class<? extends Simulation> simulationClass;
 
+    /**
+     * Tag to identify the runner in the logs. It has the format "Simulation `%s` : Runner %d:"
+     * and contains the simulation name and an integer as ID of the runner.
+     */
     private final String TAG;
 
+    /**
+     * The ID of the current runner.
+     */
     private final int runnerId;
 
+    /**
+     * For how many milliseconds should the simulation execute.
+     * New iterations will be started until the duration is over.
+     * This is not being read directly from simulation config as
+     * the {@link Simulator} might want to override the value if
+     * the value exceeds the maxHoldFor value.
+     */
     private final long holdForMillis;
 
+    /**
+     * The options set by the user either from command line or parsed from the config file.
+     */
     private UserArgs userArgs;
 
+    /**
+     * Creates a runner to execute a simulation asynchronously.
+     * One runner maintains one concurrency.
+     * @param runnerId The unique ID by which to identify the runner.
+     * @param runAfterMillis After how many milliseconds should the runner start execution.
+     * @param simulationConfig The configuration of the simulation that the runner will execute.
+     * @param simulationClass The class file of the simulation that the runner will execute.
+     * @param holdForMillis For how many milliseconds should the simulation execute.
+     *                      This is not being read directly from simulation config as
+     *                      the {@link Simulator} might want to override the value if
+     *                      the value exceeds the maxHoldFor value.
+     * @param userArgs The options set by the user either from command line or parsed from the config file.
+     */
     SimulationRunner(
             int runnerId,
             int runAfterMillis,
@@ -71,6 +111,8 @@ class SimulationRunner implements Callable<Report> {
             report.setRunnerId(runnerIdStr);
             report.setStartTimestampInMillis(startTimestamp);
 
+            // Run iterations until the hold for duration is over, or user-defined number of iterations
+            // have been completed.
             for(int iterationIndex = 0;
                 currentTimestamp() <= endIterationsWhenTimestamp
                     && (simulationConfig.getIterations() == null || iterationIndex < simulationConfig.getIterations());
@@ -78,12 +120,16 @@ class SimulationRunner implements Callable<Report> {
             ) {
                 maintainThroughput(startTimestamp, iterationIndex);
 
+                // Create a new instance for each iteration so that any modifications made to the simulation
+                // in previous iteration do not affect the current iteration.
                 var simulation = simulationClass.getDeclaredConstructor().newInstance();
 
                 var actionList = simulation.init();
 
                 var session = new Session();
                 session.setCustomConfigurationProperties(userArgs.getConfiguration().getCustom());
+
+                // Sequentially execute all scenarios in the given simulation
                 final int finalIterationIndex = iterationIndex;
                 actionList.forEach(action -> {
                     var actionReport = execute(session, action, runnerIdStr, finalIterationIndex);
@@ -110,6 +156,15 @@ class SimulationRunner implements Callable<Report> {
         return null;
     }
 
+    /**
+     * Execute all the steps in the given action recursively and generate report.
+     * @param session The session object holding information about current iteration.
+     * @param action The action whose steps are to be executed.
+     * @param runnerId The id of the current runner.
+     * @param iterationIndex The iteration in which this action is getting executed.
+     * @return Report for the action after it has been executed. The report is generated even
+     *         if the execution has failed.
+     */
     private Report execute(Session session, Action action, String runnerId, int iterationIndex) {
         Report actionReport = new Report();
         actionReport.setStepName(action.getName());

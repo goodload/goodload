@@ -7,7 +7,10 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
+ * Report generated after aggregating individual reports generated when simulations are run.
+ * 
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
+ * @since 1.0
  */
 @Data
 @NoArgsConstructor
