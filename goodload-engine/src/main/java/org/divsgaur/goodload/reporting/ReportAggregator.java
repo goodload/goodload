@@ -80,7 +80,7 @@ public class ReportAggregator {
      */
     private AggregateActionReport aggregate(List<ActionReport> rawReportList) {
         if(rawReportList == null || rawReportList.isEmpty()) {
-            return null;
+            return new AggregateActionReport(null);
         }
 
         // Number of substeps of current step
