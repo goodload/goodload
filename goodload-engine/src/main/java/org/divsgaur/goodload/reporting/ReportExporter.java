@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.divsgaur.goodload.config.GoodloadConfigurationProperties;
 import org.divsgaur.goodload.exceptions.UnknownExportFormatException;
 import org.divsgaur.goodload.internal.Util;
+import org.divsgaur.goodload.reporting.reports.aggregate.AggregateReport;
+import org.divsgaur.goodload.reporting.reports.raw.Report;
 import org.divsgaur.goodload.userconfig.UserArgs;
 import org.springframework.stereotype.Component;
 

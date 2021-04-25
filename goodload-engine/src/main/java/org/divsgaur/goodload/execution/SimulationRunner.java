@@ -165,9 +165,8 @@ class SimulationRunner implements Callable<Report> {
      * @return Report for the action after it has been executed. The report is generated even
      *         if the execution has failed.
      */
-    private Report execute(Session session, Action action, String runnerId, int iterationIndex) {
-        Report actionReport = new Report();
-        actionReport.setStepName(action.getName());
+    private StepReport execute(Session session, Action action, String runnerId, int iterationIndex) {
+        var actionReport = new StepReport(action.getName());
         actionReport.setRunnerId(runnerId);
         actionReport.setIterationIndex(iterationIndex);
         long actionStartTimestamp = currentTimestamp();
