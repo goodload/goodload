@@ -128,7 +128,7 @@ class SimulationRunner implements Callable<SimulationReport> {
 
                 // Run iterations until the hold for duration is over, or user-defined number of iterations
                 // have been completed.
-                for (int iterationIndex = 0;
+                for (var iterationIndex = 0;
                      currentTimestamp() <= endIterationsWhenTimestamp
                              && (simulationConfig.getIterations() == null || iterationIndex < simulationConfig.getIterations());
                      iterationIndex++
@@ -193,15 +193,15 @@ class SimulationRunner implements Callable<SimulationReport> {
         action.getExecutionSequence().forEach((step -> {
             try {
                 if (step instanceof Check) {
-                    Check check = (Check) step;
+                    var check = (Check) step;
                     if (!check.condition(session)) {
                         throw new CheckFailedException(simulationConfig.getName(), action);
                     }
                 } else if (step instanceof Executable) {
-                    Executable executable = (Executable) step;
+                    var executable = (Executable) step;
                     executable.function(session);
                 } else if (step instanceof Action) {
-                    Action nestedAction = (Action) step;
+                    var nestedAction = (Action) step;
 
                     var nestedReport = execute(session, nestedAction, runnerId, iterationIndex);
 
