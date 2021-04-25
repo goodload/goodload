@@ -51,4 +51,14 @@ public abstract class Simulation {
      * This will run after the last iteration of each scenario.
      */
     public void afterEachScenario() {}
+
+    /**
+     * This will run before each iteration.
+     */
+    public void beforeEachIteration() {}
+
+    /**
+     * This will run after each iteration.
+     */
+    public void afterEachIteration() {}
 }

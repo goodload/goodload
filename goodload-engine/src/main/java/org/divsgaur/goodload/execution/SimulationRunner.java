@@ -109,7 +109,6 @@ class SimulationRunner implements Callable<SimulationReport> {
 
             var simulationReport = new SimulationReport(simulationConfig.getName());
             simulationReport.setRunnerId(runnerIdStr);
-            simulationReport.setStartTimestampInMillis(startTimestamp);
 
             var simulation = simulationClass.getDeclaredConstructor().newInstance();
 
@@ -138,6 +137,8 @@ class SimulationRunner implements Callable<SimulationReport> {
 
                     var currentScenario = simulation.init().get(scenarioIndex);
 
+                    simulation.beforeEachIteration();
+
                     var session = new Session();
                     session.setCustomConfigurationProperties(userArgs.getConfiguration().getCustom());
 
@@ -146,6 +147,8 @@ class SimulationRunner implements Callable<SimulationReport> {
                     if (!iterationReport.isEndedNormally()) {
                         scenarioReport.setEndedNormally(false);
                     }
+
+                    simulation.afterEachIteration();
                 }
                 simulationReport.getScenarios().add(scenarioReport);
                 if(scenarioReport.isEndedNormally()) {
