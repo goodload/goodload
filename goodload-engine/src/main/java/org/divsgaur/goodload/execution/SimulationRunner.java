@@ -62,7 +62,7 @@ class SimulationRunner implements Callable<SimulationReport> {
     /**
      * The options set by the user either from command line or parsed from the config file.
      */
-    private UserArgs userArgs;
+    private final UserArgs userArgs;
 
     /**
      * Creates a runner to execute a simulation asynchronously.
