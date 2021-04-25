@@ -43,7 +43,7 @@ public class ReportExporter {
      * @throws UnknownExportFormatException If any of the formats defined in
      *                                      {@code goodload.reporting.export-formats} is not recognized.
      */
-    public void export(List<AggregateReport> report) throws IOException, UnknownExportFormatException {
+    public void export(List<? extends AggregateReport> report) throws IOException, UnknownExportFormatException {
         long currentTimestamp = Util.currentTimestamp();
         var exportFileName = "goodload-report-" + currentTimestamp;
 
@@ -59,7 +59,7 @@ public class ReportExporter {
      * @param simulationName The name of the simulation to which the report belongs.
      * @param report The report to export.
      */
-    public void exportRawIfEnabled(String simulationName, List<Report> report) {
+    public void exportRawIfEnabled(String simulationName, List<? extends Report> report) {
         if(configuration.getDebugging().isExportRawReport()) {
             try {
                 long currentTimestamp = Util.currentTimestamp();
@@ -79,7 +79,7 @@ public class ReportExporter {
      * @param simulationName The name of the simulation to which the report belongs.
      * @param report The report to export.
      */
-    public void exportTransformedIfEnabled(String simulationName, List<Report> report) {
+    public void exportTransformedIfEnabled(String simulationName, List<? extends Report> report) {
         if(configuration.getDebugging().isExportTransformedRawReport()) {
             try {
                 long currentTimestamp = Util.currentTimestamp();
