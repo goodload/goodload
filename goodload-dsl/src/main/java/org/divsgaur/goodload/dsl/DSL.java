@@ -8,6 +8,10 @@ package org.divsgaur.goodload.dsl;
  * @since 1.0
  */
 public class DSL {
+    private DSL() {
+        // Hides the public constructor. No implementation required.
+    }
+
     /**
      * Creates a scenario. The scenario can be named and be provided a list of steps.
      * The returned {@link Action} object must be collected in a List and returned by the {@code init}
