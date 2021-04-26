@@ -49,7 +49,7 @@ public class GoodloadConfigurationProperties {
     /**
      * Properties related to debugging
      */
-    private DebuggingProperties debugging;
+    private DebuggingProperties debugging = new DebuggingProperties();
 
     @Data
     public static class DebuggingProperties {
