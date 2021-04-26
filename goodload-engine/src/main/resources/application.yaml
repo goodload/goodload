@@ -42,7 +42,7 @@ server:
 
 goodload:
   engine:
-    max-hold-for: 5s
+    max-hold-for: 2h
     debugging:
       export-raw-report: true
       export-transformed-raw-report: true
