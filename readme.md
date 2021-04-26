@@ -11,7 +11,7 @@ While raising an issue, please mention the use-case, steps to reproduce the bug 
 Don't forget to put proper labels on your issues as they will help us in filtering and prioritizing your issue.
 
 ## Pull Requests
-If you want to contribute, you can raise a pull request with your work (code contribution). Before the pull request is merged, it needs to pass certain checks-
+If you want to contribute, you can raise a pull request to merge your work (code or other contribution) to <b>develop</b> branch. The pull requests to merge with <b>master</b> will be rejected for non-priority issues. Before the pull request is merged, it needs to pass certain checks-
 <ol>
   <li><b>Approved by a maintainer</b></li>
   <li><b>Security clearance by <a href="https://www.gitguardian.com/">Git Guardian</a></b> : It identifies security issues due to inclusion of information in commits that otherwise should be kept secret (such as passwords and ecryption keys).</li>
