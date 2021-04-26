@@ -18,7 +18,7 @@
 goodload:
   simulations:
     - name: Sample Simulation
-      class: org.divsgaur.goodload.samples.SampleSimulation
+      class: org.goodload.goodload.samples.SampleSimulation
       throughput: 100
       concurrency: 1
       hold-for: 10m
@@ -28,7 +28,7 @@ goodload:
       enabled: false
 
     - name: Sample Http Simulation
-      class: org.divsgaur.goodload.samples.SampleHttpSimulation
+      class: org.goodload.goodload.samples.SampleHttpSimulation
       throughput: 2
       concurrency: 1
       hold-for: 10s

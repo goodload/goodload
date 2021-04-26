@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
+/*
 Copyright (C) 2021 Goodload
 
 This program is free software: you can redistribute it and/or modify
@@ -14,17 +13,20 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
--->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <artifactId>goodload</artifactId>
-        <groupId>org.goodload.goodload</groupId>
-        <version>1.0-SNAPSHOT</version>
-    </parent>
-    <modelVersion>4.0.0</modelVersion>
+*/
+package org.goodload.goodload.exceptions;
 
-    <artifactId>goodload-core</artifactId>
-
-</project>
+/**
+ * Thrown when an simulator is interrupted before the child runner threads could complete execution.
+ *
+ * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
+ * @since 1.0
+ */
+public class SimulatorInterruptedException extends RuntimeException {
+    public SimulatorInterruptedException(String message) {
+        super(message);
+    }
+    public SimulatorInterruptedException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}

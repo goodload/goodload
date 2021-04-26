@@ -26,7 +26,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         <version>2.4.4</version>
     </parent>
 
-    <groupId>org.divsgaur.goodload</groupId>
+    <groupId>org.goodload.goodload</groupId>
     <artifactId>goodload</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
@@ -132,31 +132,31 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             </dependency>
 
             <dependency>
-                <groupId>org.divsgaur.goodload</groupId>
+                <groupId>org.goodload.goodload</groupId>
                 <artifactId>goodload-dsl</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.divsgaur.goodload</groupId>
+                <groupId>org.goodload.goodload</groupId>
                 <artifactId>goodload-http</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.divsgaur.goodload</groupId>
+                <groupId>org.goodload.goodload</groupId>
                 <artifactId>goodload-sample</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.divsgaur.goodload</groupId>
+                <groupId>org.goodload.goodload</groupId>
                 <artifactId>goodload-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.divsgaur.goodload</groupId>
+                <groupId>org.goodload.goodload</groupId>
                 <artifactId>goodload-reporting</artifactId>
                 <version>${project.version}</version>
             </dependency>

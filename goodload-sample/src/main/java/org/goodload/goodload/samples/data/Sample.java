@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
+/*
 Copyright (C) 2021 Goodload
 
 This program is free software: you can redistribute it and/or modify
@@ -14,17 +13,19 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
--->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <artifactId>goodload</artifactId>
-        <groupId>org.goodload.goodload</groupId>
-        <version>1.0-SNAPSHOT</version>
-    </parent>
-    <modelVersion>4.0.0</modelVersion>
+*/
+package org.goodload.goodload.samples.data;
 
-    <artifactId>goodload-core</artifactId>
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
-</project>
+import java.io.Serializable;
+
+@Data
+@AllArgsConstructor
+public class Sample implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    private String name;
+    private String desc;
+}

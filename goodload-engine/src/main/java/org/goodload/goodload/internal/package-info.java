@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
+/*
 Copyright (C) 2021 Goodload
 
 This program is free software: you can redistribute it and/or modify
@@ -14,17 +13,13 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
--->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <artifactId>goodload</artifactId>
-        <groupId>org.goodload.goodload</groupId>
-        <version>1.0-SNAPSHOT</version>
-    </parent>
-    <modelVersion>4.0.0</modelVersion>
-
-    <artifactId>goodload-core</artifactId>
-
-</project>
+*/
+/**
+ * Contains internal APIs and helper classes used by the engine.
+ * <strong>Caution:</strong> Any external projects or modules should
+ * not use the APIs provided within this package as it is internal to
+ * the goodload engine and may change at any time without any notice.
+ *
+ * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
+ */
+package org.goodload.goodload.internal;
