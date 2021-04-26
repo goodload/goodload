@@ -70,6 +70,12 @@ public class GoodloadApplication implements CommandLineRunner {
     private ReportExporter reportExporter;
 
     public static void main(String... args) {
+        System.out.println("Goodload Engine Copyright (C) 2021  Goodload\n" +
+                "This program has been distributed under GNU General Public License " +
+                "and comes with ABSOLUTELY NO WARRANTY. " +
+                "You should have received a copy of the GNU General Public License along with this program. " +
+                "If not, see <https://www.gnu.org/licenses/>.");
+
         System.exit(
                 SpringApplication.exit(
                         SpringApplication.run(GoodloadApplication.class, args)
