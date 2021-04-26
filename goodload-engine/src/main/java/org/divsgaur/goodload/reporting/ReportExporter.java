@@ -161,5 +161,4 @@ public class ReportExporter {
             throw new UnknownExportFormatException(String.format("The export formats `%s` are not recognized", exportFormats));
         }
     }
-
 }
