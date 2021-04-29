@@ -195,23 +195,31 @@ public class GoodloadApplication implements CommandLineRunner {
      */
     private void parseCriteria(GoodloadUserConfigurationProperties config) throws UnsupportedCriteriaException {
         final var percentFailCriteriaPattern =
-                Pattern.compile("([0-9]*)(%)( )+(failure)(s)?", Pattern.CASE_INSENSITIVE);
+                Pattern.compile("([0-9]*)%[ ]+failure(s)?", Pattern.CASE_INSENSITIVE);
         final var minimumFailCriteriaPattern =
-                Pattern.compile("atleast ([0-9]*)( )+(failure)(s)?", Pattern.CASE_INSENSITIVE);
+                Pattern.compile("atleast ([0-9]*) +failure[s]?", Pattern.CASE_INSENSITIVE);
 
         for(var criteriaStr: config.getFailPassCriteria()) {
-            if(criteriaStr.matches(percentFailCriteriaPattern.pattern())) {
+            final var percentFailCriteriaPatternMatcher = percentFailCriteriaPattern.matcher(criteriaStr);
+            final var minimumFailCountCriteriaPatternMatcher = minimumFailCriteriaPattern.matcher(criteriaStr);
+            if(percentFailCriteriaPatternMatcher.matches()) {
                 parsedUserArgs.getFailPassCriteria().add(new PercentFailCriteria(
-                        Long.parseLong(percentFailCriteriaPattern.matcher(criteriaStr).group(0))
+                        Long.parseLong(percentFailCriteriaPatternMatcher.group(1))
                 ));
-            } else if(criteriaStr.matches(minimumFailCriteriaPattern.pattern())) {
+            } else if(minimumFailCountCriteriaPatternMatcher.matches()) {
                 parsedUserArgs.getFailPassCriteria().add(new MinimumFailCountCriteria(
-                        Long.parseLong(percentFailCriteriaPattern.matcher(criteriaStr).group(1))
+                        Long.parseLong(minimumFailCountCriteriaPatternMatcher.group(1))
                 ));
             } else {
                 throw new UnsupportedCriteriaException(String.format(
-                        "The fail-when criteria '%s' is invalid. Make sure the syntax is correct.",
-                        criteriaStr));
+                        "The fail-when criterion '%s' is invalid. Make sure the syntax is correct. " +
+                                "The recognized criteria formats/syntax are %s",
+                        criteriaStr,
+                        Arrays.toString(new String[]{
+                                minimumFailCriteriaPattern.pattern(),
+                                percentFailCriteriaPattern.pattern()
+                        })
+                ));
             }
         }
         if(parsedUserArgs.getFailPassCriteria().isEmpty()) {

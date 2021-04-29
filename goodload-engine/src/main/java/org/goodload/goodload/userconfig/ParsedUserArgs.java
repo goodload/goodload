@@ -6,7 +6,8 @@ import org.goodload.goodload.criteria.Criteria;
 import org.springframework.stereotype.Component;
 
 import java.net.URLClassLoader;
-import java.util.Set;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -25,7 +26,7 @@ public class ParsedUserArgs {
     /**
      * Criteria for goodload.fail-when property
      */
-    private Set<Criteria> failPassCriteria;
+    private List<Criteria> failPassCriteria = new LinkedList<>();
 
     /**
      * The loader used to load classes from user's simulation jar file.
