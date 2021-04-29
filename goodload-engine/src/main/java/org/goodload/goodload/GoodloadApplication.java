@@ -188,6 +188,11 @@ public class GoodloadApplication implements CommandLineRunner {
         }
     }
 
+    /**
+     * Read the user defined fail-when criteria and create Criteria objects for them.
+     * @param config The used defined config
+     * @throws UnsupportedCriteriaException If any of the fail-when criteria is not recognized.
+     */
     private void parseCriteria(GoodloadUserConfigurationProperties config) throws UnsupportedCriteriaException {
         final var percentFailCriteriaPattern =
                 Pattern.compile("([0-9]*)(%)( )+(failure)(s)?", Pattern.CASE_INSENSITIVE);
