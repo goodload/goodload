@@ -27,6 +27,7 @@ import org.goodload.goodload.criteria.PercentFailCriteria;
 import org.goodload.goodload.exceptions.GoodloadRuntimeException;
 import org.goodload.goodload.exceptions.InvalidSimulationConfigFileException;
 import org.goodload.goodload.exceptions.JarFileNotFoundException;
+import org.goodload.goodload.exceptions.UnsupportedCriteriaException;
 import org.goodload.goodload.execution.Simulator;
 import org.goodload.goodload.reporting.ReportExporter;
 import org.goodload.goodload.reporting.reports.aggregate.AggregateSimulationReport;
@@ -170,6 +171,8 @@ public class GoodloadApplication implements CommandLineRunner {
 
             parseCriteria(config);
 
+        } catch(UnsupportedCriteriaException e) {
+          throw new InvalidSimulationConfigFileException(e.getMessage(), e);
         } catch(JsonParseException | JsonMappingException e) {
             throw new InvalidSimulationConfigFileException(
                     String.format("The configuration file %s is not well-formed." +
@@ -185,7 +188,7 @@ public class GoodloadApplication implements CommandLineRunner {
         }
     }
 
-    private void parseCriteria(GoodloadUserConfigurationProperties config) {
+    private void parseCriteria(GoodloadUserConfigurationProperties config) throws UnsupportedCriteriaException {
         final var percentFailCriteriaPattern =
                 Pattern.compile("([0-9]*)(%)( )+(failure)(s)?", Pattern.CASE_INSENSITIVE);
         final var minimumFailCriteriaPattern =
@@ -196,11 +199,14 @@ public class GoodloadApplication implements CommandLineRunner {
                 parsedUserArgs.getFailPassCriteria().add(new PercentFailCriteria(
                         Long.parseLong(percentFailCriteriaPattern.matcher(criteriaStr).group(0))
                 ));
-            }
-            if(criteriaStr.matches(minimumFailCriteriaPattern.pattern())) {
+            } else if(criteriaStr.matches(minimumFailCriteriaPattern.pattern())) {
                 parsedUserArgs.getFailPassCriteria().add(new MinimumFailCountCriteria(
                         Long.parseLong(percentFailCriteriaPattern.matcher(criteriaStr).group(1))
                 ));
+            } else {
+                throw new UnsupportedCriteriaException(String.format(
+                        "The fail-when criteria '%s' is invalid. Make sure the syntax is correct.",
+                        criteriaStr));
             }
         }
     }
