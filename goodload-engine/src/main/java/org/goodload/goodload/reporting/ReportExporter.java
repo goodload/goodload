@@ -1,19 +1,19 @@
 /*
-Copyright (C) 2021 Goodload
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Copyright (C) 2021 Goodload
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.goodload.goodload.reporting;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -66,7 +66,7 @@ public class ReportExporter {
         export(report, exportFileName);
 
         log.info("Exported aggregate reports to {} directory.",
-                new File(userArgs.getConfiguration().getReporting().getExportDirectoryPath()).getAbsolutePath());
+                new File(userArgs.getYamlConfiguration().getReporting().getExportDirectoryPath()).getAbsolutePath());
     }
 
     /**
@@ -126,8 +126,8 @@ public class ReportExporter {
      * @throws IOException If the export directory was not found or the file couldn't be written.
      */
     private void export(Object object, String exportFileName) throws UnknownExportFormatException, IOException {
-        Set<String> exportFormats = new HashSet<>(userArgs.getConfiguration().getReporting().getExportFormats());
-        var exportDirectory = new File(userArgs.getConfiguration().getReporting().getExportDirectoryPath());
+        Set<String> exportFormats = new HashSet<>(userArgs.getYamlConfiguration().getReporting().getExportFormats());
+        var exportDirectory = new File(userArgs.getYamlConfiguration().getReporting().getExportDirectoryPath());
         if (exportFormats.contains("json")) {
             var objectMapper = new ObjectMapper();
             objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);

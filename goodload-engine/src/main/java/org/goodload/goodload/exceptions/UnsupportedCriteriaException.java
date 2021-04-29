@@ -14,22 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package org.goodload.goodload.exceptions;
 
-import java.io.IOException;
-
 /**
- * Thrown when the simulation jar file couldn't be read/found.
+ * Thrown when a fail-when criteria defined by the user is not recognized.
+ * The reason could be syntax error in the criteria string or unknown criteria.
  *
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
  * @since 1.0
  */
-public class JarFileNotFoundException extends IOException {
-    public JarFileNotFoundException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public JarFileNotFoundException(String message) {
+public class UnsupportedCriteriaException extends Exception {
+    public UnsupportedCriteriaException(String message) {
         super(message);
     }
 }

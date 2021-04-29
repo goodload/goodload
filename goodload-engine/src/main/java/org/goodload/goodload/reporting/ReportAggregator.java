@@ -1,19 +1,19 @@
 /*
-Copyright (C) 2021 Goodload
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Copyright (C) 2021 Goodload
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.goodload.goodload.reporting;
 
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +22,7 @@ import org.goodload.goodload.reporting.reports.aggregate.AggregateSimulationRepo
 import org.goodload.goodload.reporting.reports.raw.ActionReport;
 import org.goodload.goodload.reporting.reports.raw.Report;
 import org.goodload.goodload.reporting.reports.raw.SimulationReport;
+import org.goodload.goodload.userconfig.ParsedUserArgs;
 import org.goodload.goodload.userconfig.UserArgs;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
@@ -43,6 +44,9 @@ import java.util.Optional;
 public class ReportAggregator {
     @Resource
     private UserArgs userArgs;
+
+    @Resource
+    private ParsedUserArgs parsedUserArgs;
 
     @Resource
     private ReportExporter reportExporter;
@@ -122,6 +126,8 @@ public class ReportAggregator {
 
         // Aggregate the report for the current step.
         if(!aggregateReportForStep.getRawReports().isEmpty()) {
+            checkFailPassCriteria(aggregateReportForStep);
+
             aggregateReportForStep.setErrorsOccured(
                     aggregateReportForStep
                             .getRawReports()
@@ -136,12 +142,27 @@ public class ReportAggregator {
                             .reduce(0L, Long::sum)
                             / aggregateReportForStep.getRawReports().size()
             );
+
             aggregateReportForStep.setIterations(aggregateReportForStep.getRawReports().size());
 
             redactRawReports(aggregateReportForStep);
         }
 
         return aggregateReportForStep;
+    }
+
+    /**
+     * Checks the fail pass criteria for the current report and sets the AggregateActionReport.passed accordingly.
+     * @param aggregateReport The aggregate report which is to be checked for fail-pass criteria
+     */
+    private void checkFailPassCriteria(AggregateActionReport aggregateReport) {
+        aggregateReport.setPassed(true);
+        for(var criteria: parsedUserArgs.getFailPassCriteria()) {
+            if(!criteria.matches(aggregateReport.getRawReports())) {
+                aggregateReport.setPassed(false);
+                return;
+            }
+        }
     }
 
     /**
@@ -153,7 +174,7 @@ public class ReportAggregator {
      * @param aggregateReport The aggregate report from which to remove raw report information.
      */
     private void redactRawReports(AggregateActionReport aggregateReport) {
-        if(userArgs.getConfiguration().getReporting().isIncludeRawReport()) {
+        if(userArgs.getYamlConfiguration().getReporting().isIncludeRawReport()) {
             for (var rawReport : aggregateReport.getRawReports()) {
                 rawReport.setSubSteps(null);
             }

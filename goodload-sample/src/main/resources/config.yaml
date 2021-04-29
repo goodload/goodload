@@ -37,6 +37,11 @@ goodload:
       iterations: 5
       enabled: true
 
+  fail-when:
+    - 5% failures
+    - atleast 4 failures
+    - atleast x failure
+
   reporting:
     include-raw-report: false
     export-directory-path: "./goodload-sample/target/"

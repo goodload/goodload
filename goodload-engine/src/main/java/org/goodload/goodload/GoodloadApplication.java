@@ -1,19 +1,19 @@
 /*
-Copyright (C) 2021 Goodload
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Copyright (C) 2021 Goodload
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.goodload.goodload;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -22,13 +22,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.*;
+import org.goodload.goodload.criteria.MinimumFailCountCriteria;
+import org.goodload.goodload.criteria.PercentFailCriteria;
 import org.goodload.goodload.exceptions.GoodloadRuntimeException;
 import org.goodload.goodload.exceptions.InvalidSimulationConfigFileException;
 import org.goodload.goodload.exceptions.JarFileNotFoundException;
+import org.goodload.goodload.exceptions.UnsupportedCriteriaException;
 import org.goodload.goodload.execution.Simulator;
 import org.goodload.goodload.reporting.ReportExporter;
 import org.goodload.goodload.reporting.reports.aggregate.AggregateSimulationReport;
 import org.goodload.goodload.userconfig.GoodloadUserConfigurationProperties;
+import org.goodload.goodload.userconfig.ParsedUserArgs;
 import org.goodload.goodload.userconfig.SimulationConfiguration;
 import org.goodload.goodload.userconfig.UserArgs;
 import org.springframework.boot.CommandLineRunner;
@@ -48,6 +52,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.NoSuchElementException;
 import java.util.concurrent.Executors;
+import java.util.regex.Pattern;
 
 /**
  * The main class that starts the simulation.
@@ -62,6 +67,9 @@ public class GoodloadApplication implements CommandLineRunner {
 
     @Resource
     private UserArgs userArgs;
+
+    @Resource
+    private ParsedUserArgs parsedUserArgs;
 
     @Resource
     private Simulator simulator;
@@ -103,7 +111,7 @@ public class GoodloadApplication implements CommandLineRunner {
 
         var reports = new ArrayList<AggregateSimulationReport>();
 
-        for(SimulationConfiguration simulation: userArgs.getConfiguration().getSimulations()) {
+        for(SimulationConfiguration simulation: userArgs.getYamlConfiguration().getSimulations()) {
             var report = simulator.execute(simulation);
             if(report != null) {
                 reports.add(report);
@@ -118,12 +126,12 @@ public class GoodloadApplication implements CommandLineRunner {
      * Uses the maximum value of concurrency across simulations as the size of the pool
      */
     private void createSimulationExecutionThreadPool() {
-        int maxConcurrency = userArgs.getConfiguration().getSimulations().stream()
+        int maxConcurrency = userArgs.getYamlConfiguration().getSimulations().stream()
                 .map(SimulationConfiguration::getConcurrency)
                 .max(Comparator.comparingInt(o -> o))
                 .orElseThrow(NoSuchElementException::new);
 
-        userArgs.setSimulationExecutorService(Executors.newFixedThreadPool(maxConcurrency));
+        parsedUserArgs.setSimulationExecutorService(Executors.newFixedThreadPool(maxConcurrency));
     }
 
     /**
@@ -139,7 +147,7 @@ public class GoodloadApplication implements CommandLineRunner {
                         jarFile.getAbsolutePath()));
             }
 
-            userArgs.setUserSimulationsClassLoader(new URLClassLoader(
+            parsedUserArgs.setUserSimulationsClassLoader(new URLClassLoader(
                     new URL[] { new File(userArgs.getJarFilePath()).toURI().toURL() },
                     ClassLoader.getSystemClassLoader()));
         } catch (MalformedURLException e) {
@@ -159,8 +167,12 @@ public class GoodloadApplication implements CommandLineRunner {
         var mapper = new ObjectMapper(new YAMLFactory());
         try {
             var config = mapper.readValue(new File(userArgs.getConfigFilePath()), GoodloadUserConfigurationProperties.class);
-            userArgs.setConfiguration(config);
+            userArgs.setYamlConfiguration(config);
 
+            parseCriteria(config);
+
+        } catch(UnsupportedCriteriaException e) {
+          throw new InvalidSimulationConfigFileException(e.getMessage(), e);
         } catch(JsonParseException | JsonMappingException e) {
             throw new InvalidSimulationConfigFileException(
                     String.format("The configuration file %s is not well-formed." +
@@ -173,6 +185,45 @@ public class GoodloadApplication implements CommandLineRunner {
                             "Make sure that the file is present and accessible.",
                             userArgs.getConfigFilePath()),
                     e);
+        }
+    }
+
+    /**
+     * Read the user defined fail-when criteria and create Criteria objects for them.
+     * @param config The used defined config
+     * @throws UnsupportedCriteriaException If any of the fail-when criteria is not recognized.
+     */
+    private void parseCriteria(GoodloadUserConfigurationProperties config) throws UnsupportedCriteriaException {
+        final var percentFailCriteriaPattern =
+                Pattern.compile("([0-9]*)%[ ]+failure(s)?", Pattern.CASE_INSENSITIVE);
+        final var minimumFailCriteriaPattern =
+                Pattern.compile("atleast ([0-9]*) +failure[s]?", Pattern.CASE_INSENSITIVE);
+
+        for(var criteriaStr: config.getFailPassCriteria()) {
+            final var percentFailCriteriaPatternMatcher = percentFailCriteriaPattern.matcher(criteriaStr);
+            final var minimumFailCountCriteriaPatternMatcher = minimumFailCriteriaPattern.matcher(criteriaStr);
+            if(percentFailCriteriaPatternMatcher.matches()) {
+                parsedUserArgs.getFailPassCriteria().add(new PercentFailCriteria(
+                        Long.parseLong(percentFailCriteriaPatternMatcher.group(1))
+                ));
+            } else if(minimumFailCountCriteriaPatternMatcher.matches()) {
+                parsedUserArgs.getFailPassCriteria().add(new MinimumFailCountCriteria(
+                        Long.parseLong(minimumFailCountCriteriaPatternMatcher.group(1))
+                ));
+            } else {
+                throw new UnsupportedCriteriaException(String.format(
+                        "The fail-when criterion '%s' is invalid. Make sure the syntax is correct. " +
+                                "The recognized criteria formats/syntax are %s",
+                        criteriaStr,
+                        Arrays.toString(new String[]{
+                                minimumFailCriteriaPattern.pattern(),
+                                percentFailCriteriaPattern.pattern()
+                        })
+                ));
+            }
+        }
+        if(parsedUserArgs.getFailPassCriteria().isEmpty()) {
+            parsedUserArgs.getFailPassCriteria().add(new MinimumFailCountCriteria(1));
         }
     }
 
