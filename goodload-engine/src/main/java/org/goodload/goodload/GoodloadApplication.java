@@ -209,6 +209,9 @@ public class GoodloadApplication implements CommandLineRunner {
                         criteriaStr));
             }
         }
+        if(parsedUserArgs.getFailPassCriteria().isEmpty()) {
+            parsedUserArgs.getFailPassCriteria().add(new MinimumFailCountCriteria(1));
+        }
     }
 
     /**
