@@ -8,6 +8,7 @@
 .idea/**/dictionaries
 .idea/**/shelf
 .idea/misc.xml
+.idea/copyright/
 
 # Generated files
 .idea/**/contentModel.xml
@@ -82,6 +83,10 @@ buildNumber.properties
 .mvn/timing.properties
 # https://github.com/takari/maven-wrapper#usage-without-binary-jar
 .mvn/wrapper/maven-wrapper.jar
+
+# Sonar
 /.idea/sonarlint/issuestore/index.pb
 /.idea/sonarlint-state.xml
 /.idea/sonarlint.xml
+
+
