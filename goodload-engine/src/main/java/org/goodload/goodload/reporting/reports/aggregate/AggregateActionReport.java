@@ -45,6 +45,12 @@ public class AggregateActionReport extends AggregateReport {
      */
     private List<ActionReport> rawReports = new ArrayList<>();
 
+    /**
+     * If the action passed all the fail-pass criteria then true, else false.
+     *
+     */
+    private boolean passed = false;
+
     public AggregateActionReport(String name) {
         super(name);
     }

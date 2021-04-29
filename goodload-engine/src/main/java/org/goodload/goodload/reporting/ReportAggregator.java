@@ -22,6 +22,7 @@ import org.goodload.goodload.reporting.reports.aggregate.AggregateSimulationRepo
 import org.goodload.goodload.reporting.reports.raw.ActionReport;
 import org.goodload.goodload.reporting.reports.raw.Report;
 import org.goodload.goodload.reporting.reports.raw.SimulationReport;
+import org.goodload.goodload.userconfig.ParsedUserArgs;
 import org.goodload.goodload.userconfig.UserArgs;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
@@ -43,6 +44,9 @@ import java.util.Optional;
 public class ReportAggregator {
     @Resource
     private UserArgs userArgs;
+
+    @Resource
+    private ParsedUserArgs parsedUserArgs;
 
     @Resource
     private ReportExporter reportExporter;
@@ -122,6 +126,8 @@ public class ReportAggregator {
 
         // Aggregate the report for the current step.
         if(!aggregateReportForStep.getRawReports().isEmpty()) {
+            checkFailPassCriteria(aggregateReportForStep);
+
             aggregateReportForStep.setErrorsOccured(
                     aggregateReportForStep
                             .getRawReports()
@@ -136,12 +142,27 @@ public class ReportAggregator {
                             .reduce(0L, Long::sum)
                             / aggregateReportForStep.getRawReports().size()
             );
+
             aggregateReportForStep.setIterations(aggregateReportForStep.getRawReports().size());
 
             redactRawReports(aggregateReportForStep);
         }
 
         return aggregateReportForStep;
+    }
+
+    /**
+     * Checks the fail pass criteria for the current report and sets the AggregateActionReport.passed accordingly.
+     * @param aggregateReport The aggregate report which is to be checked for fail-pass criteria
+     */
+    private void checkFailPassCriteria(AggregateActionReport aggregateReport) {
+        aggregateReport.setPassed(true);
+        for(var criteria: parsedUserArgs.getFailPassCriteria()) {
+            if(!criteria.matches(aggregateReport.getRawReports())) {
+                aggregateReport.setPassed(false);
+                return;
+            }
+        }
     }
 
     /**
