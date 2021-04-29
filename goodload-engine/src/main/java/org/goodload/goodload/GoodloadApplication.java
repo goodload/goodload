@@ -22,6 +22,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.*;
+import org.goodload.goodload.criteria.MinimumFailCountCriteria;
+import org.goodload.goodload.criteria.PercentFailCriteria;
 import org.goodload.goodload.exceptions.GoodloadRuntimeException;
 import org.goodload.goodload.exceptions.InvalidSimulationConfigFileException;
 import org.goodload.goodload.exceptions.JarFileNotFoundException;
@@ -29,6 +31,7 @@ import org.goodload.goodload.execution.Simulator;
 import org.goodload.goodload.reporting.ReportExporter;
 import org.goodload.goodload.reporting.reports.aggregate.AggregateSimulationReport;
 import org.goodload.goodload.userconfig.GoodloadUserConfigurationProperties;
+import org.goodload.goodload.userconfig.ParsedUserArgs;
 import org.goodload.goodload.userconfig.SimulationConfiguration;
 import org.goodload.goodload.userconfig.UserArgs;
 import org.springframework.boot.CommandLineRunner;
@@ -48,6 +51,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.NoSuchElementException;
 import java.util.concurrent.Executors;
+import java.util.regex.Pattern;
 
 /**
  * The main class that starts the simulation.
@@ -62,6 +66,9 @@ public class GoodloadApplication implements CommandLineRunner {
 
     @Resource
     private UserArgs userArgs;
+
+    @Resource
+    private ParsedUserArgs parsedUserArgs;
 
     @Resource
     private Simulator simulator;
@@ -161,6 +168,8 @@ public class GoodloadApplication implements CommandLineRunner {
             var config = mapper.readValue(new File(userArgs.getConfigFilePath()), GoodloadUserConfigurationProperties.class);
             userArgs.setConfiguration(config);
 
+            parseCriteria(config);
+
         } catch(JsonParseException | JsonMappingException e) {
             throw new InvalidSimulationConfigFileException(
                     String.format("The configuration file %s is not well-formed." +
@@ -173,6 +182,26 @@ public class GoodloadApplication implements CommandLineRunner {
                             "Make sure that the file is present and accessible.",
                             userArgs.getConfigFilePath()),
                     e);
+        }
+    }
+
+    private void parseCriteria(GoodloadUserConfigurationProperties config) {
+        final var percentFailCriteriaPattern =
+                Pattern.compile("([0-9]*)(%)( )+(failure)(s)?", Pattern.CASE_INSENSITIVE);
+        final var minimumFailCriteriaPattern =
+                Pattern.compile("atleast ([0-9]*)( )+(failure)(s)?", Pattern.CASE_INSENSITIVE);
+
+        for(var criteriaStr: config.getFailPassCriteria()) {
+            if(criteriaStr.matches(percentFailCriteriaPattern.pattern())) {
+                parsedUserArgs.getFailPassCriteria().add(new PercentFailCriteria(
+                        Long.parseLong(percentFailCriteriaPattern.matcher(criteriaStr).group(0))
+                ));
+            }
+            if(criteriaStr.matches(minimumFailCriteriaPattern.pattern())) {
+                parsedUserArgs.getFailPassCriteria().add(new MinimumFailCountCriteria(
+                        Long.parseLong(percentFailCriteriaPattern.matcher(criteriaStr).group(1))
+                ));
+            }
         }
     }
 

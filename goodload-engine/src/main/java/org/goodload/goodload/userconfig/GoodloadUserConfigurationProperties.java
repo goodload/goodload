@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -43,6 +44,14 @@ public class GoodloadUserConfigurationProperties implements Serializable {
      */
     @JsonProperty(value="simulations")
     private List<SimulationConfiguration> simulations;
+
+    /**
+     * Define when the aggregate report for a given step/group/scenario should fail depending
+     * upon how much of the iteration for that step/group/scenario fails.
+     * @since 1.0
+     */
+    @JsonProperty(value="fail-when")
+    private List<String> failPassCriteria = new ArrayList<>();
 
     /**
      * Properties and configuration that affect how the reports are generated.
