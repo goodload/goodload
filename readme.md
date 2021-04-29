@@ -35,7 +35,7 @@ If you want to contribute, you can raise a pull request to merge your work (code
 After the pull request has been merged with develop or master branch, the build is run again, along with the sonar quality gates. This time, whole code in the develop or master branch is analyzed by Sonar.
 
 ## License and Copyright
-Copyright (C) 2021 Goodload
+Copyright (C) 2021 Divyansh Shekhar Gaur
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
