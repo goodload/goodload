@@ -174,7 +174,7 @@ public class ReportAggregator {
      * @param aggregateReport The aggregate report from which to remove raw report information.
      */
     private void redactRawReports(AggregateActionReport aggregateReport) {
-        if(userArgs.getConfiguration().getReporting().isIncludeRawReport()) {
+        if(userArgs.getYamlConfiguration().getReporting().isIncludeRawReport()) {
             for (var rawReport : aggregateReport.getRawReports()) {
                 rawReport.setSubSteps(null);
             }

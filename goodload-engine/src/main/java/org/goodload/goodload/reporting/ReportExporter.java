@@ -66,7 +66,7 @@ public class ReportExporter {
         export(report, exportFileName);
 
         log.info("Exported aggregate reports to {} directory.",
-                new File(userArgs.getConfiguration().getReporting().getExportDirectoryPath()).getAbsolutePath());
+                new File(userArgs.getYamlConfiguration().getReporting().getExportDirectoryPath()).getAbsolutePath());
     }
 
     /**
@@ -126,8 +126,8 @@ public class ReportExporter {
      * @throws IOException If the export directory was not found or the file couldn't be written.
      */
     private void export(Object object, String exportFileName) throws UnknownExportFormatException, IOException {
-        Set<String> exportFormats = new HashSet<>(userArgs.getConfiguration().getReporting().getExportFormats());
-        var exportDirectory = new File(userArgs.getConfiguration().getReporting().getExportDirectoryPath());
+        Set<String> exportFormats = new HashSet<>(userArgs.getYamlConfiguration().getReporting().getExportFormats());
+        var exportDirectory = new File(userArgs.getYamlConfiguration().getReporting().getExportDirectoryPath());
         if (exportFormats.contains("json")) {
             var objectMapper = new ObjectMapper();
             objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);

@@ -110,7 +110,7 @@ public class GoodloadApplication implements CommandLineRunner {
 
         var reports = new ArrayList<AggregateSimulationReport>();
 
-        for(SimulationConfiguration simulation: userArgs.getConfiguration().getSimulations()) {
+        for(SimulationConfiguration simulation: userArgs.getYamlConfiguration().getSimulations()) {
             var report = simulator.execute(simulation);
             if(report != null) {
                 reports.add(report);
@@ -125,12 +125,12 @@ public class GoodloadApplication implements CommandLineRunner {
      * Uses the maximum value of concurrency across simulations as the size of the pool
      */
     private void createSimulationExecutionThreadPool() {
-        int maxConcurrency = userArgs.getConfiguration().getSimulations().stream()
+        int maxConcurrency = userArgs.getYamlConfiguration().getSimulations().stream()
                 .map(SimulationConfiguration::getConcurrency)
                 .max(Comparator.comparingInt(o -> o))
                 .orElseThrow(NoSuchElementException::new);
 
-        userArgs.setSimulationExecutorService(Executors.newFixedThreadPool(maxConcurrency));
+        parsedUserArgs.setSimulationExecutorService(Executors.newFixedThreadPool(maxConcurrency));
     }
 
     /**
@@ -146,7 +146,7 @@ public class GoodloadApplication implements CommandLineRunner {
                         jarFile.getAbsolutePath()));
             }
 
-            userArgs.setUserSimulationsClassLoader(new URLClassLoader(
+            parsedUserArgs.setUserSimulationsClassLoader(new URLClassLoader(
                     new URL[] { new File(userArgs.getJarFilePath()).toURI().toURL() },
                     ClassLoader.getSystemClassLoader()));
         } catch (MalformedURLException e) {
@@ -166,7 +166,7 @@ public class GoodloadApplication implements CommandLineRunner {
         var mapper = new ObjectMapper(new YAMLFactory());
         try {
             var config = mapper.readValue(new File(userArgs.getConfigFilePath()), GoodloadUserConfigurationProperties.class);
-            userArgs.setConfiguration(config);
+            userArgs.setYamlConfiguration(config);
 
             parseCriteria(config);
 

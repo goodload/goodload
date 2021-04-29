@@ -19,9 +19,6 @@ package org.goodload.goodload.userconfig;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 
-import java.net.URLClassLoader;
-import java.util.concurrent.ExecutorService;
-
 /**
  * Defines the arguments and configuration/settings passed by the user
  * when launching the goodload tool/engine/application.
@@ -51,7 +48,7 @@ public class UserArgs {
 
     /**
      * Contents of the user's simulation config file.
-     * Can be used extended submodules such as http-dsl to read module-specific configuration.
+     * Can be used by extended submodules such as http-dsl to read module-specific configuration.
      * @since 1.0
      */
     private String originalConfigFileContents;
@@ -60,17 +57,5 @@ public class UserArgs {
      * The configuration properties deserialized from configuration yaml file.
      * @since 1.0
      */
-    private GoodloadUserConfigurationProperties configuration;
-
-    /**
-     * The loader used to load classes from user's simulation jar file.
-     * @since 1.0
-     */
-    private URLClassLoader userSimulationsClassLoader;
-
-    /**
-     * Thread pool to be used for execution of simulations.
-     * @since 1.0
-     */
-    private ExecutorService simulationExecutorService;
+    private GoodloadUserConfigurationProperties yamlConfiguration;
 }

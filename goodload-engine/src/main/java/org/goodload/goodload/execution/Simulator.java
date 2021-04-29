@@ -24,6 +24,7 @@ import org.goodload.goodload.internal.Util;
 import org.goodload.goodload.reporting.ReportAggregator;
 import org.goodload.goodload.reporting.reports.aggregate.AggregateSimulationReport;
 import org.goodload.goodload.reporting.reports.raw.SimulationReport;
+import org.goodload.goodload.userconfig.ParsedUserArgs;
 import org.goodload.goodload.userconfig.SimulationConfiguration;
 import org.goodload.goodload.userconfig.UserArgs;
 import org.springframework.stereotype.Component;
@@ -49,6 +50,9 @@ public class Simulator {
 
     @Resource
     private UserArgs userArgs;
+
+    @Resource
+    private ParsedUserArgs parsedUserArgs;
 
     @Resource
     private ReportAggregator reportAggregator;
@@ -77,7 +81,7 @@ public class Simulator {
         var simulationClass = Class.forName(
                 simulationConfig.getFullClassName(),
                 true,
-                userArgs.getUserSimulationsClassLoader()).asSubclass(Simulation.class);
+                parsedUserArgs.getUserSimulationsClassLoader()).asSubclass(Simulation.class);
 
         // DO NOT REMOVE UNUSED VARIABLE simulationInstance
         // We are creating an instance just to verify that it can be created and the user's simulation class is not invalid.
@@ -121,7 +125,7 @@ public class Simulator {
 
         long simulationStartTime = Util.currentTimestamp();
         try {
-            var futures = userArgs.getSimulationExecutorService().invokeAll(
+            var futures = parsedUserArgs.getSimulationExecutorService().invokeAll(
                     runners,
                     forceEndAfterDuration,
                     TimeUnit.MILLISECONDS);

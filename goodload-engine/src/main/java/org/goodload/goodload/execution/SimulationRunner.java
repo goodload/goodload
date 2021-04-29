@@ -152,7 +152,7 @@ class SimulationRunner implements Callable<SimulationReport> {
                     simulation.beforeEachIteration(currentScenario.getName(), iterationIndex);
 
                     var session = new Session();
-                    session.setCustomConfigurationProperties(userArgs.getConfiguration().getCustom());
+                    session.setCustomConfigurationProperties(userArgs.getYamlConfiguration().getCustom());
 
                     var iterationReport = execute(session, currentScenario, runnerIdStr, iterationIndex);
                     scenarioReport.getIterations().add(iterationReport);
