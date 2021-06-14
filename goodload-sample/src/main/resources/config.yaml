@@ -40,11 +40,10 @@ goodload:
   fail-when:
     - 5% failures
     - atleast 4 failures
-    - atleast x failure
 
   reporting:
     include-raw-report: false
-    export-directory-path: "./goodload-sample/target/"
+    export-directory-path: "target/"
     export-formats:
       - "yaml"
       - "json"

@@ -30,7 +30,7 @@ import static org.goodload.goodload.http.HttpDSL.jsonBody;
 public class SampleHttpSimulation implements Simulation {
     @Override
     public List<Action> init() {
-        Action scenario = scenario("Sample scenario",
+        Action scenario = scenario("Sample scenario 1",
                 group("Login",
                         exec("Get request", session -> http(session)
                                 .post("https://www.google.com")
@@ -49,10 +49,10 @@ public class SampleHttpSimulation implements Simulation {
                         exec("Logout: Exec 2", session -> {}),
                         exec("Logout: Exec 3", session -> {}))
         );
-        var scenario2 = scenario("Sample scenario",
+        var scenario2 = scenario("Sample scenario 2",
                 group("Login",
                         exec("Get request", session -> http(session)
-                                .post("https://www.google.com")
+                                .post("https://www.facebook.com")
                                 .header("AUTHENTICATION", "")
                                 .header("X-Cache-Control", "")
                                 .body(jsonBody(new Sample("sample name", "sample descr")))
