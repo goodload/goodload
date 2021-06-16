@@ -20,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.goodload.goodload.reporting.reports.aggregate.AggregateActionReport;
 import org.goodload.goodload.reporting.reports.aggregate.AggregateSimulationReport;
 import org.goodload.goodload.reporting.reports.raw.ActionReport;
-import org.goodload.goodload.reporting.reports.raw.Report;
 import org.goodload.goodload.reporting.reports.raw.SimulationReport;
 import org.goodload.goodload.userconfig.ParsedUserArgs;
 import org.goodload.goodload.userconfig.UserArgs;
@@ -28,10 +27,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Aggregates the raw thread-wise report generated for a simulation.
@@ -124,7 +121,7 @@ public class ReportAggregator {
                             .getSubSteps()
                             .get(subStepIndex));
                 }
-                AggregateActionReport aggregateReportForSubStep = aggregate(nestedRawReportList);
+                var aggregateReportForSubStep = aggregate(nestedRawReportList);
                 aggregateReportForStep.getSubSteps().add(aggregateReportForSubStep);
             }
         }
@@ -133,7 +130,7 @@ public class ReportAggregator {
         if (!aggregateReportForStep.getRawReports().isEmpty()) {
             checkFailPassCriteria(aggregateReportForStep);
 
-            for (Report rawReport : aggregateReportForStep.getRawReports()) {
+            for (var rawReport : aggregateReportForStep.getRawReports()) {
                 if (rawReport.getStartTimestampInMillis() < aggregateReportForStep.getIterationsStartTimestamp()) {
                     aggregateReportForStep.setIterationsStartTimestamp(rawReport.getStartTimestampInMillis());
                 }
@@ -152,10 +149,48 @@ public class ReportAggregator {
             aggregateReportForStep.setAverageTimeInMillis(
                     aggregateReportForStep.getTotalTimeInMillis() / aggregateReportForStep.getIterations());
 
+            computeHitsAtEverySecond(aggregateReportForStep);
+
             redactRawReports(aggregateReportForStep);
         }
 
         return aggregateReportForStep;
+    }
+
+    private void computeHitsAtEverySecond(AggregateActionReport aggregateReportForStep) {
+        var startAndEndTimesInSec =
+                aggregateReportForStep.getRawReports().stream()
+                        .map(report -> Map.entry(
+                                (int) ((report.getStartTimestampInMillis()
+                                        - aggregateReportForStep.getIterationsStartTimestamp()) / 1000),
+                                (int) ((report.getEndTimestampInMillis()
+                                        - aggregateReportForStep.getIterationsStartTimestamp())/ 1000)))
+                        .collect(Collectors.toUnmodifiableList());
+
+        var hitsAtSecond = new LinkedList<Integer>();
+
+        int numberOfSeconds = (int) ((aggregateReportForStep.getIterationsEndTimestamp()
+                        - aggregateReportForStep.getIterationsStartTimestamp()) / 1000 + 1);
+
+        int[] hitsAtSecondArray = new int[numberOfSeconds];
+
+        for (var entry : startAndEndTimesInSec) {
+            // For every iteration, increment the total iterations when the iteration starts
+            hitsAtSecondArray[entry.getKey()] += 1;
+            // For every iteration, decrement the total iterations when the iteration ends
+            hitsAtSecondArray[entry.getValue()] -= 1;
+        }
+
+        // Calculate the total hits at every second by adding current value with previous value
+        hitsAtSecond.add(hitsAtSecondArray[0]);
+        int hitsAtPrevSecond = hitsAtSecondArray[0];
+        for(var second=1; second < numberOfSeconds; second++) {
+            int hitsAtCurrentSecond = hitsAtPrevSecond + hitsAtSecondArray[second];
+            hitsAtSecond.add(hitsAtCurrentSecond);
+            hitsAtPrevSecond = hitsAtCurrentSecond;
+        }
+
+        aggregateReportForStep.setHitsAtSecond(hitsAtSecond);
     }
 
     /**

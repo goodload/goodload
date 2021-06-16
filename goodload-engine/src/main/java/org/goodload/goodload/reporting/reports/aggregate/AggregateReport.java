@@ -76,9 +76,9 @@ public abstract class AggregateReport implements Serializable {
 
     /**
      * Store number of hits for every second the step was run.
-     * The actual time for nHits at index i = startTimeInMillis / 1000 + i
+     * The actual time in second for number of hits at index i = startTimeInMillis / 1000 + i
      */
-    private List<Float> hitsPerSecond;
+    private List<Integer> hitsAtEverySecond;
 
     protected AggregateReport(String stepName) {
         this.stepName = stepName;
