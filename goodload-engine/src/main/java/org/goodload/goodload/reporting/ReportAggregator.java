@@ -20,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.goodload.goodload.reporting.reports.aggregate.AggregateActionReport;
 import org.goodload.goodload.reporting.reports.aggregate.AggregateSimulationReport;
 import org.goodload.goodload.reporting.reports.raw.ActionReport;
-import org.goodload.goodload.reporting.reports.raw.Report;
 import org.goodload.goodload.reporting.reports.raw.SimulationReport;
 import org.goodload.goodload.userconfig.ParsedUserArgs;
 import org.goodload.goodload.userconfig.UserArgs;
@@ -28,10 +27,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Aggregates the raw thread-wise report generated for a simulation.
@@ -52,10 +49,13 @@ public class ReportAggregator {
     private ReportExporter reportExporter;
 
     @Nullable
-    public AggregateSimulationReport aggregate(String simulationName, List<SimulationReport> rawReports, long totalSimulationRunTime) {
+    public AggregateSimulationReport aggregate(
+            String simulationName,
+            List<SimulationReport> rawReports,
+            long totalSimulationRunTime) {
         reportExporter.exportRawIfEnabled(simulationName, rawReports);
 
-        if(rawReports == null || rawReports.isEmpty()) {
+        if (rawReports == null || rawReports.isEmpty()) {
             log.info("No reports found. Skipping export.");
             return null;
         }
@@ -65,7 +65,7 @@ public class ReportAggregator {
         var finalSimulationReport = new AggregateSimulationReport(simulationName);
         finalSimulationReport.setTotalTimeInMillis(totalSimulationRunTime);
 
-        for(var scenarioIndex = 0; scenarioIndex < scenarioCount; scenarioIndex++) {
+        for (var scenarioIndex = 0; scenarioIndex < scenarioCount; scenarioIndex++) {
             var transformedRawReports = new ArrayList<ActionReport>();
             /*
              * Raw reports contain n iterations level report in 1 thread level report,
@@ -77,7 +77,7 @@ public class ReportAggregator {
              * The transformed report will have all the reports flattened as list of
              * iterations, and hence will be a list of n*m reports.
              */
-            for(var report: rawReports) {
+            for (var report : rawReports) {
                 transformedRawReports.addAll(report.getScenarios().get(scenarioIndex).getIterations());
             }
             reportExporter.exportTransformedIfEnabled(simulationName, transformedRawReports);
@@ -94,56 +94,64 @@ public class ReportAggregator {
 
     /**
      * Recursively aggregate the raw reports for all the iterations.
+     *
      * @param rawReportList The list of a step where each item in the list
      *                      is report of the same step in different iteration.
      * @return Aggregate report for the step.
      */
     private AggregateActionReport aggregate(List<ActionReport> rawReportList) {
-        if(rawReportList == null || rawReportList.isEmpty()) {
+        if (rawReportList == null || rawReportList.isEmpty()) {
             return new AggregateActionReport(null);
         }
 
         // Number of substeps of current step
-        int subStepCount = Optional.ofNullable(rawReportList.get(0).getSubSteps()).orElse(Collections.emptyList()).size();
+        int subStepCount =
+                Optional.ofNullable(rawReportList.get(0).getSubSteps()).orElse(Collections.emptyList()).size();
 
         var aggregateReportForStep = new AggregateActionReport(rawReportList.get(0).getStepName());
         aggregateReportForStep.setRawReports(rawReportList);
+        aggregateReportForStep.setIterationsStartTimestamp(Long.MAX_VALUE);
+        aggregateReportForStep.setIterationsEndTimestamp(Long.MIN_VALUE);
 
         // Recursively aggregate the sub step reports
         aggregateReportForStep.setSubSteps(new ArrayList<>());
-        for(var subStepIndex = 0; subStepIndex < subStepCount; subStepIndex++) {
+        for (var subStepIndex = 0; subStepIndex < subStepCount; subStepIndex++) {
             List<ActionReport> nestedRawReportList = new ArrayList<>();
-            if(rawReportList.get(0).getSubSteps() != null && !rawReportList.get(0).getSubSteps().isEmpty()) {
+            if (rawReportList.get(0).getSubSteps() != null && !rawReportList.get(0).getSubSteps().isEmpty()) {
                 for (ActionReport report : rawReportList) {
                     nestedRawReportList.add(report
                             .getSubSteps()
                             .get(subStepIndex));
                 }
-                AggregateActionReport aggregateReportForSubStep = aggregate(nestedRawReportList);
+                var aggregateReportForSubStep = aggregate(nestedRawReportList);
                 aggregateReportForStep.getSubSteps().add(aggregateReportForSubStep);
             }
         }
 
         // Aggregate the report for the current step.
-        if(!aggregateReportForStep.getRawReports().isEmpty()) {
+        if (!aggregateReportForStep.getRawReports().isEmpty()) {
             checkFailPassCriteria(aggregateReportForStep);
 
-            aggregateReportForStep.setErrorsOccured(
-                    aggregateReportForStep
-                            .getRawReports()
-                            .stream().anyMatch(report -> !report.isEndedNormally())
-            );
-
-            aggregateReportForStep.setAverageTimeInMillis(
-                    aggregateReportForStep
-                            .getRawReports()
-                            .stream()
-                            .map(Report::getTotalTimeInMillis)
-                            .reduce(0L, Long::sum)
-                            / aggregateReportForStep.getRawReports().size()
-            );
+            for (var rawReport : aggregateReportForStep.getRawReports()) {
+                if (rawReport.getStartTimestampInMillis() < aggregateReportForStep.getIterationsStartTimestamp()) {
+                    aggregateReportForStep.setIterationsStartTimestamp(rawReport.getStartTimestampInMillis());
+                }
+                if (rawReport.getEndTimestampInMillis() > aggregateReportForStep.getIterationsEndTimestamp()) {
+                    aggregateReportForStep.setIterationsEndTimestamp(rawReport.getEndTimestampInMillis());
+                }
+                if (!rawReport.isEndedNormally()) {
+                    aggregateReportForStep.setErrorsOccured(true);
+                }
+                aggregateReportForStep.setTotalTimeInMillis(
+                        aggregateReportForStep.getTotalTimeInMillis() + rawReport.getTotalTimeInMillis());
+            }
 
             aggregateReportForStep.setIterations(aggregateReportForStep.getRawReports().size());
+
+            aggregateReportForStep.setAverageTimeInMillis(
+                    aggregateReportForStep.getTotalTimeInMillis() / aggregateReportForStep.getIterations());
+
+            computeHitsAtEverySecond(aggregateReportForStep);
 
             redactRawReports(aggregateReportForStep);
         }
@@ -151,14 +159,52 @@ public class ReportAggregator {
         return aggregateReportForStep;
     }
 
+    private void computeHitsAtEverySecond(AggregateActionReport aggregateReportForStep) {
+        var startAndEndTimesInSec =
+                aggregateReportForStep.getRawReports().stream()
+                        .map(report -> Map.entry(
+                                (int) ((report.getStartTimestampInMillis()
+                                        - aggregateReportForStep.getIterationsStartTimestamp()) / 1000),
+                                (int) ((report.getEndTimestampInMillis()
+                                        - aggregateReportForStep.getIterationsStartTimestamp())/ 1000)))
+                        .collect(Collectors.toUnmodifiableList());
+
+        var hitsAtSecond = new LinkedList<Integer>();
+
+        int numberOfSeconds = (int) ((aggregateReportForStep.getIterationsEndTimestamp()
+                        - aggregateReportForStep.getIterationsStartTimestamp()) / 1000 + 1);
+
+        int[] hitsAtSecondArray = new int[numberOfSeconds];
+
+        for (var entry : startAndEndTimesInSec) {
+            // For every iteration, increment the total iterations when the iteration starts
+            hitsAtSecondArray[entry.getKey()] += 1;
+            // For every iteration, decrement the total iterations when the iteration ends
+            hitsAtSecondArray[entry.getValue()] -= 1;
+        }
+
+        // Calculate the total hits at every second by adding current value with previous value
+        hitsAtSecond.add(hitsAtSecondArray[0]);
+        int hitsAtPrevSecond = hitsAtSecondArray[0];
+        for(var second=1; second < numberOfSeconds; second++) {
+            int hitsAtCurrentSecond = hitsAtPrevSecond + hitsAtSecondArray[second];
+            hitsAtSecond.add(hitsAtCurrentSecond);
+            hitsAtPrevSecond = hitsAtCurrentSecond;
+        }
+
+        aggregateReportForStep.setHitsAtEverySecond(hitsAtSecond);
+    }
+
     /**
-     * Checks the fail pass criteria for the current report and sets the AggregateActionReport.passed accordingly.
+     * Checks the fail pass criteria for the current report and sets the {@code AggregateActionReport.passed}
+     * accordingly.
+     *
      * @param aggregateReport The aggregate report which is to be checked for fail-pass criteria
      */
     private void checkFailPassCriteria(AggregateActionReport aggregateReport) {
         aggregateReport.setPassed(true);
-        for(var criteria: parsedUserArgs.getFailPassCriteria()) {
-            if(!criteria.matches(aggregateReport.getRawReports())) {
+        for (var criteria : parsedUserArgs.getFailPassCriteria()) {
+            if (!criteria.matches(aggregateReport.getRawReports())) {
                 aggregateReport.setPassed(false);
                 return;
             }
@@ -171,10 +217,11 @@ public class ReportAggregator {
      * If the configuration property {@code goodload.reporting.include-raw-report} is true,
      * then removes only the nested report information from raw reports for current step,
      * otherwise removes the complete raw report information.
+     *
      * @param aggregateReport The aggregate report from which to remove raw report information.
      */
     private void redactRawReports(AggregateActionReport aggregateReport) {
-        if(userArgs.getYamlConfiguration().getReporting().isIncludeRawReport()) {
+        if (userArgs.getYamlConfiguration().getReporting().isIncludeRawReport()) {
             for (var rawReport : aggregateReport.getRawReports()) {
                 rawReport.setSubSteps(null);
             }
