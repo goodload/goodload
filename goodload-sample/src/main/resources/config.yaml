@@ -29,22 +29,21 @@ goodload:
 
     - name: Sample Http Simulation
       class: org.goodload.goodload.samples.SampleHttpSimulation
-      throughput: 2
-      concurrency: 1
+      throughput: 100
+      concurrency: 100
       hold-for: 10s
       ramp-up: 5s
       ramp-down: 10s
-      iterations: 5
+      iterations: 500
       enabled: true
 
   fail-when:
     - 5% failures
     - atleast 4 failures
-    - atleast x failure
 
   reporting:
     include-raw-report: false
-    export-directory-path: "./goodload-sample/target/"
+    export-directory-path: "target/"
     export-formats:
       - "yaml"
       - "json"
