@@ -49,8 +49,10 @@ public class ReportAggregator {
     private ReportExporter reportExporter;
 
     @Nullable
-    public AggregateSimulationReport aggregate(String simulationName, List<SimulationReport> rawReports,
-                                               long totalSimulationRunTime) {
+    public AggregateSimulationReport aggregate(
+            String simulationName,
+            List<SimulationReport> rawReports,
+            long totalSimulationRunTime) {
         reportExporter.exportRawIfEnabled(simulationName, rawReports);
 
         if (rawReports == null || rawReports.isEmpty()) {
@@ -190,7 +192,7 @@ public class ReportAggregator {
             hitsAtPrevSecond = hitsAtCurrentSecond;
         }
 
-        aggregateReportForStep.setHitsAtSecond(hitsAtSecond);
+        aggregateReportForStep.setHitsAtEverySecond(hitsAtSecond);
     }
 
     /**
