@@ -20,6 +20,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Report generated after aggregating individual reports generated when simulations are run.
@@ -38,12 +39,32 @@ public abstract class AggregateReport implements Serializable {
     private String stepName;
 
     /**
+     * Timestamp when the first iteration started
+     */
+    private long iterationsStartTimestamp;
+
+    /**
+     * Timestamp when the last iteration ended
+     */
+    private long iterationsEndTimestamp;
+
+    /**
      * The total time (in milliseconds) taken by a step to execute.
+     * Only includes the actual time spent in executing an iteration
+     * and not the time spent in initialization of the steps/iteration
+     * by the engine.
+     * <br>
+     * Note that the initializations/setup you do as part of the step will
+     * be counted towards the aggregate. Only the internal boilerplate
+     * is ignored.
+     * <br>
+     * Hence, the totalTimeInMillis may or may not be equal to
+     * {@code iterationsEndTimestamp - iterationsStartTimestamp}
      */
     private long totalTimeInMillis;
 
     /**
-     * Average time in milliseconds.
+     * Average time in milliseconds. It is equal to totalTimeInMillis / number of iterations.
      */
     private long averageTimeInMillis;
 
@@ -52,6 +73,12 @@ public abstract class AggregateReport implements Serializable {
      * If false, then the execution completed successfully.
      */
     private boolean errorsOccured = false;
+
+    /**
+     * Store number of hits for every second the step was run.
+     * The actual time in second for number of hits at index i = startTimeInMillis / 1000 + i
+     */
+    private List<Integer> hitsAtEverySecond;
 
     protected AggregateReport(String stepName) {
         this.stepName = stepName;
