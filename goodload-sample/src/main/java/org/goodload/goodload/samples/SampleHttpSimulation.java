@@ -30,77 +30,41 @@ import static org.goodload.goodload.http.HttpDSL.jsonBody;
 public class SampleHttpSimulation implements Simulation {
     @Override
     public List<Action> init() {
-        var scenario1 = scenario("Sample scenario 1",
+        Action scenario = scenario("Sample scenario",
                 group("Login",
                         exec("Get request", session -> http(session)
-                                .post("https://www.facebook.com")
+                                .post("https://www.google.com")
                                 .header("AUTHENTICATION", "")
                                 .header("X-Cache-Control", "")
                                 .body(jsonBody(new Sample("sample name", "sample descr")))
                                 .go()),
-                        exec("sdf", session -> http(session)
-                                .post("https://www.facebook.com")
-                                .header("AUTHENTICATION", "")
-                                .header("X-Cache-Control", "")
-                                .body(jsonBody(new Sample("sample name", "sample descr")))
-                                .go()),
+                        exec("sdf", session -> { }),
                         check("Login check", session -> true)),
+                /*.check((session) -> {
+                    return ((String) session.get("HEADER-AUTHENTICATION")).equals("401");
+                })*/
+                exec("Execution 1: ", session -> {}),
                 group("Logout",
-                        exec("Logout: Exec 1", session -> http(session)
-                                .post("https://www.facebook.com")
-                                .header("AUTHENTICATION", "")
-                                .header("X-Cache-Control", "")
-                                .body(jsonBody(new Sample("sample name", "sample descr")))
-                                .go()),
-                        exec("Logout: Exec 2", session -> http(session)
-                                .post("https://www.facebook.com")
-                                .header("AUTHENTICATION", "")
-                                .header("X-Cache-Control", "")
-                                .body(jsonBody(new Sample("sample name", "sample descr")))
-                                .go()),
-                        exec("Logout: Exec 3", session -> http(session)
-                                .post("https://www.facebook.com")
-                                .header("AUTHENTICATION", "")
-                                .header("X-Cache-Control", "")
-                                .body(jsonBody(new Sample("sample name", "sample descr")))
-                                .go()))
+                        exec("Logout: Exec 1", session -> {}),
+                        exec("Logout: Exec 2", session -> {}),
+                        exec("Logout: Exec 3", session -> {}))
         );
-        var scenario2 = scenario("Sample scenario 2",
+        var scenario2 = scenario("Sample scenario",
                 group("Login",
                         exec("Get request", session -> http(session)
-                                .post("https://www.facebook.com")
+                                .post("https://www.google.com")
                                 .header("AUTHENTICATION", "")
                                 .header("X-Cache-Control", "")
                                 .body(jsonBody(new Sample("sample name", "sample descr")))
                                 .go()),
-                        exec("sdf", session -> http(session)
-                                .post("https://www.facebook.com")
-                                .header("AUTHENTICATION", "")
-                                .header("X-Cache-Control", "")
-                                .body(jsonBody(new Sample("sample name", "sample descr")))
-                                .go()),
+                        exec("sdf", session -> { }),
                         check("Login check", session -> true)),
                 group("Logout",
-                        exec("Logout: Exec 1", session -> http(session)
-                                .post("https://www.facebook.com")
-                                .header("AUTHENTICATION", "")
-                                .header("X-Cache-Control", "")
-                                .body(jsonBody(new Sample("sample name", "sample descr")))
-                                .go()),
-                        exec("Logout: Exec 2", session -> http(session)
-                                .post("https://www.facebook.com")
-                                .header("AUTHENTICATION", "")
-                                .header("X-Cache-Control", "")
-                                .body(jsonBody(new Sample("sample name", "sample descr")))
-                                .go()),
-                        exec("Logout: Exec 3", session -> http(session)
-                                .post("https://www.facebook.com")
-                                .header("AUTHENTICATION", "")
-                                .header("X-Cache-Control", "")
-                                .body(jsonBody(new Sample("sample name", "sample descr")))
-                                .go()))
+                        exec("Logout: Exec 1", session -> {}),
+                        exec("Logout: Exec 2", session -> {}),
+                        exec("Logout: Exec 3", session -> {}))
         );
 
-        return Arrays.asList(scenario1, scenario2);
+        return Arrays.asList(scenario, scenario2);
     }
 }
