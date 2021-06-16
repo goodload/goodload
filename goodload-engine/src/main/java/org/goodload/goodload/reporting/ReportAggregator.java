@@ -171,10 +171,10 @@ public class ReportAggregator {
 
         var hitsAtSecond = new LinkedList<Integer>();
 
-        int numberOfSeconds = (int) ((aggregateReportForStep.getIterationsEndTimestamp()
+        var numberOfSeconds = (int) ((aggregateReportForStep.getIterationsEndTimestamp()
                         - aggregateReportForStep.getIterationsStartTimestamp()) / 1000 + 1);
 
-        int[] hitsAtSecondArray = new int[numberOfSeconds];
+        var hitsAtSecondArray = new int[numberOfSeconds];
 
         for (var entry : startAndEndTimesInSec) {
             // For every iteration, increment the total iterations when the iteration starts
@@ -185,9 +185,9 @@ public class ReportAggregator {
 
         // Calculate the total hits at every second by adding current value with previous value
         hitsAtSecond.add(hitsAtSecondArray[0]);
-        int hitsAtPrevSecond = hitsAtSecondArray[0];
+        var hitsAtPrevSecond = hitsAtSecondArray[0];
         for(var second=1; second < numberOfSeconds; second++) {
-            int hitsAtCurrentSecond = hitsAtPrevSecond + hitsAtSecondArray[second];
+            var hitsAtCurrentSecond = hitsAtPrevSecond + hitsAtSecondArray[second];
             hitsAtSecond.add(hitsAtCurrentSecond);
             hitsAtPrevSecond = hitsAtCurrentSecond;
         }
