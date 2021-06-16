@@ -57,6 +57,7 @@ public class HttpRequestBuilder {
 
     /**
      * Configures the current request as HTTP DELETE request.
+     *
      * @param url The URL to reach
      * @return The current builder for chaining.
      */
@@ -68,6 +69,7 @@ public class HttpRequestBuilder {
 
     /**
      * Configures the current request as HTTP HEAD request.
+     *
      * @param url The URL to reach
      * @return The current builder for chaining.
      */
@@ -79,6 +81,7 @@ public class HttpRequestBuilder {
 
     /**
      * Configures the current request as HTTP GET request.
+     *
      * @param url The URL to reach
      * @return The current builder for chaining.
      */
@@ -90,6 +93,7 @@ public class HttpRequestBuilder {
 
     /**
      * Configures the current request as HTTP PATCH request.
+     *
      * @param url The URL to reach
      * @return The current builder for chaining.
      */
@@ -101,6 +105,7 @@ public class HttpRequestBuilder {
 
     /**
      * Configures the current request as HTTP POST request.
+     *
      * @param url The URL to reach
      * @return The current builder for chaining.
      */
@@ -112,6 +117,7 @@ public class HttpRequestBuilder {
 
     /**
      * Configures the current request as HTTP PUT request.
+     *
      * @param url The URL to reach
      * @return The current builder for chaining.
      */
@@ -124,7 +130,8 @@ public class HttpRequestBuilder {
     /**
      * Adds the header to the request.
      * If you want to provide multiple values for the header, call this method multiple times.
-     * @param name The name of the header
+     *
+     * @param name  The name of the header
      * @param value The value of the header
      * @return The current builder for chaining.
      */
@@ -135,6 +142,7 @@ public class HttpRequestBuilder {
 
     /**
      * Add a body to the request.
+     *
      * @param requestBody The body to add to the request
      * @return The current builder for chaining calls.
      */
@@ -145,6 +153,7 @@ public class HttpRequestBuilder {
 
     /**
      * Access and/or modify the HTTP request directly.
+     *
      * @param function The user code that accesses the http request
      * @return The current builder for chaining.
      */
@@ -155,9 +164,10 @@ public class HttpRequestBuilder {
 
     /**
      * Finalize the current http request.
-     * @throws HttpMethodDoesNotSupportBodyException If the HTTP method does not allow sending a request body.
+     *
+     * @throws HttpMethodDoesNotSupportBodyException  If the HTTP method does not allow sending a request body.
      * @throws HttpMethodRequiresNonNullBodyException if the HTTP method requires request body to be provided
-*                                                     but the provided request body is null.
+     *                                                but the provided request body is null.
      */
     public void go()
             throws HttpMethodDoesNotSupportBodyException,
@@ -165,13 +175,13 @@ public class HttpRequestBuilder {
 
         readHttpConfigurationProperties(session);
 
-        if(requestBody != null && !com.squareup.okhttp.internal.http.HttpMethod.permitsRequestBody(httpMethod.name())) {
+        if (requestBody != null && !com.squareup.okhttp.internal.http.HttpMethod.permitsRequestBody(httpMethod.name())) {
             throw HttpMethodDoesNotSupportBodyException.forMethod(httpMethod);
-        } else if(requestBody == null && com.squareup.okhttp.internal.http.HttpMethod.requiresRequestBody(httpMethod.name())) {
+        } else if (requestBody == null && com.squareup.okhttp.internal.http.HttpMethod.requiresRequestBody(httpMethod.name())) {
             throw HttpMethodRequiresNonNullBodyException.forMethod(httpMethod);
         }
 
-        switch(httpMethod) {
+        switch (httpMethod) {
             case DELETE:
                 if (requestBody != null) {
                     httpRequest.delete(requestBody);
@@ -202,21 +212,23 @@ public class HttpRequestBuilder {
             var request = httpRequest.build();
             var response = okHttpClient.newCall(request).execute();
 
-            if(httpConfigurationProperties.getLogging().isRequestHeaders()) {
+            if (httpConfigurationProperties.getLogging().isRequestHeaders()) {
                 log.debug("HTTP: Request headers {}", request.headers().toString());
             }
-            if(httpConfigurationProperties.getLogging().isRequestBody()) {
+            if (httpConfigurationProperties.getLogging().isRequestBody()) {
                 log.debug("HTTP: Request body {}", request.body().toString());
             }
-            if(httpConfigurationProperties.getLogging().isResponseCode()) {
+            if (httpConfigurationProperties.getLogging().isResponseCode()) {
                 log.debug("HTTP: Response code {}", response.code());
             }
-            if(httpConfigurationProperties.getLogging().isResponseHeaders()) {
+            if (httpConfigurationProperties.getLogging().isResponseHeaders()) {
                 log.debug("HTTP: Response headers {}", response.headers().toString());
             }
-            if(httpConfigurationProperties.getLogging().isResponseBody()) {
+            if (httpConfigurationProperties.getLogging().isResponseBody()) {
                 log.debug("HTTP: Response body {}", response.body().string());
             }
+
+            response.body().close();
         } catch (IOException e) {
             throw new ExecutionFailedException(e);
         }
@@ -224,6 +236,7 @@ public class HttpRequestBuilder {
 
     /**
      * Sets URL to the request.
+     *
      * @param url The URL to which the request will be sent.
      */
     private void setUrl(String url) {
@@ -233,13 +246,14 @@ public class HttpRequestBuilder {
     /**
      * Reads the configuration properties defined with prefix {@code goodload.custom.http}
      * as a POJO. Expects the engine to provide these values in the session object as a LinkedHashMap.
+     *
      * @param session This contains the information about current iteration.
      *                It is provided by the engine when running the simulation.
      *                The method expects the engine to put the user-provided
      *                goodload.custom to be provided in the session.
      */
     private void readHttpConfigurationProperties(Session session) {
-        if(session.getCustomConfigurationProperties() == null
+        if (session.getCustomConfigurationProperties() == null
                 || session.getCustomConfigurationProperties().get("http") == null) {
             return;
         }
@@ -249,7 +263,7 @@ public class HttpRequestBuilder {
                 .convertValue(
                         session.getCustomConfigurationProperties().get("http"),
                         HttpConfigurationProperties.class);
-        if(httpConfigurationProperties == null) {
+        if (httpConfigurationProperties == null) {
             log.error("The configuration for http module goodload.custom.http is invalid.");
         }
     }
