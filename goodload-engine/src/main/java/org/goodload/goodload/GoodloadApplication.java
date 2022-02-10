@@ -47,12 +47,10 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * The main class that starts the simulation.
@@ -93,6 +91,7 @@ public class GoodloadApplication implements CommandLineRunner {
 
     /**
      * Read the user's arguments and run the simulations.
+     *
      * @param args Command line arguments.
      * @throws Exception Any exception that occurs while starting or running simulations.
      */
@@ -111,9 +110,12 @@ public class GoodloadApplication implements CommandLineRunner {
 
         var reports = new ArrayList<AggregateSimulationReport>();
 
-        for(SimulationConfiguration simulation: userArgs.getYamlConfiguration().getSimulations()) {
+        for (SimulationConfiguration simulation : userArgs.getYamlConfiguration().getSimulations()) {
+            if (userArgs.getSimulationsToExecute() != null && !userArgs.getSimulationsToExecute().contains(simulation.getName())) {
+                continue;
+            }
             var report = simulator.execute(simulation);
-            if(report != null) {
+            if (report != null) {
                 reports.add(report);
             }
         }
@@ -136,19 +138,20 @@ public class GoodloadApplication implements CommandLineRunner {
 
     /**
      * Loads the simulation jar file from the path passed as command line argument.
+     *
      * @throws JarFileNotFoundException If the jar file couldn't be found or opened.
      */
     private void loadSimulationJar() throws JarFileNotFoundException {
         try {
             var jarFile = new File(userArgs.getJarFilePath());
-            if(!jarFile.exists() || !jarFile.canRead()) {
+            if (!jarFile.exists() || !jarFile.canRead()) {
                 throw new JarFileNotFoundException(
                         String.format("Could not open jar file %s. Make sure that the file exists and is readable.",
-                        jarFile.getAbsolutePath()));
+                                jarFile.getAbsolutePath()));
             }
 
             parsedUserArgs.setUserSimulationsClassLoader(new URLClassLoader(
-                    new URL[] { new File(userArgs.getJarFilePath()).toURI().toURL() },
+                    new URL[]{new File(userArgs.getJarFilePath()).toURI().toURL()},
                     ClassLoader.getSystemClassLoader()));
         } catch (MalformedURLException e) {
             throw new JarFileNotFoundException(
@@ -161,6 +164,7 @@ public class GoodloadApplication implements CommandLineRunner {
     /**
      * Loads/parsed the execution configuration from the config file path passed s command line
      * argumnent.
+     *
      * @throws InvalidSimulationConfigFileException If the config file couldn't be parsed properly.
      */
     private void loadExecutionConfiguration() throws InvalidSimulationConfigFileException {
@@ -171,18 +175,18 @@ public class GoodloadApplication implements CommandLineRunner {
 
             parseCriteria(config);
 
-        } catch(UnsupportedCriteriaException e) {
-          throw new InvalidSimulationConfigFileException(e.getMessage(), e);
-        } catch(JsonParseException | JsonMappingException e) {
+        } catch (UnsupportedCriteriaException e) {
+            throw new InvalidSimulationConfigFileException(e.getMessage(), e);
+        } catch (JsonParseException | JsonMappingException e) {
             throw new InvalidSimulationConfigFileException(
                     String.format("The configuration file %s is not well-formed." +
                             "Make sure that the syntax is correct and all the required fields (if any) " +
                             "have been provided.", userArgs.getConfigFilePath()),
                     e);
-        } catch(IOException e) {
+        } catch (IOException e) {
             throw new InvalidSimulationConfigFileException(
                     String.format("Failed to read the configuration file %s. " +
-                            "Make sure that the file is present and accessible.",
+                                    "Make sure that the file is present and accessible.",
                             userArgs.getConfigFilePath()),
                     e);
         }
@@ -190,6 +194,7 @@ public class GoodloadApplication implements CommandLineRunner {
 
     /**
      * Read the user defined fail-when criteria and create Criteria objects for them.
+     *
      * @param config The used defined config
      * @throws UnsupportedCriteriaException If any of the fail-when criteria is not recognized.
      */
@@ -199,14 +204,14 @@ public class GoodloadApplication implements CommandLineRunner {
         final var minimumFailCriteriaPattern =
                 Pattern.compile("atleast ([0-9]*) +failure[s]?", Pattern.CASE_INSENSITIVE);
 
-        for(var criteriaStr: config.getFailPassCriteria()) {
+        for (var criteriaStr : config.getFailPassCriteria()) {
             final var percentFailCriteriaPatternMatcher = percentFailCriteriaPattern.matcher(criteriaStr);
             final var minimumFailCountCriteriaPatternMatcher = minimumFailCriteriaPattern.matcher(criteriaStr);
-            if(percentFailCriteriaPatternMatcher.matches()) {
+            if (percentFailCriteriaPatternMatcher.matches()) {
                 parsedUserArgs.getFailPassCriteria().add(new PercentFailCriteria(
                         Long.parseLong(percentFailCriteriaPatternMatcher.group(1))
                 ));
-            } else if(minimumFailCountCriteriaPatternMatcher.matches()) {
+            } else if (minimumFailCountCriteriaPatternMatcher.matches()) {
                 parsedUserArgs.getFailPassCriteria().add(new MinimumFailCountCriteria(
                         Long.parseLong(minimumFailCountCriteriaPatternMatcher.group(1))
                 ));
@@ -222,7 +227,7 @@ public class GoodloadApplication implements CommandLineRunner {
                 ));
             }
         }
-        if(parsedUserArgs.getFailPassCriteria().isEmpty()) {
+        if (parsedUserArgs.getFailPassCriteria().isEmpty()) {
             parsedUserArgs.getFailPassCriteria().add(new MinimumFailCountCriteria(1));
         }
     }
@@ -230,6 +235,7 @@ public class GoodloadApplication implements CommandLineRunner {
     /**
      * Parses the arguments and returns error messages if the arguments are invalid.
      * The values of the parsed args are put in UserArgs bean.
+     *
      * @param args The args passed by the user.
      */
     private void parseArguments(@NonNull String[] args) throws ParseException {
@@ -251,11 +257,15 @@ public class GoodloadApplication implements CommandLineRunner {
 
         userArgs.setConfigFilePath(cmd.getOptionValue(CommandLineOptions.CONFIG_FILE_OPTION.getLongOpt()));
         userArgs.setJarFilePath(cmd.getOptionValue(CommandLineOptions.JAR_FILE_OPTION.getLongOpt()));
-        userArgs.setSimulationsToExecute(cmd.getOptionValues(CommandLineOptions.SIMULATION_OPTION.getLongOpt()));
+        var simulationsToExecute = cmd.getOptionValues(CommandLineOptions.SIMULATION_OPTION.getLongOpt());
+        if (simulationsToExecute != null) {
+            userArgs.setSimulationsToExecute(Arrays.stream(simulationsToExecute).collect(Collectors.toCollection(HashSet::new)));
+        }
     }
 
     /**
      * Add all the options that are defined in the {@link GoodloadApplication.CommandLineOptions} class
+     *
      * @return Options object that has all the options defined in the {@code CommandLineOptions} class
      */
     @NonNull

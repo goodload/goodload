@@ -19,6 +19,8 @@ package org.goodload.goodload.userconfig;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 
+import java.util.Set;
+
 /**
  * Defines the arguments and configuration/settings passed by the user
  * when launching the goodload tool/engine/application.
@@ -36,15 +38,17 @@ public class UserArgs {
     private String configFilePath;
     /**
      * The jar file which contains the simulation code.
+     *
      * @since 1.0
      */
     private String jarFilePath;
     /**
      * The list of names of simulations to execute.
      * If null or empty, then execute all simulations declared in the config file.
+     *
      * @since 1.0
      */
-    private String[] simulationsToExecute;
+    private Set<String> simulationsToExecute;
 
     /**
      * Contents of the user's simulation config file.
