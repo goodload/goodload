@@ -47,7 +47,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         <spring-boot.version>2.4.4</spring-boot.version>
         <okhttp.version>2.7.5</okhttp.version>
         <lombok.version>1.18.20</lombok.version>
-        <jackson.version>2.12.3</jackson.version>
+        <jackson.version>2.12.7.1</jackson.version>
         <apache-commons-cli.version>1.4</apache-commons-cli.version>
         <apache-commons-lang3.version>3.12.0</apache-commons-lang3.version>
         <openjfx-javafx.version>11</openjfx-javafx.version>
