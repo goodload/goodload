@@ -21,9 +21,10 @@ import org.goodload.goodload.config.GoodloadConfigurationProperties;
 import org.goodload.goodload.dsl.Simulation;
 import org.goodload.goodload.exceptions.SimulatorInterruptedException;
 import org.goodload.goodload.internal.Util;
-import org.goodload.goodload.reporting.ReportAggregator;
-import org.goodload.goodload.reporting.reports.aggregate.AggregateSimulationReport;
-import org.goodload.goodload.reporting.reports.raw.SimulationReport;
+import org.goodload.goodload.reporting.data.ActionReport;
+import org.goodload.goodload.reporting.data.SimulationTree;
+import org.goodload.goodload.reporting.datasink.Sink;
+import org.goodload.goodload.reporting.data.SimulationReport;
 import org.goodload.goodload.userconfig.ParsedUserArgs;
 import org.goodload.goodload.userconfig.SimulationConfiguration;
 import org.goodload.goodload.userconfig.UserArgs;
@@ -32,10 +33,9 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
+import java.util.LinkedList;
+import java.util.UUID;
+import java.util.concurrent.*;
 
 /**
  * As the name suggests,
@@ -55,25 +55,26 @@ public class Simulator {
     private ParsedUserArgs parsedUserArgs;
 
     @Resource
-    private ReportAggregator reportAggregator;
+    private GoodloadConfigurationProperties goodloadConfigurationProperties;
 
     @Resource
-    private GoodloadConfigurationProperties goodloadConfigurationProperties;
+    private Sink sink;
 
     /**
      * Takes a simulation configuration and executes it.
      * Also generates the report for that simulation.
+     *
      * @param simulationConfig The simulation to execute.
      */
-    public AggregateSimulationReport execute(SimulationConfiguration simulationConfig) throws
+    public void execute(SimulationConfiguration simulationConfig, int simulationId) throws
             ClassNotFoundException,
             NoSuchMethodException,
             InvocationTargetException,
             InstantiationException,
             IllegalAccessException {
-        if(!simulationConfig.isEnabled()) {
+        if (!simulationConfig.isEnabled()) {
             log.info("Simulation `{}` ignored as it is disabled.", simulationConfig.getName());
-            return null;
+            return;
         }
 
         log.info("Starting simulation `{}`", simulationConfig.getName());
@@ -90,14 +91,16 @@ public class Simulator {
         // detected and handled before the runners are even started.
         var simulationInstance = simulationClass.getDeclaredConstructor().newInstance();
 
+        prepareSimulationTree(simulationInstance);
+
         var simulationReport = new ArrayList<SimulationReport>();
 
         long maxHoldFor = Util.parseDurationToMillis(goodloadConfigurationProperties.getMaxHoldFor());
         long simulationHoldFor = Util.parseDurationToMillis(simulationConfig.getHoldFor());
 
-        if(maxHoldFor < simulationHoldFor) {
+        if (maxHoldFor < simulationHoldFor) {
             log.warn("The hold-for duration {} is greater than max allowed value of {}, " +
-                    "hence the simulation will be run only for {} duration.",
+                            "hence the simulation will be run only for {} duration.",
                     simulationConfig.getHoldFor(),
                     goodloadConfigurationProperties.getMaxHoldFor(),
                     goodloadConfigurationProperties.getMaxHoldFor());
@@ -112,15 +115,20 @@ public class Simulator {
                 ((100.0 + goodloadConfigurationProperties.getGracePeriodPercentage()) / 100 * maxHoldFor);
 
         var runners = new ArrayList<Callable<SimulationReport>>(simulationConfig.getConcurrency());
-        for(var runnerId=0; runnerId < simulationConfig.getConcurrency(); runnerId++) {
-            var runner = new SimulationRunner(
-                    runnerId,
-                    0,
-                    simulationConfig,
-                    simulationClass,
-                    holdForMillis,
-                    userArgs);
-            runners.add(runner);
+
+        for (var runnerId = 0; runnerId < simulationConfig.getConcurrency(); runnerId++) {
+            try (var actionReportPublisher = new SubmissionPublisher<ActionReport>()) {
+                sink.registerPublisher(actionReportPublisher);
+                var runner = new SimulationRunner(
+                        runnerId,
+                        0,
+                        simulationConfig,
+                        simulationClass,
+                        actionReportPublisher,
+                        holdForMillis,
+                        userArgs);
+                runners.add(runner);
+            }
         }
 
         long simulationStartTime = Util.currentTimestamp();
@@ -129,10 +137,10 @@ public class Simulator {
                     runners,
                     forceEndAfterDuration,
                     TimeUnit.MILLISECONDS);
-            for(var future: futures) {
+            for (var future : futures) {
                 simulationReport.add(future.get());
             }
-        } catch(CancellationException e) {
+        } catch (CancellationException e) {
             throw new SimulatorInterruptedException(
                     String.format(
                             "The simulation %s was cancelled forcefully because it exceeded max duration " +
@@ -153,9 +161,23 @@ public class Simulator {
 
         log.info("Simulation `{}` completed.", simulationConfig.getName());
         log.info("Simulation `{}`: Generating aggregate report...", simulationConfig.getName());
-        return reportAggregator.aggregate(
-                simulationConfig.getName(),
-                simulationReport,
-                simulationEndTime - simulationStartTime);
+        // TODO: Generate aggregate report
+//
+//        return reportAggregator.aggregate(
+//                simulationConfig.getName(),
+//                simulationReport,
+//                simulationEndTime - simulationStartTime);
+    }
+
+    private SimulationTree prepareSimulationTree(Simulation simulationInstance) {
+        var simulationTree = new SimulationTree();
+        simulationTree.setSimulationId(UUID.randomUUID().toString());
+        simulationTree.setSimulationName(simulationInstance.getClass().getCanonicalName());
+
+        var steps = new LinkedList<>();
+        for(var step: s)
+        steps.push()
+
+        simulationTree.setSteps();
     }
 }

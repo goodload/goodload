@@ -18,7 +18,7 @@ package org.goodload.goodload.reporting.reports.aggregate;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.goodload.goodload.reporting.reports.raw.ActionReport;
+import org.goodload.goodload.reporting.data.ActionReport;
 
 import java.util.ArrayList;
 import java.util.List;

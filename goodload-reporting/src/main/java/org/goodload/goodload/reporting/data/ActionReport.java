@@ -14,30 +14,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.goodload.goodload.reporting.reports.raw;
+package org.goodload.goodload.reporting.data;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * Report of entire simulation.
+ * Report of an action iteration.
  *
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
  * @since 1.0
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class SimulationReport extends Report {
+public class ActionReport extends Report {
 
     /**
-     * Report of scenarios in the simulation
+     * Denotes the iteration for which this report was generated.
      */
-    private List<ActionReport> scenarios = new ArrayList<>();
+    private int iterationIndex;
 
-    public SimulationReport(String name) {
-        super(name);
+    public ActionReport(String actionId) {
+        super(actionId);
     }
 }

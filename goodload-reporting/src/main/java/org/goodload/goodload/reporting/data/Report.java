@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.goodload.goodload.reporting.reports.raw;
+package org.goodload.goodload.reporting.data;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -32,6 +32,10 @@ import java.io.Serializable;
 public abstract class Report implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    /**
+     * ID of the step this report belongs to.
+     */
+    private String stepId;
     /**
      * Name of the step this report belongs to.
      */
@@ -54,20 +58,19 @@ public abstract class Report implements Serializable {
     private boolean endedNormally = true;
 
     /**
-     * Id of the simulation runner. Can be used for debugging.
+     * Id of the simulation runner.
      */
     private String runnerId;
-
-    /**
-     * Denotes the iteration for which this report was generated.
-     */
-    private int iterationIndex;
 
     public long getTotalTimeInMillis() {
         return endTimestampInMillis - startTimestampInMillis;
     }
 
-    protected Report(String stepName) {
+    protected Report(String stepId) {
+        this.stepId = stepId;
+    }
+    protected Report(String stepId, String stepName) {
+        this.stepId = stepId;
         this.stepName = stepName;
     }
 }

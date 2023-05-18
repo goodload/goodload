@@ -29,7 +29,7 @@ import org.goodload.goodload.exceptions.InvalidSimulationConfigFileException;
 import org.goodload.goodload.exceptions.JarFileNotFoundException;
 import org.goodload.goodload.exceptions.UnsupportedCriteriaException;
 import org.goodload.goodload.execution.Simulator;
-import org.goodload.goodload.reporting.ReportExporter;
+import org.goodload.goodload.reporting.data.SimulationGraph;
 import org.goodload.goodload.reporting.reports.aggregate.AggregateSimulationReport;
 import org.goodload.goodload.userconfig.GoodloadUserConfigurationProperties;
 import org.goodload.goodload.userconfig.ParsedUserArgs;
@@ -72,9 +72,6 @@ public class GoodloadApplication implements CommandLineRunner {
     @Resource
     private Simulator simulator;
 
-    @Resource
-    private ReportExporter reportExporter;
-
     public static void main(String... args) {
         System.out.println("Goodload Engine Copyright (C) 2021  Goodload\n" +
                 "This program has been distributed under GNU General Public License " +
@@ -108,19 +105,13 @@ public class GoodloadApplication implements CommandLineRunner {
 
         createSimulationExecutionThreadPool();
 
-        var reports = new ArrayList<AggregateSimulationReport>();
-
-        for (SimulationConfiguration simulation : userArgs.getYamlConfiguration().getSimulations()) {
+        for (int i = 0; i < userArgs.getYamlConfiguration().getSimulations().size(); i++) {
+            var simulation = userArgs.getYamlConfiguration().getSimulations().get(i);
             if (userArgs.getSimulationsToExecute() != null && !userArgs.getSimulationsToExecute().contains(simulation.getName())) {
                 continue;
             }
-            var report = simulator.execute(simulation);
-            if (report != null) {
-                reports.add(report);
-            }
+            simulator.execute(simulation, i);
         }
-
-        reportExporter.export(reports);
     }
 
     /**

@@ -14,10 +14,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+package org.goodload.goodload.reporting.data;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * Contains POJO for raw reports for different levels in a simulation.
+ * Report of entire simulation.
  *
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
  * @since 1.0
  */
-package org.goodload.goodload.reporting.reports.raw;
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class SimulationReport extends Report {
+
+    private SimulationTree simulationTree;
+
+    public SimulationReport(String name) {
+        super(name);
+    }
+}

@@ -16,7 +16,6 @@
  */
 package org.goodload.goodload.config;
 
-import org.goodload.goodload.reporting.ReportAggregator;
 import org.springframework.context.annotation.Bean;
 
 /**

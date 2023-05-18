@@ -17,7 +17,7 @@
 
 package org.goodload.goodload.criteria;
 
-import org.goodload.goodload.reporting.reports.raw.Report;
+import org.goodload.goodload.reporting.data.Report;
 
 import java.util.List;
 
