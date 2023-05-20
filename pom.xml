@@ -45,7 +45,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         <maven.compiler.release>11</maven.compiler.release>
 
         <spring-boot.version>2.4.4</spring-boot.version>
-        <okhttp.version>2.7.5</okhttp.version>
+        <okhttp.version>4.11.0</okhttp.version>
         <lombok.version>1.18.20</lombok.version>
         <jackson.version>2.12.3</jackson.version>
         <apache-commons-cli.version>1.4</apache-commons-cli.version>
@@ -76,9 +76,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
     <dependencyManagement>
         <dependencies>
-            <!-- https://mvnrepository.com/artifact/com.squareup.okhttp/okhttp -->
+            <!-- https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp -->
             <dependency>
-                <groupId>com.squareup.okhttp</groupId>
+                <groupId>com.squareup.okhttp3</groupId>
                 <artifactId>okhttp</artifactId>
                 <version>${okhttp.version}</version>
             </dependency>
