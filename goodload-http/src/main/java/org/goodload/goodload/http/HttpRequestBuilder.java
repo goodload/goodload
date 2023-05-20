@@ -17,12 +17,12 @@
 package org.goodload.goodload.http;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.RequestBody;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
 import org.goodload.goodload.core.exceptions.ExecutionFailedException;
 import org.goodload.goodload.dsl.Session;
 import org.goodload.goodload.http.config.HttpConfigurationProperties;
@@ -175,9 +175,9 @@ public class HttpRequestBuilder {
 
         readHttpConfigurationProperties(session);
 
-        if (requestBody != null && !com.squareup.okhttp.internal.http.HttpMethod.permitsRequestBody(httpMethod.name())) {
+        if (requestBody != null && !okhttp3.internal.http.HttpMethod.permitsRequestBody(httpMethod.name())) {
             throw HttpMethodDoesNotSupportBodyException.forMethod(httpMethod);
-        } else if (requestBody == null && com.squareup.okhttp.internal.http.HttpMethod.requiresRequestBody(httpMethod.name())) {
+        } else if (requestBody == null && okhttp3.internal.http.HttpMethod.requiresRequestBody(httpMethod.name())) {
             throw HttpMethodRequiresNonNullBodyException.forMethod(httpMethod);
         }
 
@@ -213,7 +213,7 @@ public class HttpRequestBuilder {
             var response = okHttpClient.newCall(request).execute();
 
             if (httpConfigurationProperties.getLogging().isRequestHeaders()) {
-                log.debug("HTTP: Request headers {}", request.headers().toString());
+                log.debug("HTTP: Request headers {}", request.headers());
             }
             if (httpConfigurationProperties.getLogging().isRequestBody()) {
                 log.debug("HTTP: Request body {}", request.body().toString());
@@ -222,7 +222,7 @@ public class HttpRequestBuilder {
                 log.debug("HTTP: Response code {}", response.code());
             }
             if (httpConfigurationProperties.getLogging().isResponseHeaders()) {
-                log.debug("HTTP: Response headers {}", response.headers().toString());
+                log.debug("HTTP: Response headers {}", response.headers());
             }
             if (httpConfigurationProperties.getLogging().isResponseBody()) {
                 log.debug("HTTP: Response body {}", response.body().string());

@@ -23,7 +23,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.4.4</version>
+        <version>3.1.0</version>
     </parent>
 
     <groupId>org.goodload.goodload</groupId>
@@ -41,17 +41,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     </modules>
 
     <properties>
-        <java.version>11</java.version>
-        <maven.compiler.release>11</maven.compiler.release>
+        <java.version>17</java.version>
+        <maven.compiler.release>17</maven.compiler.release>
 
-        <spring-boot.version>2.4.4</spring-boot.version>
-        <okhttp.version>2.7.5</okhttp.version>
-        <lombok.version>1.18.20</lombok.version>
-        <jackson.version>2.12.3</jackson.version>
-        <apache-commons-cli.version>1.4</apache-commons-cli.version>
+        <spring-boot.version>3.1.0</spring-boot.version>
+        <okhttp.version>4.11.0</okhttp.version>
+        <lombok.version>1.18.26</lombok.version>
+        <jackson.version>2.15.1</jackson.version>
+        <apache-commons-cli.version>1.5.0</apache-commons-cli.version>
         <apache-commons-lang3.version>3.12.0</apache-commons-lang3.version>
-        <openjfx-javafx.version>11</openjfx-javafx.version>
-        <slf4j.version>1.7.30</slf4j.version>
+        <slf4j.version>2.0.7</slf4j.version>
 
         <sonar.projectKey>goodload_goodload</sonar.projectKey>
         <sonar.organization>goodload</sonar.organization>
@@ -65,7 +64,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -76,9 +75,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
     <dependencyManagement>
         <dependencies>
-            <!-- https://mvnrepository.com/artifact/com.squareup.okhttp/okhttp -->
+            <!-- https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp -->
             <dependency>
-                <groupId>com.squareup.okhttp</groupId>
+                <groupId>com.squareup.okhttp3</groupId>
                 <artifactId>okhttp</artifactId>
                 <version>${okhttp.version}</version>
             </dependency>
@@ -122,13 +121,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
                 <version>${apache-commons-lang3.version}</version>
-            </dependency>
-
-            <!-- https://mvnrepository.com/artifact/org.openjfx/javafx -->
-            <dependency>
-                <groupId>org.openjfx</groupId>
-                <artifactId>javafx-base</artifactId>
-                <version>${openjfx-javafx.version}</version>
             </dependency>
 
             <dependency>
