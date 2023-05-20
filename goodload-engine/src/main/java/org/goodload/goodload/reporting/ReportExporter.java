@@ -28,7 +28,7 @@ import org.goodload.goodload.reporting.reports.raw.Report;
 import org.goodload.goodload.userconfig.UserArgs;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
