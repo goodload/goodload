@@ -16,8 +16,12 @@
  */
 package org.goodload.goodload.reporting.data;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 /**
  * Report of an action iteration.
@@ -27,7 +31,13 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
+@Entity
+@NoArgsConstructor
 public class ActionReport extends Report {
+
+    @Id
+    @GeneratedValue
+    private Integer id;
 
     /**
      * Denotes the iteration for which this report was generated.

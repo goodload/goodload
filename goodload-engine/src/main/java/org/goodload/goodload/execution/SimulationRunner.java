@@ -54,7 +54,7 @@ class SimulationRunner implements Callable<SimulationReport> {
      */
     private final Class<? extends Simulation> simulationClass;
 
-    private final SubmissionPublisher<ActionReport> ActionReportSubmissionPublisher;
+    private final SubmissionPublisher<ActionReport> actionReportSubmissionPublisher;
 
     /**
      * Tag to identify the runner in the logs. It has the format "Simulation `%s` : Runner %d:"
@@ -100,13 +100,13 @@ class SimulationRunner implements Callable<SimulationReport> {
             int runAfterMillis,
             SimulationConfiguration simulationConfig,
             Class<? extends Simulation> simulationClass,
-            SubmissionPublisher<ActionReport> ActionReportSubmissionPublisher,
+            SubmissionPublisher<ActionReport> actionReportSubmissionPublisher,
             long holdForMillis,
             UserArgs userArgs) {
         this.runAfterMillis = runAfterMillis;
         this.simulationConfig = simulationConfig;
         this.simulationClass = simulationClass;
-        this.ActionReportSubmissionPublisher = ActionReportSubmissionPublisher;
+        this.actionReportSubmissionPublisher = actionReportSubmissionPublisher;
         this.runnerId = runnerId;
         this.holdForMillis = holdForMillis;
         this.userArgs = userArgs;
@@ -239,7 +239,7 @@ class SimulationRunner implements Callable<SimulationReport> {
         }));
         actionReport.setEndTimestampInMillis(Util.currentTimestamp());
 
-        ActionReportSubmissionPublisher.submit(actionReport);
+        actionReportSubmissionPublisher.submit(actionReport);
 
         return actionReport.isEndedNormally();
     }

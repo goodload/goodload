@@ -9,6 +9,8 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 import javax.sql.DataSource;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
 
@@ -27,9 +29,13 @@ public class SQLiteSinkConfiguration {
     }
 
     @Bean
-    public DataSource dataSource() {
+    public DataSource dataSource() throws IOException {
         final DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        var dbFilePath = Path.of(System.getProperty("java.io.tmpdir"), "goodload", UUID.randomUUID().toString(), ".db");
+        var dbDirectoryPath = Path.of(System.getProperty("java.io.tmpdir"), "goodload");
+        if(!Files.exists(dbDirectoryPath)) {
+            Files.createDirectories(dbDirectoryPath);
+        }
+        var dbFilePath = dbDirectoryPath.resolve(UUID.randomUUID() + ".db");
 
         dataSource.setDriverClassName("org.sqlite.JDBC");
         dataSource.setUrl("jdbc:sqlite:" + dbFilePath);

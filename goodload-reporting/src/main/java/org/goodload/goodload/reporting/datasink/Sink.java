@@ -13,7 +13,7 @@ public abstract class Sink {
 
     protected abstract Flow.Subscriber<ActionReport> createSubscriber();
 
-    public void registerPublisher(SubmissionPublisher<ActionReport> ActionReportSubmissionPublisher) {
-        ActionReportSubmissionPublisher.subscribe(createSubscriber());
+    public void registerPublisher(SubmissionPublisher<ActionReport> actionReportSubmissionPublisher) {
+        actionReportSubmissionPublisher.subscribe(createSubscriber());
     }
 }
