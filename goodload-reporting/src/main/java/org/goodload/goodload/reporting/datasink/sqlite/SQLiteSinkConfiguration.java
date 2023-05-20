@@ -15,13 +15,15 @@ import java.util.UUID;
 import static org.goodload.goodload.reporting.config.ReportingConfigurationProperties.PREFIX;
 
 @Configuration
-@ConditionalOnProperty(prefix = PREFIX, name = "sink-type", havingValue = "SQLite")
+//@ConditionalOnProperty(prefix = PREFIX, name = "sink-type", havingValue = "SQLite")
 @EnableConfigurationProperties(SQLiteSinkConfigurationProperties.class)
 public class SQLiteSinkConfiguration {
 
     @Bean
-    public Sink sink(IterationReportRepository iterationReportRepository) {
-        return new SQLiteSink(iterationReportRepository);
+    public Sink sink(
+            IterationReportRepository iterationReportRepository,
+            SQLiteSinkConfigurationProperties sqLiteSinkConfigurationProperties) {
+        return new SQLiteSink(iterationReportRepository, sqLiteSinkConfigurationProperties);
     }
 
     @Bean

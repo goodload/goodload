@@ -18,6 +18,12 @@
 spring:
   main:
     banner-mode: "off"
+  jpa:
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
+hibernate:
+  hbm2ddl:
+    auto: create-drop
+  show_sql: true
 server:
   error:
     include-stacktrace: never
@@ -40,7 +46,6 @@ server:
 goodload:
   engine:
     max-hold-for: 2h
-    debugging:
-      export-raw-report: true
-      export-transformed-raw-report: true
+  reporting:
+    sink-type: SQLite
 

@@ -1,7 +1,9 @@
 package org.goodload.goodload.reporting.data;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public class SimulationTreeRepository implements JpaRepository<SimulationGraph, Integer> {
+@Repository
+public interface SimulationTreeRepository extends JpaRepository<SimulationTree, Integer> {
 
 }

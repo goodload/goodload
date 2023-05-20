@@ -149,11 +149,13 @@ public class Simulator {
                             goodloadConfigurationProperties.getGracePeriodPercentage(),
                             forceEndAfterDuration),
                     e);
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (ExecutionException e) {
+            log.error("An exception occurred while executing the simulation", e.getCause());
+        } catch (InterruptedException e) {
             log.error(String.format(
-                    "The simulation `%s` was interrupted before completion. Nested exception is %s",
-                    simulationConfig.getName(),
-                    e));
+                            "The simulation `%s` was interrupted before completion.",
+                            simulationConfig.getName()),
+                    e);
             Thread.currentThread().interrupt();
         }
 
@@ -174,10 +176,12 @@ public class Simulator {
         simulationTree.setSimulationId(UUID.randomUUID().toString());
         simulationTree.setSimulationName(simulationInstance.getClass().getCanonicalName());
 
-        var steps = new LinkedList<>();
-        for(var step: s)
-        steps.push()
-
-        simulationTree.setSteps();
+        // TODO
+//        var steps = new LinkedList<>();
+//        for (var step : s)
+//            steps.push()
+//
+//        simulationTree.setSteps();
+        return simulationTree;
     }
 }
