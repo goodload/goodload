@@ -31,6 +31,7 @@ import org.goodload.goodload.userconfig.UserArgs;
 import org.springframework.stereotype.Component;
 
 import jakarta.annotation.Resource;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -108,7 +109,7 @@ public class Simulator {
 
         long holdForMillis = Math.min(maxHoldFor, simulationHoldFor);
 
-        // Forcibly terminate the runner threads if some long running step in simulation is causing
+        // Forcibly terminate the runner threads if some long-running step in simulation is causing
         // it to run for more than 120% of the hold for value.
         // This prevents Denial of Service attacks due to infinite recursions or loops in simulation.
         long forceEndAfterDuration = (long)
@@ -116,19 +117,19 @@ public class Simulator {
 
         var runners = new ArrayList<Callable<SimulationReport>>(simulationConfig.getConcurrency());
 
+        var actionReportPublisher = new SubmissionPublisher<ActionReport>();
+
         for (var runnerId = 0; runnerId < simulationConfig.getConcurrency(); runnerId++) {
-            try (var actionReportPublisher = new SubmissionPublisher<ActionReport>()) {
-                sink.registerPublisher(actionReportPublisher);
-                var runner = new SimulationRunner(
-                        runnerId,
-                        0,
-                        simulationConfig,
-                        simulationClass,
-                        actionReportPublisher,
-                        holdForMillis,
-                        userArgs);
-                runners.add(runner);
-            }
+            sink.registerPublisher(actionReportPublisher);
+            var runner = new SimulationRunner(
+                    runnerId,
+                    0,
+                    simulationConfig,
+                    simulationClass,
+                    actionReportPublisher,
+                    holdForMillis,
+                    userArgs);
+            runners.add(runner);
         }
 
         long simulationStartTime = Util.currentTimestamp();
@@ -160,6 +161,8 @@ public class Simulator {
         }
 
         long simulationEndTime = Util.currentTimestamp();
+
+        actionReportPublisher.close();
 
         log.info("Simulation `{}` completed.", simulationConfig.getName());
         log.info("Simulation `{}`: Generating aggregate report...", simulationConfig.getName());
