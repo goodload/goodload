@@ -42,7 +42,7 @@ public class SQLiteSink extends Sink {
         public void onSubscribe(Flow.Subscription subscription) {
             log.debug("Sink subscriber with ID {} registered", subscriberId);
             this.subscription = subscription;
-            subscription.request(Integer.MAX_VALUE);
+            subscription.request(Long.MAX_VALUE);
         }
 
         @Override
@@ -51,7 +51,7 @@ public class SQLiteSink extends Sink {
             if (batch.size() >= batchSize) {
                 processBatch();
             }
-            subscription.request(Integer.MAX_VALUE);
+            subscription.request(Long.MAX_VALUE);
         }
 
         @Override
