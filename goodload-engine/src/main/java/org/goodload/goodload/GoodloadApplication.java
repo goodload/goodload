@@ -144,7 +144,7 @@ public class GoodloadApplication implements CommandLineRunner {
 
             parsedUserArgs.setUserSimulationsClassLoader(new URLClassLoader(
                     new URL[]{new File(userArgs.getJarFilePath()).toURI().toURL()},
-                    ClassLoader.getSystemClassLoader()));
+                    GoodloadApplication.class.getClassLoader()));
         } catch (MalformedURLException e) {
             throw new JarFileNotFoundException(
                     String.format("The path to jar file (%s) is invalid",
