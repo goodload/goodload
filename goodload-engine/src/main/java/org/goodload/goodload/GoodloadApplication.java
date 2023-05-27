@@ -59,7 +59,7 @@ import java.util.stream.Collectors;
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
  * @since 1.0
  */
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "org.goodload")
 @Slf4j
 @ConfigurationPropertiesScan
 public class GoodloadApplication implements CommandLineRunner {

@@ -19,14 +19,24 @@ spring:
   main:
     banner-mode: "off"
   jpa:
-    database-platform: org.hibernate.community.dialect.SQLiteDialect
-hibernate:
-  hbm2ddl:
-    auto: create-drop
-  show_sql: true
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: create
+    show-sql: true
 server:
   error:
     include-stacktrace: never
+logging:
+  pattern:
+    console: "%clr(%d{yy-MM-dd E HH:mm:ss.SSS}){blue} %clr(%-5p) %clr(${PID}){faint} %clr(---){faint} %clr([%8.15t]){cyan} %clr(%-40.40logger{0}){blue} %clr(:){red} %clr(%m){faint}%n"
+  level:
+    root: WARN
+    org.goodload: INFO
+goodload:
+  engine:
+    max-hold-for: 2h
+  reporting:
+    sink-type: SQLite
 ---
 spring:
   config:
@@ -35,17 +45,13 @@ spring:
   main:
     banner-mode: "console"
 logging:
-  pattern:
-    console: "%clr(%d{yy-MM-dd E HH:mm:ss.SSS}){blue} %clr(%-5p) %clr(${PID}){faint} %clr(---){faint} %clr([%8.15t]){cyan} %clr(%-40.40logger{0}){blue} %clr(:){red} %clr(%m){faint}%n"
   level:
-    org.goodload.goodload: debug
+    org.goodload.goodload: INFO
+    org.hibernate: TRACE
+    com.mysql: TRACE
+    root: WARN
 server:
   error:
     include-stacktrace: always
 
-goodload:
-  engine:
-    max-hold-for: 2h
-  reporting:
-    sink-type: SQLite
 

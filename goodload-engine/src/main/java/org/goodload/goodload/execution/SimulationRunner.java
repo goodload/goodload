@@ -22,7 +22,6 @@ import org.goodload.goodload.dsl.*;
 import org.goodload.goodload.exceptions.CheckFailedException;
 import org.goodload.goodload.internal.Util;
 import org.goodload.goodload.reporting.data.ActionReport;
-import org.goodload.goodload.reporting.data.SimulationReport;
 import org.goodload.goodload.userconfig.SimulationConfiguration;
 import org.goodload.goodload.userconfig.UserArgs;
 
@@ -37,7 +36,7 @@ import java.util.concurrent.SubmissionPublisher;
  * @since 1.0
  */
 @Slf4j
-class SimulationRunner implements Callable<SimulationReport> {
+class SimulationRunner implements Callable<Void> {
 
     /**
      * After how many milliseconds the runner should start execution.
@@ -115,7 +114,7 @@ class SimulationRunner implements Callable<SimulationReport> {
     }
 
     @Override
-    public SimulationReport call() {
+    public Void call() {
         log.debug("{} : Started", tag);
 
         try {
@@ -127,14 +126,9 @@ class SimulationRunner implements Callable<SimulationReport> {
             // Time after which no iterations will be started
             long endIterationsWhenTimestamp = startTimestamp + holdForMillis;
 
-            var simulationReport = new SimulationReport(simulationConfig.getName());
-            simulationReport.setRunnerId(runnerIdStr);
-
             var simulation = simulationClass.getDeclaredConstructor().newInstance();
 
             simulation.beforeSimulation();
-
-            simulationReport.setStartTimestampInMillis(startTimestamp);
 
             var scenarios = simulation.init();
 
@@ -167,21 +161,11 @@ class SimulationRunner implements Callable<SimulationReport> {
 
                     simulation.afterEachIteration(currentScenario.getName(), iterationIndex);
                 }
-                if (scenarioReport.isEndedNormally()) {
-                    simulationReport.setEndedNormally(false);
-                }
 
                 simulation.afterEachScenario(currentScenario.getName());
             }
 
-            // When the last iteration completed.
-            long endTimestamp = Util.currentTimestamp();
-
-            simulationReport.setEndTimestampInMillis(endTimestamp);
-
             simulation.afterSimulation();
-
-            return simulationReport;
 
         } catch (InterruptedException e) {
             log.error(String.format("%s : The runner thread was interrupted.", tag), e);
@@ -191,7 +175,6 @@ class SimulationRunner implements Callable<SimulationReport> {
         }
 
         log.debug("{} : Ended", tag);
-
         return null;
     }
 
@@ -213,16 +196,13 @@ class SimulationRunner implements Callable<SimulationReport> {
 
         action.getExecutionSequence().forEach((step -> {
             try {
-                if (step instanceof Check) {
-                    var check = (Check) step;
+                if (step instanceof Check check) {
                     if (!check.condition(session)) {
                         throw new CheckFailedException(simulationConfig.getName(), action);
                     }
-                } else if (step instanceof Executable) {
-                    var executable = (Executable) step;
+                } else if (step instanceof Executable executable) {
                     executable.function(session);
-                } else if (step instanceof Action) {
-                    var nestedAction = (Action) step;
+                } else if (step instanceof Action nestedAction) {
 
                     var nestedActionCompletedNormally = execute(session, nestedAction, runnerId, iterationIndex);
 

@@ -18,13 +18,16 @@ package org.goodload.goodload.execution;
 
 import lombok.extern.slf4j.Slf4j;
 import org.goodload.goodload.config.GoodloadConfigurationProperties;
+import org.goodload.goodload.dsl.Action;
 import org.goodload.goodload.dsl.Simulation;
 import org.goodload.goodload.exceptions.SimulatorInterruptedException;
 import org.goodload.goodload.internal.Util;
 import org.goodload.goodload.reporting.data.ActionReport;
 import org.goodload.goodload.reporting.data.SimulationTree;
+import org.goodload.goodload.reporting.data.StepSkeletonData;
 import org.goodload.goodload.reporting.datasink.Sink;
-import org.goodload.goodload.reporting.data.SimulationReport;
+import org.goodload.goodload.reporting.datasink.sqlite.IterationReportRepository;
+import org.goodload.goodload.reporting.datasink.sqlite.models.ActionReportEntity;
 import org.goodload.goodload.userconfig.ParsedUserArgs;
 import org.goodload.goodload.userconfig.SimulationConfiguration;
 import org.goodload.goodload.userconfig.UserArgs;
@@ -37,6 +40,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.UUID;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 /**
  * As the name suggests,
@@ -61,6 +65,9 @@ public class Simulator {
     @Resource
     private Sink sink;
 
+    @Resource
+    private IterationReportRepository iterationReportRepository;
+
     /**
      * Takes a simulation configuration and executes it.
      * Also generates the report for that simulation.
@@ -77,6 +84,13 @@ public class Simulator {
             log.info("Simulation `{}` ignored as it is disabled.", simulationConfig.getName());
             return;
         }
+        var entity = new ActionReportEntity();
+        entity.setStartTimestampInMillis(1L);
+        entity.setEndTimestampInMillis(1L);
+        entity.setStepId(UUID.randomUUID().toString());
+        entity.setIterationIndex(0);
+        entity.setEndedNormally(true);
+        iterationReportRepository.save(entity);
 
         log.info("Starting simulation `{}`", simulationConfig.getName());
 
@@ -85,16 +99,17 @@ public class Simulator {
                 true,
                 parsedUserArgs.getUserSimulationsClassLoader()).asSubclass(Simulation.class);
 
-        // DO NOT REMOVE UNUSED VARIABLE simulationInstance
-        // We are creating an instance just to verify that it can be created and the user's simulation class is not invalid.
+        // DO NOT REMOVE VARIABLE simulationInstance EVEN IF UNUSED
+        // Creating an instance here is a verification that an instance can be created and the user's simulation class
+        // is not invalid.
         // It will be harder to properly report the error if this verification is left for the runner threads.
         // It will also prevent the same errors from being thrown by every runner thread because the error will be
         // detected and handled before the runners are even started.
         var simulationInstance = simulationClass.getDeclaredConstructor().newInstance();
 
-        prepareSimulationTree(simulationInstance);
+        var simulationMetadata = prepareSimulationMetadata(simulationInstance);
 
-        var simulationReport = new ArrayList<SimulationReport>();
+        sink.registerSimulationSkeletonData(simulationMetadata);
 
         long maxHoldFor = Util.parseDurationToMillis(goodloadConfigurationProperties.getMaxHoldFor());
         long simulationHoldFor = Util.parseDurationToMillis(simulationConfig.getHoldFor());
@@ -115,7 +130,7 @@ public class Simulator {
         long forceEndAfterDuration = (long)
                 ((100.0 + goodloadConfigurationProperties.getGracePeriodPercentage()) / 100 * maxHoldFor);
 
-        var runners = new ArrayList<Callable<SimulationReport>>(simulationConfig.getConcurrency());
+        var runners = new ArrayList<SimulationRunner>(simulationConfig.getConcurrency());
 
         var actionReportPublisher = new SubmissionPublisher<ActionReport>();
 
@@ -132,14 +147,13 @@ public class Simulator {
             runners.add(runner);
         }
 
-        long simulationStartTime = Util.currentTimestamp();
         try {
             var futures = parsedUserArgs.getSimulationExecutorService().invokeAll(
                     runners,
                     forceEndAfterDuration,
                     TimeUnit.MILLISECONDS);
             for (var future : futures) {
-                simulationReport.add(future.get());
+                future.get();
             }
         } catch (CancellationException e) {
             throw new SimulatorInterruptedException(
@@ -160,8 +174,6 @@ public class Simulator {
             Thread.currentThread().interrupt();
         }
 
-        long simulationEndTime = Util.currentTimestamp();
-
         actionReportPublisher.close();
 
         log.info("Simulation `{}` completed.", simulationConfig.getName());
@@ -174,17 +186,41 @@ public class Simulator {
 //                simulationEndTime - simulationStartTime);
     }
 
-    private SimulationTree prepareSimulationTree(Simulation simulationInstance) {
+    private static SimulationTree prepareSimulationMetadata(Simulation simulationInstance) {
         var simulationTree = new SimulationTree();
         simulationTree.setSimulationId(UUID.randomUUID().toString());
         simulationTree.setSimulationName(simulationInstance.getClass().getCanonicalName());
 
-        // TODO
-//        var steps = new LinkedList<>();
-//        for (var step : s)
-//            steps.push()
-//
-//        simulationTree.setSteps();
+        var steps = new LinkedList<StepSkeletonData>();
+
+        for (var action : simulationInstance.init()) {
+            steps.add(mapActionToStepSkeletonData(action));
+        }
+
+        simulationTree.setSteps(steps);
+
         return simulationTree;
+    }
+
+    private static StepSkeletonData mapActionToStepSkeletonData(Action sourceAction) {
+        var subSteps = sourceAction
+                .getExecutionSequence()
+                .stream()
+                .filter(sequenceElement -> sequenceElement instanceof Action)
+                .map(sequenceElement -> (Action) sequenceElement)
+                .toList();
+
+        var skeletonSubSteps = new LinkedList<StepSkeletonData>();
+
+        for (var subStep : subSteps) {
+            skeletonSubSteps.add(mapActionToStepSkeletonData(subStep));
+        }
+
+        var targetSkeletonData = new StepSkeletonData();
+        targetSkeletonData.setStepName(sourceAction.getName());
+        targetSkeletonData.setStepId(sourceAction.getId());
+        targetSkeletonData.setSubSteps(skeletonSubSteps);
+
+        return targetSkeletonData;
     }
 }

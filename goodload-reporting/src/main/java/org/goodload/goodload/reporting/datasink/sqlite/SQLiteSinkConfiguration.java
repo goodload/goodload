@@ -24,23 +24,29 @@ public class SQLiteSinkConfiguration {
     @Bean
     public Sink sink(
             IterationReportRepository iterationReportRepository,
+            SimulationRepository simulationRepository,
             SQLiteSinkConfigurationProperties sqLiteSinkConfigurationProperties) {
-        return new SQLiteSink(iterationReportRepository, sqLiteSinkConfigurationProperties);
+        return new SQLiteSink(iterationReportRepository, simulationRepository, sqLiteSinkConfigurationProperties);
     }
 
     @Bean
     public DataSource dataSource() throws IOException {
         final DriverManagerDataSource dataSource = new DriverManagerDataSource();
         var dbDirectoryPath = Path.of(System.getProperty("java.io.tmpdir"), "goodload");
-        if(!Files.exists(dbDirectoryPath)) {
+        if (!Files.exists(dbDirectoryPath)) {
             Files.createDirectories(dbDirectoryPath);
         }
         var dbFilePath = dbDirectoryPath.resolve(UUID.randomUUID() + ".db");
 
-        dataSource.setDriverClassName("org.sqlite.JDBC");
-        dataSource.setUrl("jdbc:sqlite:" + dbFilePath);
-        dataSource.setUsername("sa");
-        dataSource.setPassword("sa");
+        final var dbName = "goodload";
+
+//        dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
+//        dataSource
+        dataSource.setSchema("sink/sqlite/schema.sql");
+        dataSource.setUrl("jdbc:mysql://localhost:3306/" + dbName + "?createDatabaseIfNotExist=true&useUnicode=yes" +
+                "&characterEncoding=UTF-8&logger=com.mysql.cj.log.Slf4JLogger&profileSQL=true");
+        dataSource.setUsername("root");
+        dataSource.setPassword("");
         return dataSource;
     }
 }

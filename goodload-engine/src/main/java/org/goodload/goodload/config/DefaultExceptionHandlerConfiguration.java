@@ -39,6 +39,7 @@ public class DefaultExceptionHandlerConfiguration {
 
     /**
      * Maps the exceptions to corresponding exit codes.
+     *
      * @return Mapper containing information about which exception to map with which exit code.
      * @since 1.0
      */
@@ -46,29 +47,29 @@ public class DefaultExceptionHandlerConfiguration {
     ExitCodeExceptionMapper exitCodeExceptionMapper() {
         log.debug("Initializing exit code exception mapper.");
         return exception -> {
-            if(exception.getCause() instanceof ParseException) {
+            if (exception.getCause() instanceof ParseException) {
                 return 2;
-            } else if(exception.getCause() instanceof InvalidSimulationConfigFileException) {
+            } else if (exception.getCause() instanceof InvalidSimulationConfigFileException) {
                 log.error(exception.getCause().getMessage());
                 return 3;
-            } else if(exception.getCause() instanceof SimulatorInterruptedException
+            } else if (exception.getCause() instanceof SimulatorInterruptedException
                     || exception.getCause() instanceof InterruptedException) {
-                log.error(exception.getCause().getMessage());
+                log.error("Simulator was interrupted before completion.", exception.getCause());
                 return 4;
-            } else if(exception.getCause() instanceof ClassNotFoundException) {
-                log.error("Failed to find simulation class {}", exception.getCause().getMessage());
+            } else if (exception.getCause() instanceof ClassNotFoundException) {
+                log.error("Failed to find simulation class.", exception.getCause());
                 return 5;
-            } else if(exception.getCause() instanceof ClassCastException) {
-                log.error("The specified simulation file is not an instance of {}. Actual error message: {}",
-                        Simulation.class.getCanonicalName(),
-                        exception.getCause().getMessage());
+            } else if (exception.getCause() instanceof ClassCastException) {
+                log.error(String.format(
+                                "The specified simulation file is not an instance of %s.",
+                                Simulation.class.getCanonicalName()),
+                        exception.getCause());
                 return 6;
-            } else if(exception.getCause() instanceof UnknownExportFormatException) {
+            } else if (exception.getCause() instanceof UnknownExportFormatException) {
                 log.error(exception.getCause().getMessage());
                 return 7;
             } else {
-                log.error("Some error occurred during execution.");
-                log.debug("Error details: {}", ExceptionUtils.getStackTrace(exception));
+                log.error("Some error occurred during execution.", exception);
                 return 1;
             }
         };
