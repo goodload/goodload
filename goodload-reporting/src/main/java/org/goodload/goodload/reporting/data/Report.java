@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Divyansh Shekhar Gaur
+ * Copyright (C) 2023 Divyansh Shekhar Gaur
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,8 @@ import java.io.Serializable;
 
 /**
  * The performance report generated for a step, or group of steps.
+ *
+ * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
  * @since 1.0
  */
 @Data
@@ -71,6 +73,7 @@ public abstract class Report implements Serializable {
     protected Report(String stepId) {
         this.stepId = stepId;
     }
+
     protected Report(String stepId, String stepName) {
         this.stepId = stepId;
         this.stepName = stepName;

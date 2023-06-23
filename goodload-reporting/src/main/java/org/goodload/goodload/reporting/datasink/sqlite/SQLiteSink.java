@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2023 Divyansh Shekhar Gaur
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.goodload.goodload.reporting.datasink.sqlite;
 
 import lombok.AllArgsConstructor;
@@ -6,19 +22,24 @@ import org.goodload.goodload.reporting.data.ActionReport;
 import org.goodload.goodload.reporting.data.SimulationTree;
 import org.goodload.goodload.reporting.data.StepSkeletonData;
 import org.goodload.goodload.reporting.datasink.Sink;
-import org.goodload.goodload.reporting.datasink.sqlite.models.StepSkeletonEntity;
+import org.goodload.goodload.reporting.datasink.SinkSubscriber;
 import org.goodload.goodload.reporting.datasink.sqlite.models.ActionReportEntity;
 import org.goodload.goodload.reporting.datasink.sqlite.models.SimulationEntity;
+import org.goodload.goodload.reporting.datasink.sqlite.models.StepSkeletonEntity;
 
 import java.util.LinkedList;
 import java.util.UUID;
 import java.util.concurrent.Flow;
 
+/**
+ * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
+ * @since 1.0
+ */
 @Slf4j
 @AllArgsConstructor
 public class SQLiteSink extends Sink {
 
-    private final IterationReportRepository iterationReportRepository;
+    private final IterationReportRegistry iterationReportRegistry;
 
     private final SimulationRepository simulationRepository;
 
@@ -29,21 +50,12 @@ public class SQLiteSink extends Sink {
         var simulationEntity = new SimulationEntity();
         simulationEntity.setSimulationId(simulationTree.getSimulationId());
         simulationEntity.setSimulationName(simulationTree.getSimulationName());
-        var stepEntities = simulationTree
-                .getSteps()
-                .stream()
-                .map(step ->
-                        mapStepDataToEntity(
-                                step,
-                                simulationTree.getSimulationId(),
-                                null))
-                .toList();
+        var stepEntities = simulationTree.getSteps().stream().map(step -> mapStepDataToEntity(step, simulationTree.getSimulationId(), null)).toList();
         simulationEntity.setSteps(stepEntities);
         simulationRepository.saveAndFlush(simulationEntity);
     }
 
-    private StepSkeletonEntity mapStepDataToEntity(StepSkeletonData stepSkeletonData, String simulationId,
-                                                   String parentStepId) {
+    private StepSkeletonEntity mapStepDataToEntity(StepSkeletonData stepSkeletonData, String simulationId, String parentStepId) {
         var entity = new StepSkeletonEntity();
         entity.setStepName(stepSkeletonData.getStepName());
         entity.setStepId(stepSkeletonData.getStepId());
@@ -59,23 +71,25 @@ public class SQLiteSink extends Sink {
     }
 
     @Override
-    protected Flow.Subscriber<ActionReport> createSubscriber() {
-        return new ActionReportSubscriber(iterationReportRepository, sqLiteSinkConfigurationProperties.getBatchSize());
+    protected SinkSubscriber createSubscriber() {
+        return new SQLiteSinkSubscriber(iterationReportRegistry, sqLiteSinkConfigurationProperties.getBatchSize());
     }
 
     @Slf4j
-    protected static class ActionReportSubscriber implements Flow.Subscriber<ActionReport> {
+    protected static class SQLiteSinkSubscriber implements SinkSubscriber {
 
         private final LinkedList<ActionReport> batch = new LinkedList<>();
-        private final IterationReportRepository iterationReportRepository;
+
+        private final IterationReportRegistry iterationReportRegistry;
+
         private final int batchSize;
 
         private final String subscriberId = UUID.randomUUID().toString();
 
         private Flow.Subscription subscription = null;
 
-        public ActionReportSubscriber(IterationReportRepository iterationReportRepository, int batchSize) {
-            this.iterationReportRepository = iterationReportRepository;
+        public SQLiteSinkSubscriber(IterationReportRegistry iterationReportRegistry, int batchSize) {
+            this.iterationReportRegistry = iterationReportRegistry;
             this.batchSize = batchSize;
         }
 
@@ -108,13 +122,22 @@ public class SQLiteSink extends Sink {
         }
 
         private void processBatch() {
-            // TODO: Run in transaction to speed up writes
             try {
-                iterationReportRepository.saveAll(batch.stream().map(ActionReportEntity::fromAction).toList());
+                log.debug("Writing {} report rows to sqlite", batch.size());
+                iterationReportRegistry.insertAll(batch.stream().map(ActionReportEntity::fromAction).toList());
             } catch (Exception e) {
                 log.error("Failed to write iteration report batch", e);
             }
             batch.clear();
+            batch.notifyAll();
+        }
+
+        @Override
+        public void close() {
+            synchronized (batch) {
+                subscription.cancel();
+                processBatch();
+            }
         }
     }
 }

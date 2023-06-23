@@ -16,15 +16,27 @@
  */
 package org.goodload.goodload.reporting.datasink.sqlite;
 
-import org.goodload.goodload.reporting.datasink.sqlite.models.SimulationEntity;
-import org.springframework.data.jpa.repository.JpaRepository;
+import jakarta.annotation.Resource;
+import org.goodload.goodload.reporting.datasink.sqlite.models.ActionReportEntity;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
+ * Repository bean for interacting with iteration reports
+ *
+ * @author divsgaur
  * @since 1.0
  */
 @Repository
-public interface SimulationRepository extends JpaRepository<SimulationEntity, Integer> {
+public class IterationReportRegistry {
 
+    @Resource
+    private IterationReportRepository iterationReportRepository;
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW, noRollbackFor = Exception.class, isolation = Isolation.READ_COMMITTED)
+    public void insertAll(Iterable<ActionReportEntity> reports) {
+        iterationReportRepository.saveAll(reports);
+    }
 }

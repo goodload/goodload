@@ -14,30 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.goodload.goodload.reporting.data;
+package org.goodload.goodload.reporting.datasink;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import org.goodload.goodload.reporting.data.ActionReport;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.List;
+import java.util.concurrent.Flow;
 
 /**
- * The simulation structure. Contains all the steps, their IDs and sub-steps.
+ * Base subscriber for consuming {@link ActionReport}(s) published during simulation execution.
  *
- * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
+ * @author divsgaur
  * @since 1.0
  */
-@Data
-@NoArgsConstructor
-public class SimulationTree implements Serializable {
-    @Serial
-    private static final long serialVersionUID = 1L;
+public interface SinkSubscriber extends Flow.Subscriber<ActionReport>, AutoCloseable {
 
-    private String simulationId;
-
-    private String simulationName;
-
-    private List<StepSkeletonData> steps;
 }

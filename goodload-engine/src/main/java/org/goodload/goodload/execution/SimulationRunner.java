@@ -160,6 +160,8 @@ class SimulationRunner implements Callable<Void> {
                     }
 
                     simulation.afterEachIteration(currentScenario.getName(), iterationIndex);
+
+                    log.trace("{}: Iteration {} finished", tag, iterationIndex);
                 }
 
                 simulation.afterEachScenario(currentScenario.getName());
@@ -220,6 +222,7 @@ class SimulationRunner implements Callable<Void> {
         actionReport.setEndTimestampInMillis(Util.currentTimestamp());
 
         actionReportSubmissionPublisher.submit(actionReport);
+        log.trace("{}: Submitted action report {}", tag, actionReport);
 
         return actionReport.isEndedNormally();
     }

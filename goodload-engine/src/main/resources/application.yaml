@@ -19,16 +19,19 @@ spring:
   main:
     banner-mode: "off"
   jpa:
-    database-platform: org.hibernate.dialect.MySQLDialect
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
     hibernate:
-      ddl-auto: create
-    show-sql: true
+      ddl-auto: none
+    show-sql: false
+  sql:
+    init:
+      mode: always
 server:
   error:
     include-stacktrace: never
 logging:
   pattern:
-    console: "%clr(%d{yy-MM-dd E HH:mm:ss.SSS}){blue} %clr(%-5p) %clr(${PID}){faint} %clr(---){faint} %clr([%8.15t]){cyan} %clr(%-40.40logger{0}){blue} %clr(:){red} %clr(%m){faint}%n"
+    console: "%clr(%d{yy-MM-dd E HH:mm:ss.SSS}){blue} %clr(%-5p) %clr(${PID}){faint} %clr(---){faint} %clr([%8.15t]){cyan} %clr(%-40.40logger{26}){blue} %clr(:){red} %clr(%m){faint}%n"
   level:
     root: WARN
     org.goodload: INFO
@@ -44,11 +47,15 @@ spring:
       on-profile: log-dev
   main:
     banner-mode: "console"
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
 logging:
   level:
-    org.goodload.goodload: INFO
-    org.hibernate: TRACE
-    com.mysql: TRACE
+    org.goodload.goodload: DEBUG
+    org.hibernate: DEBUG
     root: WARN
 server:
   error:

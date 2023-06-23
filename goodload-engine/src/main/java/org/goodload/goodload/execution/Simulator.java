@@ -84,13 +84,6 @@ public class Simulator {
             log.info("Simulation `{}` ignored as it is disabled.", simulationConfig.getName());
             return;
         }
-        var entity = new ActionReportEntity();
-        entity.setStartTimestampInMillis(1L);
-        entity.setEndTimestampInMillis(1L);
-        entity.setStepId(UUID.randomUUID().toString());
-        entity.setIterationIndex(0);
-        entity.setEndedNormally(true);
-        iterationReportRepository.save(entity);
 
         log.info("Starting simulation `{}`", simulationConfig.getName());
 
@@ -132,22 +125,22 @@ public class Simulator {
 
         var runners = new ArrayList<SimulationRunner>(simulationConfig.getConcurrency());
 
-        var actionReportPublisher = new SubmissionPublisher<ActionReport>();
+        try (var actionReportPublisher = new SubmissionPublisher<ActionReport>(); ) {
 
-        for (var runnerId = 0; runnerId < simulationConfig.getConcurrency(); runnerId++) {
             sink.registerPublisher(actionReportPublisher);
-            var runner = new SimulationRunner(
-                    runnerId,
-                    0,
-                    simulationConfig,
-                    simulationClass,
-                    actionReportPublisher,
-                    holdForMillis,
-                    userArgs);
-            runners.add(runner);
-        }
 
-        try {
+            for (var runnerId = 0; runnerId < simulationConfig.getConcurrency(); runnerId++) {
+                var runner = new SimulationRunner(
+                        runnerId,
+                        0,
+                        simulationConfig,
+                        simulationClass,
+                        actionReportPublisher,
+                        holdForMillis,
+                        userArgs);
+                runners.add(runner);
+            }
+
             var futures = parsedUserArgs.getSimulationExecutorService().invokeAll(
                     runners,
                     forceEndAfterDuration,
@@ -155,6 +148,8 @@ public class Simulator {
             for (var future : futures) {
                 future.get();
             }
+
+            sink.close();
         } catch (CancellationException e) {
             throw new SimulatorInterruptedException(
                     String.format(
@@ -172,11 +167,12 @@ public class Simulator {
                             simulationConfig.getName()),
                     e);
             Thread.currentThread().interrupt();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
-        actionReportPublisher.close();
-
         log.info("Simulation `{}` completed.", simulationConfig.getName());
+
         log.info("Simulation `{}`: Generating aggregate report...", simulationConfig.getName());
         // TODO: Generate aggregate report
 //

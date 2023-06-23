@@ -23,8 +23,8 @@ goodload:
       concurrency: 1
       hold-for: 10s
       ramp-up: 5s
-      ramp-down: 10s
-      iterations: 5
+      ramp-down: 100s
+      iterations: 100
       enabled: true
 
   fail-when:
