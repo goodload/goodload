@@ -14,16 +14,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.goodload.goodload.reporting.datasink.sqlite;
+package org.goodload.goodload.plugin.datasink.sqlite;
 
-import org.goodload.goodload.reporting.datasink.sqlite.models.ActionReportEntity;
-import org.springframework.data.jpa.repository.JpaRepository;
-
+import lombok.Data;
+import org.goodload.goodload.reporting.config.ReportingConfigurationProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
  * @since 1.0
  */
-public interface IterationReportRepository extends JpaRepository<ActionReportEntity, Integer> {
+@ConfigurationProperties(prefix = SQLiteSinkConfigurationProperties.PREFIX)
+@Data
+public class SQLiteSinkConfigurationProperties {
+    public static final String PREFIX = ReportingConfigurationProperties.PREFIX + ".sink.sqlite.batch-size";
 
+    private int batchSize = 1000;
 }

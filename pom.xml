@@ -23,7 +23,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.0</version>
+        <version>3.1.1</version>
     </parent>
 
     <groupId>org.goodload.goodload</groupId>
@@ -38,6 +38,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         <module>goodload-sample</module>
         <module>goodload-engine</module>
         <module>goodload-reporting</module>
+        <module>goodload-plugins</module>
     </modules>
 
     <properties>
@@ -137,12 +138,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
             <dependency>
                 <groupId>org.goodload.goodload</groupId>
-                <artifactId>goodload-sample</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.goodload.goodload</groupId>
                 <artifactId>goodload-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -150,6 +145,24 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <dependency>
                 <groupId>org.goodload.goodload</groupId>
                 <artifactId>goodload-reporting</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.goodload.plugins</groupId>
+                <artifactId>goodload-plugins</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.goodload.plugins</groupId>
+                <artifactId>goodload-sqlite-sink</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.goodload.goodload</groupId>
+                <artifactId>goodload-sample</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

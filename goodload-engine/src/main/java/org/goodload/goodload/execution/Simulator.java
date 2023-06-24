@@ -16,6 +16,7 @@
  */
 package org.goodload.goodload.execution;
 
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.goodload.goodload.config.GoodloadConfigurationProperties;
 import org.goodload.goodload.dsl.Action;
@@ -26,21 +27,19 @@ import org.goodload.goodload.reporting.data.ActionReport;
 import org.goodload.goodload.reporting.data.SimulationTree;
 import org.goodload.goodload.reporting.data.StepSkeletonData;
 import org.goodload.goodload.reporting.datasink.Sink;
-import org.goodload.goodload.reporting.datasink.sqlite.IterationReportRepository;
-import org.goodload.goodload.reporting.datasink.sqlite.models.ActionReportEntity;
 import org.goodload.goodload.userconfig.ParsedUserArgs;
 import org.goodload.goodload.userconfig.SimulationConfiguration;
 import org.goodload.goodload.userconfig.UserArgs;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.Resource;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.UUID;
-import java.util.concurrent.*;
-import java.util.stream.Collectors;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.SubmissionPublisher;
+import java.util.concurrent.TimeUnit;
 
 /**
  * As the name suggests,
@@ -64,9 +63,6 @@ public class Simulator {
 
     @Resource
     private Sink sink;
-
-    @Resource
-    private IterationReportRepository iterationReportRepository;
 
     /**
      * Takes a simulation configuration and executes it.
@@ -125,7 +121,7 @@ public class Simulator {
 
         var runners = new ArrayList<SimulationRunner>(simulationConfig.getConcurrency());
 
-        try (var actionReportPublisher = new SubmissionPublisher<ActionReport>(); ) {
+        try (var actionReportPublisher = new SubmissionPublisher<ActionReport>();) {
 
             sink.registerPublisher(actionReportPublisher);
 

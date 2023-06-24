@@ -14,20 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.goodload.goodload.reporting.datasink.sqlite;
+package org.goodload.goodload.plugin.datasink.sqlite.data;
 
-import lombok.Data;
-import org.goodload.goodload.reporting.config.ReportingConfigurationProperties;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.goodload.goodload.plugin.datasink.sqlite.models.SimulationEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 /**
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
  * @since 1.0
  */
-@ConfigurationProperties(prefix = SQLiteSinkConfigurationProperties.PREFIX)
-@Data
-public class SQLiteSinkConfigurationProperties {
-    public static final String PREFIX = ReportingConfigurationProperties.PREFIX + ".sink.sqlite.batch-size";
+@Repository
+public interface SimulationRepository extends JpaRepository<SimulationEntity, Integer> {
 
-    private int batchSize = 1000;
 }

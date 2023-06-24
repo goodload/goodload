@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.goodload.goodload.reporting.datasink.sqlite.models;
+package org.goodload.goodload.plugin.datasink.sqlite.models;
 
 
 import jakarta.persistence.Column;

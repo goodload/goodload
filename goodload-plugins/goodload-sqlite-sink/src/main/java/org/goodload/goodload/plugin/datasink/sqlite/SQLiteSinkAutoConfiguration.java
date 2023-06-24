@@ -14,12 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.goodload.goodload.reporting.datasink.sqlite;
+package org.goodload.goodload.plugin.datasink.sqlite;
 
+import org.goodload.goodload.plugin.datasink.sqlite.data.IterationReportRegistry;
+import org.goodload.goodload.plugin.datasink.sqlite.data.SimulationRepository;
 import org.goodload.goodload.reporting.datasink.Sink;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -35,10 +37,10 @@ import java.util.UUID;
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
  * @since 1.0
  */
-@Configuration
+@AutoConfiguration
 @EnableConfigurationProperties(SQLiteSinkConfigurationProperties.class)
 @EnableTransactionManagement
-public class SQLiteSinkConfiguration {
+public class SQLiteSinkAutoConfiguration {
     @Bean
     public Sink sink(
             IterationReportRegistry iterationReportRegistry,

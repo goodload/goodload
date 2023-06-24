@@ -14,17 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.goodload.goodload.reporting.datasink.sqlite;
+package org.goodload.goodload.plugin.datasink.sqlite.data;
 
-import org.goodload.goodload.reporting.datasink.sqlite.models.SimulationEntity;
+import org.goodload.goodload.plugin.datasink.sqlite.models.ActionReportEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+
 
 /**
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
  * @since 1.0
  */
-@Repository
-public interface SimulationRepository extends JpaRepository<SimulationEntity, Integer> {
+public interface IterationReportRepository extends JpaRepository<ActionReportEntity, Integer> {
 
 }

@@ -82,6 +82,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <groupId>org.goodload.goodload</groupId>
             <artifactId>goodload-reporting</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.goodload.plugins</groupId>
+            <artifactId>goodload-plugins</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.goodload.plugins</groupId>
+            <artifactId>goodload-sqlite-sink</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

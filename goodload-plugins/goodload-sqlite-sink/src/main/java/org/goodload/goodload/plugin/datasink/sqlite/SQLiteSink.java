@@ -14,18 +14,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.goodload.goodload.reporting.datasink.sqlite;
+package org.goodload.goodload.plugin.datasink.sqlite;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.goodload.goodload.plugin.datasink.sqlite.data.IterationReportRegistry;
+import org.goodload.goodload.plugin.datasink.sqlite.data.SimulationRepository;
 import org.goodload.goodload.reporting.data.ActionReport;
 import org.goodload.goodload.reporting.data.SimulationTree;
 import org.goodload.goodload.reporting.data.StepSkeletonData;
 import org.goodload.goodload.reporting.datasink.Sink;
 import org.goodload.goodload.reporting.datasink.SinkSubscriber;
-import org.goodload.goodload.reporting.datasink.sqlite.models.ActionReportEntity;
-import org.goodload.goodload.reporting.datasink.sqlite.models.SimulationEntity;
-import org.goodload.goodload.reporting.datasink.sqlite.models.StepSkeletonEntity;
+import org.goodload.goodload.plugin.datasink.sqlite.models.ActionReportEntity;
+import org.goodload.goodload.plugin.datasink.sqlite.models.SimulationEntity;
+import org.goodload.goodload.plugin.datasink.sqlite.models.StepSkeletonEntity;
 
 import java.util.LinkedList;
 import java.util.UUID;

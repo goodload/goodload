@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.goodload.goodload.reporting.datasink.sqlite;
+package org.goodload.goodload.plugin.datasink.sqlite.data;
 
 import jakarta.annotation.Resource;
-import org.goodload.goodload.reporting.datasink.sqlite.models.ActionReportEntity;
+import org.goodload.goodload.plugin.datasink.sqlite.models.ActionReportEntity;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;

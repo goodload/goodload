@@ -14,13 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.goodload.goodload.reporting.datasink.sqlite.models;
+package org.goodload.goodload.plugin.datasink.sqlite.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Where;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -32,29 +33,23 @@ import java.util.List;
  * @since 1.0
  */
 @Entity
-@Table(name = "action_metadata")
-@NoArgsConstructor
+@Table(name = "simulation_metadata")
 @Getter
 @Setter
-public class StepSkeletonEntity implements Serializable {
+@NoArgsConstructor
+public class SimulationEntity implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
     @Id
-    private String stepId;
-
-    @Column(nullable = false)
-    @NotNull
-    private String stepName;
-
-    @Column(nullable = false)
-    @NotNull
     private String simulationId;
 
-    @Column
-    private String parentStepId;
+    @Column(nullable = false)
+    @NotNull
+    private String simulationName;
 
     @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "parentStepId")
-    private List<StepSkeletonEntity> subSteps;
+    @JoinColumn(name = "simulationId")
+    @Where(clause = "parent_step_id IS NULL")
+    private List<StepSkeletonEntity> steps;
 }
