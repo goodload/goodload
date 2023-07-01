@@ -52,18 +52,25 @@ public abstract class Sink implements AutoCloseable {
     public abstract void registerSimulationSkeletonData(SimulationTree simulationTree);
 
     public void registerPublisher(SubmissionPublisher<ActionReport> actionReportSubmissionPublisher) {
-        if (this.closed) {
-            throw new IllegalStateException("Can't register publisher to closed sink");
+        synchronized (this) {
+            if (this.actionReportSubscriber != null) {
+                throw new IllegalStateException("Sink already has a registered publisher.");
+            }
+            if (this.closed) {
+                throw new IllegalStateException("Can't register publisher to closed sink");
+            }
+            actionReportSubscriber = createSubscriber();
+            actionReportSubmissionPublisher.subscribe(actionReportSubscriber);
         }
-        actionReportSubscriber = createSubscriber();
-        actionReportSubmissionPublisher.subscribe(actionReportSubscriber);
     }
 
     @Override
     public void close() throws Exception {
-        if (!closed) {
-            actionReportSubscriber.close();
-            closed = true;
+        synchronized (this) {
+            if (!closed) {
+                actionReportSubscriber.close();
+                closed = true;
+            }
         }
     }
 }
