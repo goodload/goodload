@@ -20,14 +20,14 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.goodload.goodload.plugin.datasink.sqlite.data.IterationReportRegistry;
 import org.goodload.goodload.plugin.datasink.sqlite.data.SimulationRepository;
+import org.goodload.goodload.plugin.datasink.sqlite.models.ActionReportEntity;
+import org.goodload.goodload.plugin.datasink.sqlite.models.SimulationEntity;
+import org.goodload.goodload.plugin.datasink.sqlite.models.StepSkeletonEntity;
 import org.goodload.goodload.reporting.data.ActionReport;
 import org.goodload.goodload.reporting.data.SimulationTree;
 import org.goodload.goodload.reporting.data.StepSkeletonData;
 import org.goodload.goodload.reporting.datasink.Sink;
 import org.goodload.goodload.reporting.datasink.SinkSubscriber;
-import org.goodload.goodload.plugin.datasink.sqlite.models.ActionReportEntity;
-import org.goodload.goodload.plugin.datasink.sqlite.models.SimulationEntity;
-import org.goodload.goodload.plugin.datasink.sqlite.models.StepSkeletonEntity;
 
 import java.util.LinkedList;
 import java.util.UUID;
@@ -104,7 +104,9 @@ public class SQLiteSink extends Sink {
 
         @Override
         public void onNext(ActionReport item) {
-            batch.add(item);
+            synchronized (batch) {
+                batch.add(item);
+            }
             if (batch.size() >= batchSize) {
                 processBatch();
             }
@@ -124,14 +126,19 @@ public class SQLiteSink extends Sink {
         }
 
         private void processBatch() {
+            LinkedList<ActionReport> batchCopy;
+            synchronized (batch) {
+                // Copy the batch to new list so that we don't block the subscriber while we write data to SQLite
+                batchCopy = new LinkedList<>(batch);
+                batch.clear();
+            }
+
             try {
-                log.debug("Writing {} report rows to sqlite", batch.size());
-                iterationReportRegistry.insertAll(batch.stream().map(ActionReportEntity::fromAction).toList());
+                log.debug("Writing {} report rows to sqlite", batchCopy.size());
+                iterationReportRegistry.insertAll(batchCopy.stream().map(ActionReportEntity::fromAction).toList());
             } catch (Exception e) {
                 log.error("Failed to write iteration report batch", e);
             }
-            batch.clear();
-            batch.notifyAll();
         }
 
         @Override
