@@ -18,9 +18,26 @@
 spring:
   main:
     banner-mode: "off"
+  jpa:
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+  sql:
+    init:
+      mode: always
 server:
   error:
     include-stacktrace: never
+logging:
+  pattern:
+    console: "%clr(%d{yy-MM-dd E HH:mm:ss.SSS}){blue} %clr(%-5p) %clr(${PID}){faint} %clr(---){faint} %clr([%8.15t]){cyan} %clr(%-40.40logger{26}){blue} %clr(:){red} %clr(%m){faint}%n"
+  level:
+    root: WARN
+    org.goodload: INFO
+goodload:
+  engine:
+    max-hold-for: 2h
 ---
 spring:
   config:
@@ -28,19 +45,18 @@ spring:
       on-profile: log-dev
   main:
     banner-mode: "console"
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
 logging:
-  pattern:
-    console: "%clr(%d{yy-MM-dd E HH:mm:ss.SSS}){blue} %clr(%-5p) %clr(${PID}){faint} %clr(---){faint} %clr([%8.15t]){cyan} %clr(%-40.40logger{0}){blue} %clr(:){red} %clr(%m){faint}%n"
   level:
-    org.goodload.goodload: debug
+    org.goodload.goodload: DEBUG
+    org.hibernate: DEBUG
+    root: WARN
 server:
   error:
     include-stacktrace: always
 
-goodload:
-  engine:
-    max-hold-for: 2h
-    debugging:
-      export-raw-report: true
-      export-transformed-raw-report: true
 

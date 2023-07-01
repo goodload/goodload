@@ -21,12 +21,12 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.goodload.goodload.dsl.*;
 import org.goodload.goodload.exceptions.CheckFailedException;
 import org.goodload.goodload.internal.Util;
-import org.goodload.goodload.reporting.reports.raw.ActionReport;
-import org.goodload.goodload.reporting.reports.raw.SimulationReport;
+import org.goodload.goodload.reporting.data.ActionReport;
 import org.goodload.goodload.userconfig.SimulationConfiguration;
 import org.goodload.goodload.userconfig.UserArgs;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.SubmissionPublisher;
 
 /**
  * Runs a simulation in a thread.
@@ -36,7 +36,7 @@ import java.util.concurrent.Callable;
  * @since 1.0
  */
 @Slf4j
-class SimulationRunner implements Callable<SimulationReport> {
+class SimulationRunner implements Callable<Void> {
 
     /**
      * After how many milliseconds the runner should start execution.
@@ -52,6 +52,8 @@ class SimulationRunner implements Callable<SimulationReport> {
      * The class file containing the simulation that this runner will execute.
      */
     private final Class<? extends Simulation> simulationClass;
+
+    private final SubmissionPublisher<ActionReport> actionReportSubmissionPublisher;
 
     /**
      * Tag to identify the runner in the logs. It has the format "Simulation `%s` : Runner %d:"
@@ -81,26 +83,29 @@ class SimulationRunner implements Callable<SimulationReport> {
     /**
      * Creates a runner to execute a simulation asynchronously.
      * One runner maintains one concurrency.
-     * @param runnerId The unique ID by which to identify the runner.
-     * @param runAfterMillis After how many milliseconds should the runner start execution.
+     *
+     * @param runnerId         The unique ID by which to identify the runner.
+     * @param runAfterMillis   After how many milliseconds should the runner start execution.
      * @param simulationConfig The configuration of the simulation that the runner will execute.
-     * @param simulationClass The class file of the simulation that the runner will execute.
-     * @param holdForMillis For how many milliseconds should the simulation execute.
-     *                      This is not being read directly from simulation config as
-     *                      the {@link Simulator} might want to override the value if
-     *                      the value exceeds the maxHoldFor value.
-     * @param userArgs The options set by the user either from command line or parsed from the config file.
+     * @param simulationClass  The class file of the simulation that the runner will execute.
+     * @param holdForMillis    For how many milliseconds should the simulation execute.
+     *                         This is not being read directly from simulation config as
+     *                         the {@link Simulator} might want to override the value if
+     *                         the value exceeds the maxHoldFor value.
+     * @param userArgs         The options set by the user either from command line or parsed from the config file.
      */
     SimulationRunner(
             int runnerId,
             int runAfterMillis,
             SimulationConfiguration simulationConfig,
-            Class<? extends Simulation>  simulationClass,
+            Class<? extends Simulation> simulationClass,
+            SubmissionPublisher<ActionReport> actionReportSubmissionPublisher,
             long holdForMillis,
             UserArgs userArgs) {
         this.runAfterMillis = runAfterMillis;
         this.simulationConfig = simulationConfig;
         this.simulationClass = simulationClass;
+        this.actionReportSubmissionPublisher = actionReportSubmissionPublisher;
         this.runnerId = runnerId;
         this.holdForMillis = holdForMillis;
         this.userArgs = userArgs;
@@ -109,7 +114,7 @@ class SimulationRunner implements Callable<SimulationReport> {
     }
 
     @Override
-    public SimulationReport call() {
+    public Void call() {
         log.debug("{} : Started", tag);
 
         try {
@@ -121,26 +126,21 @@ class SimulationRunner implements Callable<SimulationReport> {
             // Time after which no iterations will be started
             long endIterationsWhenTimestamp = startTimestamp + holdForMillis;
 
-            var simulationReport = new SimulationReport(simulationConfig.getName());
-            simulationReport.setRunnerId(runnerIdStr);
-
             var simulation = simulationClass.getDeclaredConstructor().newInstance();
 
             simulation.beforeSimulation();
-
-            simulationReport.setStartTimestampInMillis(startTimestamp);
 
             var scenarios = simulation.init();
 
             // Sequentially execute all scenarios in the given simulation
             for (var currentScenario : scenarios) {
-                var scenarioReport = new ActionReport(currentScenario.getName());
+                var scenarioReport = new ActionReport(currentScenario.getId());
                 scenarioReport.setRunnerId(runnerIdStr);
                 scenarioReport.setStartTimestampInMillis(Util.currentTimestamp());
 
                 simulation.beforeEachScenario(currentScenario.getName());
 
-                // Run iterations until the hold for duration is over, or user-defined number of iterations
+                // Run iterations until the hold-for duration is over, or user-defined number of iterations
                 // have been completed.
                 for (var iterationIndex = 0;
                      Util.currentTimestamp() <= endIterationsWhenTimestamp
@@ -154,82 +154,65 @@ class SimulationRunner implements Callable<SimulationReport> {
                     var session = new Session();
                     session.setCustomConfigurationProperties(userArgs.getYamlConfiguration().getCustom());
 
-                    var iterationReport = execute(session, currentScenario, runnerIdStr, iterationIndex);
-                    scenarioReport.getIterations().add(iterationReport);
-                    if (!iterationReport.isEndedNormally()) {
+                    var iterationCompletedNormally = execute(session, currentScenario, runnerIdStr, iterationIndex);
+                    if (iterationCompletedNormally) {
                         scenarioReport.setEndedNormally(false);
                     }
 
                     simulation.afterEachIteration(currentScenario.getName(), iterationIndex);
-                }
-                simulationReport.getScenarios().add(scenarioReport);
-                if (scenarioReport.isEndedNormally()) {
-                    simulationReport.setEndedNormally(false);
+
+                    log.trace("{}: Iteration {} finished", tag, iterationIndex);
                 }
 
                 simulation.afterEachScenario(currentScenario.getName());
             }
 
-            // When the last iteration completed.
-            long endTimestamp = Util.currentTimestamp();
-
-            simulationReport.setEndTimestampInMillis(endTimestamp);
-
             simulation.afterSimulation();
 
-            return simulationReport;
-
-        } catch(InterruptedException e) {
-            log.error("{} : The runner thread was interrupted. {}", tag, e);
+        } catch (InterruptedException e) {
+            log.error(String.format("%s : The runner thread was interrupted.", tag), e);
             Thread.currentThread().interrupt();
         } catch (Exception e) {
-            log.error("{} : Unknown exception occurred during execution: ", tag, e);
+            log.error(String.format("%s : Unknown exception occurred during execution: ", tag), e);
         }
 
         log.debug("{} : Ended", tag);
-
         return null;
     }
 
     /**
      * Execute all the steps in the given action recursively and generate report.
-     * @param session The session object holding information about current iteration.
-     * @param action The action whose steps are to be executed.
-     * @param runnerId The id of the current runner.
+     *
+     * @param session        The session object holding information about current iteration.
+     * @param action         The action whose steps are to be executed.
+     * @param runnerId       The id of the current runner.
      * @param iterationIndex The iteration in which this action is getting executed.
-     * @return Report for the action after it has been executed. The report is generated even
-     *         if the execution has failed.
+     * @return true if the execution completed successfully, false if execution of this or any of the substeps failed.
      */
-    private ActionReport execute(Session session, Action action, String runnerId, int iterationIndex) {
-        var actionReport = new ActionReport(action.getName());
-        actionReport.setRunnerId(runnerId);
+    private boolean execute(Session session, Action action, String runnerId, int iterationIndex) {
+        var actionReport = new ActionReport(action.getId());
         actionReport.setIterationIndex(iterationIndex);
+        actionReport.setRunnerId(runnerId);
         long actionStartTimestamp = Util.currentTimestamp();
         actionReport.setStartTimestampInMillis(actionStartTimestamp);
 
         action.getExecutionSequence().forEach((step -> {
             try {
-                if (step instanceof Check) {
-                    var check = (Check) step;
+                if (step instanceof Check check) {
                     if (!check.condition(session)) {
                         throw new CheckFailedException(simulationConfig.getName(), action);
                     }
-                } else if (step instanceof Executable) {
-                    var executable = (Executable) step;
+                } else if (step instanceof Executable executable) {
                     executable.function(session);
-                } else if (step instanceof Action) {
-                    var nestedAction = (Action) step;
+                } else if (step instanceof Action nestedAction) {
 
-                    var nestedReport = execute(session, nestedAction, runnerId, iterationIndex);
+                    var nestedActionCompletedNormally = execute(session, nestedAction, runnerId, iterationIndex);
 
-                    if(!nestedReport.isEndedNormally()) {
+                    if (nestedActionCompletedNormally) {
                         actionReport.setEndedNormally(false);
                     }
-
-                    actionReport.getSubSteps().add(nestedReport);
                 }
-            }
-            catch(CheckFailedException e) {
+            } catch (CheckFailedException e) {
                 actionReport.setEndedNormally(false);
             } catch (Exception e) {
                 log.debug("Error occurred in step {}: {}", actionReport.getStepName(), ExceptionUtils.getStackTrace(e));
@@ -238,7 +221,10 @@ class SimulationRunner implements Callable<SimulationReport> {
         }));
         actionReport.setEndTimestampInMillis(Util.currentTimestamp());
 
-        return actionReport;
+        actionReportSubmissionPublisher.submit(actionReport);
+        log.trace("{}: Submitted action report {}", tag, actionReport);
+
+        return actionReport.isEndedNormally();
     }
 
     /**
@@ -246,6 +232,7 @@ class SimulationRunner implements Callable<SimulationReport> {
      * Throughput is the number simulation iterations per second.
      * The sleep time needed is calculated using formula- <br/>
      * sleep time (Tsl) = iterationCount (C) / max throughput (M) - simulation duration (T)
+     *
      * @param startTimestamp When the simulation was started.
      * @param iterationCount How many iterations have been completed till now.
      * @throws InterruptedException If the sleeping thread is interrupted.
@@ -254,15 +241,15 @@ class SimulationRunner implements Callable<SimulationReport> {
             throws InterruptedException {
         var maxThroughput = simulationConfig.getThroughput();
 
-        if(maxThroughput == null) {
+        if (maxThroughput == null) {
             return;
         }
         long simulationDurationInSeconds = (Util.currentTimestamp() - startTimestamp) / 1000;
         float currentThroughput = (float) iterationCount /
                 simulationDurationInSeconds;
-        if(currentThroughput > maxThroughput) {
+        if (currentThroughput > maxThroughput) {
             long requiredWaitTimeInSeconds = iterationCount / maxThroughput - simulationDurationInSeconds;
-            if(requiredWaitTimeInSeconds * 1000 > 0) {
+            if (requiredWaitTimeInSeconds * 1000 > 0) {
                 Thread.sleep(requiredWaitTimeInSeconds * 1000);
             }
         }

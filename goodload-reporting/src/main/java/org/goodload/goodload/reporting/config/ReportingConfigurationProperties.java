@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Divyansh Shekhar Gaur
+ * Copyright (C) 2023 Divyansh Shekhar Gaur
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,17 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+package org.goodload.goodload.reporting.config;
 
-package org.goodload.goodload.criteria;
-
-import org.goodload.goodload.reporting.data.Report;
-
-import java.util.List;
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
  * @since 1.0
  */
-public interface Criteria {
-    boolean matches(List<? extends Report> rawReports);
+@Data
+@ConfigurationProperties(prefix = ReportingConfigurationProperties.PREFIX)
+public class ReportingConfigurationProperties {
+
+    public static final String PREFIX = "goodload.reporting";
 }

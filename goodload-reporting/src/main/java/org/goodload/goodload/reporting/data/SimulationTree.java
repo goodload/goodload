@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Divyansh Shekhar Gaur
+ * Copyright (C) 2023 Divyansh Shekhar Gaur
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,30 +14,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.goodload.goodload.reporting.reports.raw;
+package org.goodload.goodload.reporting.data;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.List;
 
 /**
- * Report of entire simulation.
+ * The simulation structure. Contains all the steps, their IDs and sub-steps.
  *
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
  * @since 1.0
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
-public class SimulationReport extends Report {
+@NoArgsConstructor
+public class SimulationTree implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    /**
-     * Report of scenarios in the simulation
-     */
-    private List<ActionReport> scenarios = new ArrayList<>();
+    private String simulationId;
 
-    public SimulationReport(String name) {
-        super(name);
-    }
+    private String simulationName;
+
+    private List<StepSkeletonData> steps;
 }

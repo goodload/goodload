@@ -20,6 +20,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.*;
 import org.goodload.goodload.criteria.MinimumFailCountCriteria;
@@ -29,8 +30,6 @@ import org.goodload.goodload.exceptions.InvalidSimulationConfigFileException;
 import org.goodload.goodload.exceptions.JarFileNotFoundException;
 import org.goodload.goodload.exceptions.UnsupportedCriteriaException;
 import org.goodload.goodload.execution.Simulator;
-import org.goodload.goodload.reporting.ReportExporter;
-import org.goodload.goodload.reporting.reports.aggregate.AggregateSimulationReport;
 import org.goodload.goodload.userconfig.GoodloadUserConfigurationProperties;
 import org.goodload.goodload.userconfig.ParsedUserArgs;
 import org.goodload.goodload.userconfig.SimulationConfiguration;
@@ -41,13 +40,15 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.lang.NonNull;
 
-import jakarta.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.NoSuchElementException;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -58,7 +59,7 @@ import java.util.stream.Collectors;
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
  * @since 1.0
  */
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "org.goodload")
 @Slf4j
 @ConfigurationPropertiesScan
 public class GoodloadApplication implements CommandLineRunner {
@@ -71,9 +72,6 @@ public class GoodloadApplication implements CommandLineRunner {
 
     @Resource
     private Simulator simulator;
-
-    @Resource
-    private ReportExporter reportExporter;
 
     public static void main(String... args) {
         System.out.println("Goodload Engine Copyright (C) 2021  Goodload\n" +
@@ -108,19 +106,13 @@ public class GoodloadApplication implements CommandLineRunner {
 
         createSimulationExecutionThreadPool();
 
-        var reports = new ArrayList<AggregateSimulationReport>();
-
-        for (SimulationConfiguration simulation : userArgs.getYamlConfiguration().getSimulations()) {
+        for (int i = 0; i < userArgs.getYamlConfiguration().getSimulations().size(); i++) {
+            var simulation = userArgs.getYamlConfiguration().getSimulations().get(i);
             if (userArgs.getSimulationsToExecute() != null && !userArgs.getSimulationsToExecute().contains(simulation.getName())) {
                 continue;
             }
-            var report = simulator.execute(simulation);
-            if (report != null) {
-                reports.add(report);
-            }
+            simulator.execute(simulation, i);
         }
-
-        reportExporter.export(reports);
     }
 
     /**

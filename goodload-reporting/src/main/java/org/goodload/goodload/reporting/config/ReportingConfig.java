@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Divyansh Shekhar Gaur
+ * Copyright (C) 2023 Divyansh Shekhar Gaur
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,10 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+package org.goodload.goodload.reporting.config;
+
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+
 /**
- * Contains POJO for raw reports for different levels in a simulation.
- *
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
  * @since 1.0
  */
-package org.goodload.goodload.reporting.reports.raw;
+@Configuration
+@EnableConfigurationProperties(ReportingConfigurationProperties.class)
+public class ReportingConfig {
+
+}

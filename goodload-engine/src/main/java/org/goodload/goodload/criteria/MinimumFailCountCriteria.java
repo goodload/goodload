@@ -18,7 +18,7 @@
 package org.goodload.goodload.criteria;
 
 import lombok.AllArgsConstructor;
-import org.goodload.goodload.reporting.reports.raw.Report;
+import org.goodload.goodload.reporting.data.Report;
 
 import java.util.List;
 

@@ -29,7 +29,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(value= "goodload.engine")
 @Data
 public class GoodloadConfigurationProperties {
-    private static final long serialVersionUID = 1L;
 
     /**
      * Maximum value for hold-for. If hold-for value is more than this in simulation configuration,

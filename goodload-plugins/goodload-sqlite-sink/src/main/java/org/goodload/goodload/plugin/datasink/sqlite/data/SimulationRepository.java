@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Divyansh Shekhar Gaur
+ * Copyright (C) 2023 Divyansh Shekhar Gaur
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,17 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+package org.goodload.goodload.plugin.datasink.sqlite.data;
 
-package org.goodload.goodload.criteria;
-
-import org.goodload.goodload.reporting.data.Report;
-
-import java.util.List;
+import org.goodload.goodload.plugin.datasink.sqlite.models.SimulationEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 /**
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
  * @since 1.0
  */
-public interface Criteria {
-    boolean matches(List<? extends Report> rawReports);
+@Repository
+public interface SimulationRepository extends JpaRepository<SimulationEntity, Integer> {
+
 }

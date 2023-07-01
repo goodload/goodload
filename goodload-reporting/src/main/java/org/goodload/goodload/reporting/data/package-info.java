@@ -14,17 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-package org.goodload.goodload.criteria;
-
-import org.goodload.goodload.reporting.data.Report;
-
-import java.util.List;
-
 /**
+ * Contains POJO for raw reports for different levels in a simulation.
+ *
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
  * @since 1.0
  */
-public interface Criteria {
-    boolean matches(List<? extends Report> rawReports);
-}
+package org.goodload.goodload.reporting.data;

@@ -16,25 +16,29 @@
  */
 package org.goodload.goodload.execution;
 
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.goodload.goodload.config.GoodloadConfigurationProperties;
+import org.goodload.goodload.dsl.Action;
 import org.goodload.goodload.dsl.Simulation;
 import org.goodload.goodload.exceptions.SimulatorInterruptedException;
 import org.goodload.goodload.internal.Util;
-import org.goodload.goodload.reporting.ReportAggregator;
-import org.goodload.goodload.reporting.reports.aggregate.AggregateSimulationReport;
-import org.goodload.goodload.reporting.reports.raw.SimulationReport;
+import org.goodload.goodload.reporting.data.ActionReport;
+import org.goodload.goodload.reporting.data.SimulationTree;
+import org.goodload.goodload.reporting.data.StepSkeletonData;
+import org.goodload.goodload.reporting.datasink.Sink;
 import org.goodload.goodload.userconfig.ParsedUserArgs;
 import org.goodload.goodload.userconfig.SimulationConfiguration;
 import org.goodload.goodload.userconfig.UserArgs;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.Resource;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.concurrent.Callable;
+import java.util.LinkedList;
+import java.util.UUID;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.SubmissionPublisher;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -55,25 +59,26 @@ public class Simulator {
     private ParsedUserArgs parsedUserArgs;
 
     @Resource
-    private ReportAggregator reportAggregator;
+    private GoodloadConfigurationProperties goodloadConfigurationProperties;
 
     @Resource
-    private GoodloadConfigurationProperties goodloadConfigurationProperties;
+    private Sink sink;
 
     /**
      * Takes a simulation configuration and executes it.
      * Also generates the report for that simulation.
+     *
      * @param simulationConfig The simulation to execute.
      */
-    public AggregateSimulationReport execute(SimulationConfiguration simulationConfig) throws
+    public void execute(SimulationConfiguration simulationConfig, int simulationId) throws
             ClassNotFoundException,
             NoSuchMethodException,
             InvocationTargetException,
             InstantiationException,
             IllegalAccessException {
-        if(!simulationConfig.isEnabled()) {
+        if (!simulationConfig.isEnabled()) {
             log.info("Simulation `{}` ignored as it is disabled.", simulationConfig.getName());
-            return null;
+            return;
         }
 
         log.info("Starting simulation `{}`", simulationConfig.getName());
@@ -83,21 +88,24 @@ public class Simulator {
                 true,
                 parsedUserArgs.getUserSimulationsClassLoader()).asSubclass(Simulation.class);
 
-        // DO NOT REMOVE UNUSED VARIABLE simulationInstance
-        // We are creating an instance just to verify that it can be created and the user's simulation class is not invalid.
+        // DO NOT REMOVE VARIABLE simulationInstance EVEN IF UNUSED
+        // Creating an instance here is a verification that an instance can be created and the user's simulation class
+        // is not invalid.
         // It will be harder to properly report the error if this verification is left for the runner threads.
         // It will also prevent the same errors from being thrown by every runner thread because the error will be
         // detected and handled before the runners are even started.
         var simulationInstance = simulationClass.getDeclaredConstructor().newInstance();
 
-        var simulationReport = new ArrayList<SimulationReport>();
+        var simulationMetadata = prepareSimulationMetadata(simulationInstance);
+
+        sink.registerSimulationSkeletonData(simulationMetadata);
 
         long maxHoldFor = Util.parseDurationToMillis(goodloadConfigurationProperties.getMaxHoldFor());
         long simulationHoldFor = Util.parseDurationToMillis(simulationConfig.getHoldFor());
 
-        if(maxHoldFor < simulationHoldFor) {
+        if (maxHoldFor < simulationHoldFor) {
             log.warn("The hold-for duration {} is greater than max allowed value of {}, " +
-                    "hence the simulation will be run only for {} duration.",
+                            "hence the simulation will be run only for {} duration.",
                     simulationConfig.getHoldFor(),
                     goodloadConfigurationProperties.getMaxHoldFor(),
                     goodloadConfigurationProperties.getMaxHoldFor());
@@ -105,34 +113,40 @@ public class Simulator {
 
         long holdForMillis = Math.min(maxHoldFor, simulationHoldFor);
 
-        // Forcibly terminate the runner threads if some long running step in simulation is causing
+        // Forcibly terminate the runner threads if some long-running step in simulation is causing
         // it to run for more than 120% of the hold for value.
         // This prevents Denial of Service attacks due to infinite recursions or loops in simulation.
         long forceEndAfterDuration = (long)
                 ((100.0 + goodloadConfigurationProperties.getGracePeriodPercentage()) / 100 * maxHoldFor);
 
-        var runners = new ArrayList<Callable<SimulationReport>>(simulationConfig.getConcurrency());
-        for(var runnerId=0; runnerId < simulationConfig.getConcurrency(); runnerId++) {
-            var runner = new SimulationRunner(
-                    runnerId,
-                    0,
-                    simulationConfig,
-                    simulationClass,
-                    holdForMillis,
-                    userArgs);
-            runners.add(runner);
-        }
+        var runners = new ArrayList<SimulationRunner>(simulationConfig.getConcurrency());
 
-        long simulationStartTime = Util.currentTimestamp();
-        try {
+        try (var actionReportPublisher = new SubmissionPublisher<ActionReport>()) {
+
+            sink.registerPublisher(actionReportPublisher);
+
+            for (var runnerId = 0; runnerId < simulationConfig.getConcurrency(); runnerId++) {
+                var runner = new SimulationRunner(
+                        runnerId,
+                        0,
+                        simulationConfig,
+                        simulationClass,
+                        actionReportPublisher,
+                        holdForMillis,
+                        userArgs);
+                runners.add(runner);
+            }
+
             var futures = parsedUserArgs.getSimulationExecutorService().invokeAll(
                     runners,
                     forceEndAfterDuration,
                     TimeUnit.MILLISECONDS);
-            for(var future: futures) {
-                simulationReport.add(future.get());
+            for (var future : futures) {
+                future.get();
             }
-        } catch(CancellationException e) {
+
+            sink.close();
+        } catch (CancellationException e) {
             throw new SimulatorInterruptedException(
                     String.format(
                             "The simulation %s was cancelled forcefully because it exceeded max duration " +
@@ -141,21 +155,64 @@ public class Simulator {
                             goodloadConfigurationProperties.getGracePeriodPercentage(),
                             forceEndAfterDuration),
                     e);
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (ExecutionException e) {
+            log.error("An exception occurred while executing the simulation", e.getCause());
+        } catch (InterruptedException e) {
             log.error(String.format(
-                    "The simulation `%s` was interrupted before completion. Nested exception is %s",
-                    simulationConfig.getName(),
-                    e));
+                            "The simulation `%s` was interrupted before completion.",
+                            simulationConfig.getName()),
+                    e);
             Thread.currentThread().interrupt();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
-        long simulationEndTime = Util.currentTimestamp();
-
         log.info("Simulation `{}` completed.", simulationConfig.getName());
+
         log.info("Simulation `{}`: Generating aggregate report...", simulationConfig.getName());
-        return reportAggregator.aggregate(
-                simulationConfig.getName(),
-                simulationReport,
-                simulationEndTime - simulationStartTime);
+        // TODO: Generate aggregate report
+//
+//        return reportAggregator.aggregate(
+//                simulationConfig.getName(),
+//                simulationReport,
+//                simulationEndTime - simulationStartTime);
+    }
+
+    private static SimulationTree prepareSimulationMetadata(Simulation simulationInstance) {
+        var simulationTree = new SimulationTree();
+        simulationTree.setSimulationId(UUID.randomUUID().toString());
+        simulationTree.setSimulationName(simulationInstance.getClass().getCanonicalName());
+
+        var steps = new LinkedList<StepSkeletonData>();
+
+        for (var action : simulationInstance.init()) {
+            steps.add(mapActionToStepSkeletonData(action));
+        }
+
+        simulationTree.setSteps(steps);
+
+        return simulationTree;
+    }
+
+    private static StepSkeletonData mapActionToStepSkeletonData(Action sourceAction) {
+        var subSteps = sourceAction
+                .getExecutionSequence()
+                .stream()
+                .filter(sequenceElement -> sequenceElement instanceof Action)
+                .map(sequenceElement -> (Action) sequenceElement)
+                .toList();
+
+        var skeletonSubSteps = new LinkedList<StepSkeletonData>();
+
+        for (var subStep : subSteps) {
+            skeletonSubSteps.add(mapActionToStepSkeletonData(subStep));
+        }
+
+        var targetSkeletonData = new StepSkeletonData();
+        targetSkeletonData.setStepName(sourceAction.getName());
+        targetSkeletonData.setStepId(sourceAction.getId());
+        targetSkeletonData.setSubSteps(skeletonSubSteps);
+
+        return targetSkeletonData;
     }
 }

@@ -22,6 +22,7 @@ import lombok.Getter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Action is a group of steps to be executed sequentially.
@@ -37,6 +38,9 @@ public class Action implements SequenceElement {
 
     @Getter
     private final String name;
+
+    @Getter
+    private final String id = UUID.randomUUID().toString();
 
     private List<SequenceElement> executionSequence = new ArrayList<>();
 

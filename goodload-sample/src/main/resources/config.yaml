@@ -17,24 +17,14 @@
 
 goodload:
   simulations:
-    - name: Sample Simulation
-      class: org.goodload.goodload.samples.SampleSimulation
-      throughput: 100
-      concurrency: 1
-      hold-for: 10m
-      ramp-up: 5s
-      ramp-down: 10s
-      iterations: 5
-      enabled: false
-
     - name: Sample Http Simulation
       class: org.goodload.goodload.samples.SampleHttpSimulation
       throughput: 100
-      concurrency: 100
+      concurrency: 1
       hold-for: 10s
       ramp-up: 5s
-      ramp-down: 10s
-      iterations: 500
+      ramp-down: 100s
+      iterations: 100
       enabled: true
 
   fail-when:
