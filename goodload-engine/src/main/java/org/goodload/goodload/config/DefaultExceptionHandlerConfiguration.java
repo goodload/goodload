@@ -18,7 +18,6 @@ package org.goodload.goodload.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.goodload.goodload.dsl.Simulation;
 import org.goodload.goodload.exceptions.InvalidSimulationConfigFileException;
 import org.goodload.goodload.exceptions.SimulatorInterruptedException;

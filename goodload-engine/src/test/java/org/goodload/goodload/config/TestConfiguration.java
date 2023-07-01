@@ -16,8 +16,6 @@
  */
 package org.goodload.goodload.config;
 
-import org.springframework.context.annotation.Bean;
-
 /**
  * @author Divyansh Shekhar Gaur <divyanshshekhar@users.noreply.github.com>
  */
