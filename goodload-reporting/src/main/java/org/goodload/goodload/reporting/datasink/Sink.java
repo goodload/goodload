@@ -38,7 +38,7 @@ public abstract class Sink implements AutoCloseable {
     /**
      * Default constructor
      */
-    public Sink() {
+    protected Sink() {
     }
 
     protected abstract SinkSubscriber createSubscriber();
