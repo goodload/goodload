@@ -19,6 +19,9 @@ package org.goodload.goodload.config;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 /**
  * Properties used to cnfigure the goodload engine before the simulations are run.
  * These affect how the simulations will be executed.
@@ -29,7 +32,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(value= "goodload.engine")
 @Data
 public class GoodloadConfigurationProperties {
-    private static final long serialVersionUID = 1L;
 
     /**
      * Maximum value for hold-for. If hold-for value is more than this in simulation configuration,
