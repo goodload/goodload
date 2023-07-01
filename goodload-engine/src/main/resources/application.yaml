@@ -38,8 +38,6 @@ logging:
 goodload:
   engine:
     max-hold-for: 2h
-  reporting:
-    sink-type: SQLite
 ---
 spring:
   config:

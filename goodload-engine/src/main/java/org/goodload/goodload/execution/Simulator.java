@@ -121,7 +121,7 @@ public class Simulator {
 
         var runners = new ArrayList<SimulationRunner>(simulationConfig.getConcurrency());
 
-        try (var actionReportPublisher = new SubmissionPublisher<ActionReport>();) {
+        try (var actionReportPublisher = new SubmissionPublisher<ActionReport>()) {
 
             sink.registerPublisher(actionReportPublisher);
 
