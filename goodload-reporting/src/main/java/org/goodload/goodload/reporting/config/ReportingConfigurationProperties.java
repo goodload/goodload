@@ -28,10 +28,4 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class ReportingConfigurationProperties {
 
     public static final String PREFIX = "goodload.reporting";
-
-    private SinkType sinkType;
-
-    private enum SinkType {
-        SQLite
-    }
 }
